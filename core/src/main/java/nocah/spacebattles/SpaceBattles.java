@@ -16,6 +16,9 @@ public class SpaceBattles extends Game {
     public static final String RSC_CIRCLE_IMG = "circle.png";
     public static final String RSC_TRIANGLE_IMG = "triangle.png";
 
+    Server server;
+    Client client;
+
     SpriteBatch batch;
     AssetManager am;
 
@@ -58,5 +61,8 @@ public class SpaceBattles extends Game {
     public void dispose() {
         batch.dispose();
         am.dispose();
+
+        if (server != null) server.stop();
+        if (client != null) client.stop();
     }
 }

@@ -14,9 +14,6 @@ public class LobbyScreen extends ScreenAdapter {
     private SpaceBattles game;
     private HUD hud;
     private Player player;
-    private boolean is_server = false;
-    private Server server;
-    private Client client;
 
     public LobbyScreen(SpaceBattles game) {
         this.game = game;
@@ -29,9 +26,8 @@ public class LobbyScreen extends ScreenAdapter {
             @Override
             public String execute(String[] cmd) {
                 try {
-                    is_server = true;
-                    server = new Server();
-                    server.startServer();
+                    game.server = new Server();
+                    game.server.startServer();
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -49,7 +45,7 @@ public class LobbyScreen extends ScreenAdapter {
             @Override
             public String execute(String[] cmd) {
                 try {
-                    client = new Client(cmd[1]);
+                    game.client = new Client(cmd[1]);
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -67,7 +63,7 @@ public class LobbyScreen extends ScreenAdapter {
             @Override
             public String execute(String[] cmd) {
                 try {
-                    client.sendMessage(cmd[1]);
+                    game.client.sendMessage(cmd[1]);
                     return "ok!";
                 } catch (Exception e) {
                     return help;

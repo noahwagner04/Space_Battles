@@ -1,9 +1,6 @@
 package nocah.spacebattles;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -11,26 +8,48 @@ import java.util.List;
 
 public class Server {
     private static final int PORT = 12345;
-    private static List<ClientHandler> clientHandlers = new ArrayList<>();
+    private List<ClientHandler> clientHandlers = new ArrayList<>();
+    private List<Socket> clientSockets = new ArrayList<>();
+    ServerSocket serverSocket;
+    private boolean exit = false;
 
     public void startServer() {
         new Thread(new ServerListener()).start();
     }
 
+    public void stop() {
+        exit = true;
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing server socket: " + e.getMessage());
+            }
+        }
+        for (int i = 0; i < clientHandlers.size(); i++) {
+            try {
+                clientSockets.get(i).close();
+            } catch (IOException e) {
+                System.err.println("Error closing client socket: " + e.getMessage());
+            }
+        }
+    }
+
     private class ServerListener implements Runnable {
         @Override
         public void run() {
-            try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            try {
+                serverSocket = new ServerSocket(PORT);
                 System.out.println("Chat server started on port " + PORT);
-                while (true) {
+                while (!exit) {
                     Socket clientSocket = serverSocket.accept();
-                    //System.out.println("New client connected: " + clientSocket.getInetAddress());
+                    clientSockets.add(clientSocket);
                     ClientHandler clientHandler = new ClientHandler(clientSocket, clientHandlers);
                     clientHandlers.add(clientHandler);
                     new Thread(clientHandler).start();
                 }
             } catch (IOException e) {
-                System.err.println("Error starting server: " + e.getMessage());
+                System.err.println("Error running server: " + e.getMessage());
             }
         }
     }
@@ -40,7 +59,6 @@ class ClientHandler implements Runnable {
     private Socket clientSocket;
     private PrintWriter out;
     private List<ClientHandler> clients;
-
     public ClientHandler(Socket socket, List<ClientHandler> clients) {
         this.clientSocket = socket;
         this.clients = clients;

@@ -10,6 +10,8 @@ public class Client {
     private String serverAddress;
     private static final int SERVER_PORT = 12345;
     private PrintWriter out;
+    private MessageReceiver msgReceiver;
+    private Socket socket;
 
     public Client(String serverAddress) {
         this.serverAddress = serverAddress;
@@ -18,11 +20,11 @@ public class Client {
 
     public void startClient() {
         try {
-            Socket socket = new Socket(serverAddress, SERVER_PORT);
+            socket = new Socket(serverAddress, SERVER_PORT);
             out = new PrintWriter(socket.getOutputStream(), true);
             System.out.println("Connected to the chat server.");
-
-            new Thread(new MessageReceiver(socket)).start();
+            msgReceiver = new MessageReceiver(socket);
+            new Thread(msgReceiver).start();
 
         } catch (IOException e) {
             System.err.println("Error connecting to server: " + e.getMessage());
@@ -32,6 +34,16 @@ public class Client {
     public void sendMessage(String message) {
         if (out != null && !message.isEmpty()) {
             out.println(message);
+        }
+    }
+
+    public void stop() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing socket: " + e.getMessage());
+            }
         }
     }
 }
