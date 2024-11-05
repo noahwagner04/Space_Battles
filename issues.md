@@ -8,4 +8,5 @@
 
 ## Open Issues ##
 - Player-to-screenBounds collision detection
+- Low resolution screen filter
 - create server/client echo in hud

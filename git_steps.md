@@ -4,7 +4,7 @@
 git clone git@github.com:noahwagner04/Space_Battles.git
 cd Space_Battles
 ```
-### 2. Make a feature branch
+### 2. Make a feature branch (do step 4 first)
 ```bash
 git branch feature-branch
 git switch feature-branch
@@ -26,6 +26,7 @@ git rebase master
 ```
 ### 6. Resolve any conflicts, then continue rebasing
 ```bash
+git add .
 git rebase --continue
 ```
 ### 7. Add commits to fix things if necessary
