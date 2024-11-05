@@ -8,3 +8,4 @@
 - Add player movement
 - Create lobby screen
 - Player-to-screenBounds collision detection
+- create server/client echo in hud
