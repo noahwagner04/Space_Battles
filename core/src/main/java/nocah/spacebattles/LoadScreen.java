@@ -22,7 +22,7 @@ public class LoadScreen extends ScreenAdapter {
 
     public void update(float delta) {
         if (game.am.update(16) && timer > waitTime) {
-            game.setScreen(new TitleScreen(game));
+            game.setScreen(new MainMenuScreen(game));
             return;
         }
 

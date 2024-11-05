@@ -5,9 +5,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-public class TitleScreen extends ScreenAdapter {
+public class MainMenuScreen extends ScreenAdapter {
     private SpaceBattles game;
-    public TitleScreen(SpaceBattles game) {
+    public MainMenuScreen(SpaceBattles game) {
         this.game = game;
     }
 
