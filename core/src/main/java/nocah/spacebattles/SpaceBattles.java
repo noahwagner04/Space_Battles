@@ -1,34 +1,38 @@
 package nocah.spacebattles;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class SpaceBattles extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+public class SpaceBattles extends Game {
+    public static final String RSC_LIBGDX_IMG = "libgdx.png";
+    public static final String RSC_SQUARE_IMG = "square.png";
+    public static final String RSC_CIRCLE_IMG = "circle.png";
+    public static final String RSC_TRIANGLE_IMG = "triangle.png";
+
+    SpriteBatch batch;
+    AssetManager am;
 
     @Override
     public void create() {
+        am = new AssetManager();
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
-    }
 
-    @Override
-    public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        batch.begin();
-        batch.draw(image, 140, 210);
-        batch.end();
+        am.load(RSC_LIBGDX_IMG, Texture.class);
+        am.load(RSC_SQUARE_IMG, Texture.class);
+        am.load(RSC_CIRCLE_IMG, Texture.class);
+        am.load(RSC_TRIANGLE_IMG, Texture.class);
+
+        setScreen(new LoadScreen(this));
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
+        am.dispose();
     }
 }
