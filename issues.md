@@ -1,5 +1,10 @@
 ## Resolved Issues ##
-- **[1]** Add Design Document
-- **[2]** Add git steps file
+- Add Design Document
+- Add git steps file
 
 ## Open Issues ##
+- Add HUD classes
+- Add template assets & classes
+- Add player movement
+- Create lobby screen
+- Player-to-screenBounds collision detection
