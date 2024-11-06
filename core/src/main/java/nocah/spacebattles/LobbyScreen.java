@@ -1,7 +1,11 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class LobbyScreen extends ScreenAdapter {
@@ -81,6 +85,7 @@ public class LobbyScreen extends ScreenAdapter {
 
     public void update(float delta) {
         player.update(delta);
+        player.constrain(new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     }
 
     @Override

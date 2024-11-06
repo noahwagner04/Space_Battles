@@ -5,8 +5,9 @@
 - Add template assets & classes
 - Add player movement
 - Create lobby screen
+- Player-to-screenBounds collision detection
 
 ## Open Issues ##
-- Player-to-screenBounds collision detection
 - Low resolution screen filter
+- Add Arena scene with camera / Viewport
 - create server/client echo in hud
