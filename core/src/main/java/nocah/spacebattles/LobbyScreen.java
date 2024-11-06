@@ -3,8 +3,10 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -18,8 +20,8 @@ public class LobbyScreen extends ScreenAdapter {
 
     public LobbyScreen(SpaceBattles game) {
         this.game = game;
-        this.hud = new HUD(new BitmapFont());
-        this.player = new Player(game);
+        hud = new HUD(new BitmapFont());
+        player = new Player(game);
 
         hud.registerAction("server", new HUDActionCommand() {
             static final String help = "creates server to listen for clients";
@@ -91,9 +93,13 @@ public class LobbyScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         update(delta);
+        game.frameBufferBegin();
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        game.batch.begin();
         player.draw(game.batch);
+        game.frameBufferEnd();
+
+        game.batch.begin();
+        game.drawFrameBuffer();
         hud.draw(game.batch);
         game.batch.end();
     }
