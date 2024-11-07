@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class SpaceBattles extends Game {
@@ -41,14 +42,27 @@ public class SpaceBattles extends Game {
         setScreen(new LoadScreen(this));
     }
 
-    public void frameBufferBegin() {
+    public void startWorldDraw(Matrix4 proj) {
+        batch.setProjectionMatrix(proj.cpy());
         frameBuffer.begin();
         batch.begin();
     }
 
-    public void frameBufferEnd() {
+    public void startWorldDraw() {
+        frameBuffer.begin();
+        batch.begin();
+    }
+
+    public void endWorldDraw() {
         batch.end();
         frameBuffer.end();
+
+        ScreenUtils.clear(0f, 0f, 0f, 1f);
+
+        batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        batch.begin();
+        drawFrameBuffer();
+        batch.end();
     }
 
     public void drawFrameBuffer() {
