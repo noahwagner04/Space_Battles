@@ -8,13 +8,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class ArenaScreen extends ScreenAdapter {
     private SpaceBattles game;
-    private HUD hud;
     private Player player;
     private Camera camera;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
-        hud = new HUD(new BitmapFont());
         player = new Player(game);
 
         int w = Gdx.graphics.getWidth();
@@ -28,6 +26,8 @@ public class ArenaScreen extends ScreenAdapter {
     }
 
     public void update(float delta) {
+        if (game.server != null) game.server.broadcastMessageInQueue();
+        if (game.client != null) game.client.printMessageInQueue();
         player.update(delta);
         camera.follow(new Vector2(player.getX(), player.getY()), delta);
     }
@@ -42,7 +42,7 @@ public class ArenaScreen extends ScreenAdapter {
         game.endWorldDraw();
 
         game.batch.begin();
-        hud.draw(game.batch);
+        game.hud.draw(game.batch);
         game.batch.end();
     }
 }
