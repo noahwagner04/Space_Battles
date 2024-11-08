@@ -10,6 +10,7 @@
 - create server/client echo in hud
 - fix hanging when exiting
 - Add Arena scene with camera / Viewport
+- Add tilemap & collision code to arena
 
 ## Open Issues ##
 - Stream movement from clients

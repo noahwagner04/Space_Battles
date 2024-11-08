@@ -45,7 +45,12 @@ public class LoadScreen extends ScreenAdapter {
         }
 
         game.batch.begin();
-        game.batch.draw(game.am.get("libgdx.png", Texture.class), 140, 210);
+        Texture gdxTex = game.am.get("libgdx.png", Texture.class);
+        game.batch.draw(
+            gdxTex,
+            Gdx.graphics.getWidth() / 2f - gdxTex.getWidth() / 2f,
+            Gdx.graphics.getHeight() / 2f - gdxTex.getHeight() / 2f
+        );
         game.batch.end();
     }
 }
