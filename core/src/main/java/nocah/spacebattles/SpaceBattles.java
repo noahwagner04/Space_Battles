@@ -3,12 +3,16 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
@@ -16,11 +20,13 @@ import nocah.spacebattles.netevents.HandlerRegistry;
 import nocah.spacebattles.netevents.StartGameEvent;
 
 public class SpaceBattles extends Game {
-    public static final String RSC_LIBGDX_IMG = "libgdx.png";
-    public static final String RSC_SQUARE_IMG = "square.png";
-    public static final String RSC_CIRCLE_IMG = "circle.png";
-    public static final String RSC_TRIANGLE_IMG = "triangle.png";
-    public static final String RSC_PARTICLE_ATLAS = "particleAtlas.atlas";
+    public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
+    public static final String RSC_SQUARE_IMG = "square";
+    public static final String RSC_CIRCLE_IMG = "circle";
+    public static final String RSC_TRIANGLE_IMG = "triangle";
+    public static final String RSC_ENTITY_ATLAS = "atlases/entities.atlas";
+    public static final String RSC_PARTICLE_ATLAS = "atlases/particles.atlas";
+    public static final String RSC_TILED_MAP = "BattleArena/BattleArena.tmx";
 
     public Server server;
     public Client client;
@@ -50,10 +56,12 @@ public class SpaceBattles extends Game {
         handlers = new HandlerRegistry(this);
 
         am.load(RSC_LIBGDX_IMG, Texture.class);
-        am.load(RSC_SQUARE_IMG, Texture.class);
-        am.load(RSC_CIRCLE_IMG, Texture.class);
-        am.load(RSC_TRIANGLE_IMG, Texture.class);
+
+        am.load(RSC_ENTITY_ATLAS, TextureAtlas.class);
         am.load(RSC_PARTICLE_ATLAS, TextureAtlas.class);
+
+        am.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
+        am.load(SpaceBattles.RSC_TILED_MAP, TiledMap.class);
 
         setScreen(new LoadScreen(this));
 
@@ -182,6 +190,11 @@ public class SpaceBattles extends Game {
         Texture tex = frameBuffer.getColorBufferTexture();
         tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         batch.draw(tex, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
+    }
+
+    public TextureRegion getEntity(String name) {
+        TextureAtlas atlas = am.get(SpaceBattles.RSC_ENTITY_ATLAS, TextureAtlas.class);
+        return atlas.findRegion(name);
     }
 
     @Override

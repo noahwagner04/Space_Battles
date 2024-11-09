@@ -1,11 +1,8 @@
 package nocah.spacebattles;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.NetEvent;
@@ -14,15 +11,18 @@ public class ArenaScreen extends ScreenAdapter {
     private SpaceBattles game;
     private Player player;
     private Camera camera;
-    private Tilemap tilemap;
+    private TiledMap map;
+    private OrthogonalTiledMapRenderer mapRenderer;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
         player = new Player(game);
         player.setPosition(1, 1);
-        tilemap = new Tilemap(30, 30, "arena.txt", game.am.get(SpaceBattles.RSC_SQUARE_IMG, Texture.class), 256, 256);
-        tilemap.addTile('.', new Tile(0, 0, new Color(0, 0, 0, 0)));
-        tilemap.addTile('#', new Tile(0, 0));
+
+        map = game.am.get(SpaceBattles.RSC_TILED_MAP);
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1/32f);
+
+        map.getProperties().getKeys().forEachRemaining(System.out::println);
 
         camera = new Camera(15, 15);
     }
@@ -46,7 +46,7 @@ public class ArenaScreen extends ScreenAdapter {
             }
         }
         player.update(delta);
-        player.collide(tilemap);
+        player.collide(map);
         camera.follow(new Vector2(player.getX(), player.getY()), delta);
     }
 
@@ -56,8 +56,9 @@ public class ArenaScreen extends ScreenAdapter {
 
         game.startWorldDraw(camera.getProjMat());
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        tilemap.render(game.batch);
         player.draw(game.batch);
+        mapRenderer.setView(camera.getOrthCamera());
+        mapRenderer.render();
         game.endWorldDraw();
 
         game.batch.begin();

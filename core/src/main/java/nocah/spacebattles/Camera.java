@@ -24,4 +24,8 @@ public class Camera {
     public Matrix4 getProjMat() {
         return orthCamera.combined.cpy();
     }
+
+    public OrthographicCamera getOrthCamera() {
+        return orthCamera;
+    }
 }

@@ -26,7 +26,7 @@ public class LoadScreen extends ScreenAdapter {
             return;
         }
 
-        if (!game.am.isLoaded("libgdx.png")) {
+        if (!game.am.isLoaded(SpaceBattles.RSC_LIBGDX_IMG)) {
             return;
         }
 
@@ -45,7 +45,7 @@ public class LoadScreen extends ScreenAdapter {
         }
 
         game.batch.begin();
-        Texture gdxTex = game.am.get("libgdx.png", Texture.class);
+        Texture gdxTex = game.am.get(SpaceBattles.RSC_LIBGDX_IMG, Texture.class);
         game.batch.draw(
             gdxTex,
             Gdx.graphics.getWidth() / 2f - gdxTex.getWidth() / 2f,

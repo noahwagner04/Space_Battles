@@ -9,8 +9,7 @@ buildscript {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
   }
   dependencies {
-
-
+    classpath "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
   }
 }
 
@@ -71,3 +70,12 @@ subprojects {
 }
 
 eclipse.project.name = 'Space_Battles' + '-parent'
+
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+
+task texturePacker {
+  doLast {
+    TexturePacker.process("assets_raw/entities", "assets/atlases", "entities")
+    TexturePacker.process("assets_raw/particles", "assets/atlases", "particles")
+  }
+}

@@ -2,11 +2,12 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -25,7 +26,7 @@ public class Player extends Sprite {
     private ParticleEffect effect;
 
     public Player(SpaceBattles game) {
-        super(game.am.get(SpaceBattles.RSC_TRIANGLE_IMG, Texture.class));
+        super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
         setSize(size, size);
         setOriginCenter();
         setupParticleEffect(game);
@@ -65,20 +66,24 @@ public class Player extends Sprite {
         }
     }
 
-    public void collide(Tilemap tilemap) {
+    public void collide(TiledMap tilemap) {
         float playerX = getX() + getOriginX();
         float playerY = getY() + getOriginY();
         float radius = getInCircleRadius();
-        float tileSize = tilemap.getTileWidth();
+        float tileSize = 1;
 
         int leftTile = (int) ((playerX - radius) / tileSize);
         int rightTile = (int) ((playerX + radius) / tileSize);
         int topTile = (int) ((playerY - radius) / tileSize);
         int bottomTile = (int) ((playerY + radius) / tileSize);
 
+        TiledMapTileLayer layer = (TiledMapTileLayer) tilemap.getLayers().get(0);
         for (int tileY = topTile; tileY <= bottomTile; tileY++) {
             for (int tileX = leftTile; tileX <= rightTile; tileX++) {
-                if (tilemap.getTileType(tileX, tileY) != '#') continue;
+                TiledMapTileLayer.Cell cell = layer.getCell(tileX, tileY);
+                if (cell == null) continue;
+                boolean collides = cell.getTile().getProperties().get("collides", Boolean.class);
+                if (!collides) continue;
                 handleTileCollision(tileX, tileY, tileSize, playerX, playerY, radius);
             }
         }
@@ -86,7 +91,10 @@ public class Player extends Sprite {
 
     private void setupParticleEffect(SpaceBattles game) {
         effect = new ParticleEffect();
-        effect.load(Gdx.files.internal("Thruster.p"), game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class));
+        effect.load(
+            Gdx.files.internal("particles/Thruster.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
         effect.scaleEffect(0.03f);
     }
 

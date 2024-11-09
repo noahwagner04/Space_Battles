@@ -1,5 +1,5 @@
 
-particleAtlas.png
+particles.png
 size: 256, 256
 format: RGBA8888
 filter: Nearest, Nearest
