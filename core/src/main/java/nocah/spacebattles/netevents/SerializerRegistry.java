@@ -12,6 +12,15 @@ public class SerializerRegistry {
         serializeMap.put(NetConstants.CHAT_EVENT_ID, ChatEvent::serialize);
         deserializeMap.put(NetConstants.CHAT_EVENT_ID, ChatEvent::deserialize);
 
+        serializeMap.put(NetConstants.CONNECTED_EVENT_ID, ConnectedEvent::serialize);
+        deserializeMap.put(NetConstants.CONNECTED_EVENT_ID, ConnectedEvent::deserialize);
+
+        serializeMap.put(NetConstants.START_GAME_EVENT_ID, StartGameEvent::serialize);
+        deserializeMap.put(NetConstants.START_GAME_EVENT_ID, StartGameEvent::deserialize);
+
+        serializeMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, SpawnEvent::serialize);
+        deserializeMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, SpawnEvent::deserialize);
+
         // at some point im going to add all net events here
     }
 

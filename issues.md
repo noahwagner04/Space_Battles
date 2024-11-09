@@ -15,10 +15,13 @@
 - create handler registry
 - Add tilemap & collision code to arena
 - Add thruster particles
+- Create proper host join in MainMenu
 
 ## Open Issues ##
 - asset organization, use texture atlases, replace Tilemap with TiledMap
 - Add player gun fire
 - Add asteroids
 - Stream movement from clients
-- Create proper host join in MainMenu
+- check for client / server instance through bool 
+- add disconnect event
+

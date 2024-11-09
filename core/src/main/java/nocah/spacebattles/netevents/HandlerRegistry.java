@@ -1,8 +1,10 @@
 package nocah.spacebattles.netevents;
 
 import com.badlogic.gdx.Game;
+import nocah.spacebattles.Player;
 import nocah.spacebattles.SpaceBattles;
 
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -17,13 +19,40 @@ public class HandlerRegistry {
         this.game = game;
 
         clientMap.put(NetConstants.CHAT_EVENT_ID, (event) -> {
-            ChatEvent c = (ChatEvent) event;
-            System.out.println(c.sender + ": " + c.message);
+            ChatEvent e = (ChatEvent) event;
+            System.out.println(e.sender + ": " + e.message);
         });
-
         serverMap.put(NetConstants.CHAT_EVENT_ID, (event) -> {
             game.server.broadcastEvent(event);
         });
+
+        clientMap.put(NetConstants.CONNECTED_EVENT_ID, (event) -> {
+            ConnectedEvent e = (ConnectedEvent) event;
+            game.connected = true;
+            game.id = e.playerID;
+        });
+
+        clientMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
+            game.gameStarted = true;
+        });
+        serverMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
+            game.server.broadcastEvent(event);
+        });
+
+        clientMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
+            SpawnEvent e = (SpawnEvent) event;
+            game.players[e.playerID] = new Player(game);
+        });
+        serverMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
+            SpawnEvent e = (SpawnEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
+            for (int i = 0; i < game.server.clientSockets.length; i++) {
+                Socket client = game.server.clientSockets[i];
+                if (client != null) game.server.sendEvent(new SpawnEvent(i), e.playerID);
+            }
+            game.players[e.playerID] = new Player(game);
+        });
+
     }
 
     public void handleServerEvent(NetEvent event) {

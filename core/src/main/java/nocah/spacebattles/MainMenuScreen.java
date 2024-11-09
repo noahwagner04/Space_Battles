@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.utils.ScreenUtils;
+import nocah.spacebattles.netevents.NetEvent;
 
 public class MainMenuScreen extends ScreenAdapter {
     private SpaceBattles game;
@@ -17,7 +18,20 @@ public class MainMenuScreen extends ScreenAdapter {
     }
 
     public void update(float delta) {
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+
+        if (game.server != null) {
+            if (!game.server.eventQueue.isEmpty()) {
+                NetEvent event = game.server.eventQueue.poll();
+                game.handlers.handleServerEvent(event);
+            }
+        }
+        if (game.client != null) {
+            if (!game.client.eventQueue.isEmpty()) {
+                NetEvent event = game.client.eventQueue.poll();
+                game.handlers.handleClientEvent(event);
+            }
+        }
+        if (game.connected) {
             game.setScreen(new LobbyScreen(game));
         }
     }
@@ -25,7 +39,9 @@ public class MainMenuScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         update(delta);
-
         ScreenUtils.clear(0f, 1f, 0f, 1f);
+        game.batch.begin();
+        game.hud.draw(game.batch);
+        game.batch.end();
     }
 }

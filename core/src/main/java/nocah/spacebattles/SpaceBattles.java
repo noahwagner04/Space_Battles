@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
 import nocah.spacebattles.netevents.HandlerRegistry;
+import nocah.spacebattles.netevents.StartGameEvent;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "libgdx.png";
@@ -25,6 +26,10 @@ public class SpaceBattles extends Game {
     public Client client;
     public String name;
     public HandlerRegistry handlers;
+    public Player[] players = new Player[4];
+    public int id;
+    public boolean connected = false;
+    public boolean gameStarted = false;
 
     public HUD hud;
 
@@ -55,13 +60,15 @@ public class SpaceBattles extends Game {
         name = "default_name";
 
         hud.registerAction("server", new HUDActionCommand() {
-            static final String help = "creates server to listen for clients";
+            static final String help = "creates server to listen for clients, and connects this client to it";
 
             @Override
             public String execute(String[] cmd) {
                 try {
+                    if (server != null) return "server already hosting";
                     server = new Server();
                     server.startServer();
+                    client = new Client("localhost");
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -79,6 +86,7 @@ public class SpaceBattles extends Game {
             @Override
             public String execute(String[] cmd) {
                 try {
+                    if (client != null) return "client already connected";
                     client = new Client(cmd[1]);
                     return "ok!";
                 } catch (Exception e) {
@@ -116,6 +124,25 @@ public class SpaceBattles extends Game {
             public String execute(String[] cmd) {
                 try {
                     name = cmd[1];
+                    return "ok!";
+                } catch (Exception e) {
+                    return help;
+                }
+            }
+
+            public String help(String[] cmd) {
+                return help;
+            }
+        });
+
+        hud.registerAction("start", new HUDActionCommand() {
+            static final String help = "used to start game if you're the host";
+
+            @Override
+            public String execute(String[] cmd) {
+                try {
+                    if (server == null) return "only the host can start a game!";
+                    client.sendEvent(new StartGameEvent());
                     return "ok!";
                 } catch (Exception e) {
                     return help;

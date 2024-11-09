@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import nocah.spacebattles.netevents.ConnectedEvent;
 import nocah.spacebattles.netevents.NetEvent;
 import nocah.spacebattles.netevents.NetConstants;
 import nocah.spacebattles.netevents.SerializerRegistry;
@@ -9,14 +10,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+// NOTE: creating all the send, broadcast, and stuff like that needs to go in its own namespace
+// also, creating all the out streams in each function is a bit goofy, do it once and store it
 
 public class Server {
     private static final int PORT = 12345;
     private List<ClientHandler> clientHandlers = new ArrayList<>();
     public ConcurrentLinkedQueue<NetEvent> eventQueue;
-    private List<Socket> clientSockets = new ArrayList<>();
+    public Socket[] clientSockets = new Socket[4];
     ServerSocket serverSocket;
     private boolean exit = false;
 
@@ -34,9 +39,11 @@ public class Server {
                 System.err.println("Error closing server socket: " + e.getMessage());
             }
         }
-        for (int i = 0; i < clientHandlers.size(); i++) {
+
+        for (Socket client : clientSockets) {
+            if (client == null) continue;
             try {
-                clientSockets.get(i).close();
+                client.close();
             } catch (IOException e) {
                 System.err.println("Error closing client socket: " + e.getMessage());
             }
@@ -46,6 +53,7 @@ public class Server {
     public void broadcastEvent(NetEvent event) {
         byte[] outData = SerializerRegistry.serialize(event.getEventID(), event);
         for (Socket client : clientSockets) {
+            if (client == null) continue;
             try {
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.write(outData);
@@ -56,6 +64,35 @@ public class Server {
         }
     }
 
+    public void sendEvent(NetEvent event, int playerID) {
+        byte[] outData = SerializerRegistry.serialize(event.getEventID(), event);
+        try {
+            DataOutputStream out = new DataOutputStream(clientSockets[playerID].getOutputStream());
+            out.write(outData);
+            out.flush();
+        } catch (IOException e) {
+            System.err.println("Error sending data to server: " + e.getMessage());
+        }
+    }
+
+    public void broadcastExcept(NetEvent event, int playerID) {
+        byte[] outData = SerializerRegistry.serialize(event.getEventID(), event);
+        for (int i = 0; i < clientSockets.length; i++) {
+            Socket client = clientSockets[i];
+            if (client == null || i == playerID) continue;
+
+            try {
+                DataOutputStream out = new DataOutputStream(client.getOutputStream());
+                out.write(outData);
+                out.flush();
+            } catch (IOException e) {
+                System.err.println("Error broadcasting message: " + e.getMessage());
+            }
+        }
+    }
+
+
+
     private class ServerListener implements Runnable {
         @Override
         public void run() {
@@ -64,7 +101,9 @@ public class Server {
                 System.out.println("Chat server started on port " + PORT);
                 while (!exit) {
                     Socket clientSocket = serverSocket.accept();
-                    clientSockets.add(clientSocket);
+                    int index = Arrays.asList(clientSockets).indexOf(null);
+                    clientSockets[index] = clientSocket;
+                    sendEvent(new ConnectedEvent(index), index);
                     ClientHandler clientHandler = new ClientHandler(clientSocket, eventQueue);
                     clientHandlers.add(clientHandler);
                     new Thread(clientHandler).start();
