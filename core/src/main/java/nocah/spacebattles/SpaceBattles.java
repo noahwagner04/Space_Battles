@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -18,15 +19,14 @@ public class SpaceBattles extends Game {
     public static final String RSC_SQUARE_IMG = "square.png";
     public static final String RSC_CIRCLE_IMG = "circle.png";
     public static final String RSC_TRIANGLE_IMG = "triangle.png";
+    public static final String RSC_PARTICLE_ATLAS = "particleAtlas.atlas";
 
     public Server server;
     public Client client;
     public String name;
     public HandlerRegistry handlers;
 
-
     public HUD hud;
-
 
     SpriteBatch batch;
     AssetManager am;
@@ -48,6 +48,7 @@ public class SpaceBattles extends Game {
         am.load(RSC_SQUARE_IMG, Texture.class);
         am.load(RSC_CIRCLE_IMG, Texture.class);
         am.load(RSC_TRIANGLE_IMG, Texture.class);
+        am.load(RSC_PARTICLE_ATLAS, TextureAtlas.class);
 
         setScreen(new LoadScreen(this));
 

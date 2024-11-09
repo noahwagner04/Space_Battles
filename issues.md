@@ -14,7 +14,11 @@
 - create serialization registry
 - create handler registry
 - Add tilemap & collision code to arena
+- Add thruster particles
 
 ## Open Issues ##
+- asset organization, use texture atlases, replace Tilemap with TiledMap
+- Add player gun fire
+- Add asteroids
 - Stream movement from clients
 - Create proper host join in MainMenu
