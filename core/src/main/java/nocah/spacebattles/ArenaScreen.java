@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import nocah.spacebattles.netevents.NetEvent;
 
 public class ArenaScreen extends ScreenAdapter {
     private SpaceBattles game;
@@ -32,8 +33,18 @@ public class ArenaScreen extends ScreenAdapter {
     }
 
     public void update(float delta) {
-        if (game.server != null) game.server.broadcastMessageInQueue();
-        if (game.client != null) game.client.printMessageInQueue();
+        if (game.server != null) {
+            if (!game.server.eventQueue.isEmpty()) {
+                NetEvent event = game.server.eventQueue.poll();
+                game.handlers.handleServerEvent(event);
+            }
+        }
+        if (game.client != null) {
+            if (!game.client.eventQueue.isEmpty()) {
+                NetEvent event = game.client.eventQueue.poll();
+                game.handlers.handleClientEvent(event);
+            }
+        }
         player.update(delta);
         player.collide(tilemap);
         camera.follow(new Vector2(player.getX(), player.getY()), delta);

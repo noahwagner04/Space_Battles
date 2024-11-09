@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
+import nocah.spacebattles.netevents.HandlerRegistry;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "libgdx.png";
@@ -18,9 +19,10 @@ public class SpaceBattles extends Game {
     public static final String RSC_CIRCLE_IMG = "circle.png";
     public static final String RSC_TRIANGLE_IMG = "triangle.png";
 
-    Server server;
-    Client client;
-    private String name;
+    public Server server;
+    public Client client;
+    public String name;
+    public HandlerRegistry handlers;
 
 
     public HUD hud;
@@ -40,6 +42,7 @@ public class SpaceBattles extends Game {
         int fb_w = (int)(Gdx.graphics.getWidth() * res);
         int fb_h = (int)(Gdx.graphics.getHeight() * res);
         frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, fb_w, fb_h, false);
+        handlers = new HandlerRegistry(this);
 
         am.load(RSC_LIBGDX_IMG, Texture.class);
         am.load(RSC_SQUARE_IMG, Texture.class);

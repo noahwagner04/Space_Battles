@@ -15,7 +15,7 @@ public class Client {
     private DataOutputStream out;
     private MessageReceiver msgReceiver;
     private Socket socket;
-    private ConcurrentLinkedQueue<NetEvent> eventQueue;
+    public ConcurrentLinkedQueue<NetEvent> eventQueue;
 
     public Client(String serverAddress) {
         this.serverAddress = serverAddress;
@@ -46,21 +46,6 @@ public class Client {
                 System.err.println("Error sending data to server: " + e.getMessage());
             }
         }
-    }
-
-    public void printMessageInQueue() {
-            if (!eventQueue.isEmpty()) {
-                NetEvent e = eventQueue.poll();
-                byte[]  outData = SerializerRegistry.serialize(e.getEventID(), e);
-
-                int nameLength = ByteBuffer.wrap(outData, 8, 4).getInt();
-                String name = new String(outData, 12, nameLength, StandardCharsets.UTF_8);
-
-                int messageLength = ByteBuffer.wrap(outData, 12 + nameLength, 4).getInt();
-                String message = new String(outData, 12 + nameLength + 4, messageLength, StandardCharsets.UTF_8);
-
-                System.out.println(name + ": " + message);
-            }
     }
 
     public void stop() {

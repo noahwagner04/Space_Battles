@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Server {
     private static final int PORT = 12345;
     private List<ClientHandler> clientHandlers = new ArrayList<>();
-    private ConcurrentLinkedQueue<NetEvent> eventQueue;
+    public ConcurrentLinkedQueue<NetEvent> eventQueue;
     private List<Socket> clientSockets = new ArrayList<>();
     ServerSocket serverSocket;
     private boolean exit = false;
@@ -43,14 +43,8 @@ public class Server {
         }
     }
 
-    public void broadcastMessageInQueue() {
-        byte[] outData;
-        if (!eventQueue.isEmpty()) {
-            NetEvent e = eventQueue.poll();
-            outData = SerializerRegistry.serialize(e.getEventID(), e);
-        } else {
-            return;
-        }
+    public void broadcastEvent(NetEvent event) {
+        byte[] outData = SerializerRegistry.serialize(event.getEventID(), event);
         for (Socket client : clientSockets) {
             try {
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());

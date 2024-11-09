@@ -9,7 +9,10 @@
 - Low resolution screen filter
 - create server/client echo in hud
 - fix hanging when exiting
+- create NetEvent framework
 - Add Arena scene with camera / Viewport
+- create serialization registry
+- create handler registry
 - Add tilemap & collision code to arena
 
 ## Open Issues ##
