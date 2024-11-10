@@ -53,6 +53,19 @@ public class HandlerRegistry {
             game.players[e.playerID] = new Player(game);
         });
 
+        clientMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {
+            MoveEvent e = (MoveEvent) event;
+            if(game.players[e.playerID] != null) {
+                game.players[e.playerID].setX(e.x);
+                game.players[e.playerID].setY(e.y);
+                game.players[e.playerID].setRotation(e.rotation);
+            }
+        });
+        serverMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {
+            MoveEvent e = (MoveEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
+        });
+
     }
 
     public void handleServerEvent(NetEvent event) {

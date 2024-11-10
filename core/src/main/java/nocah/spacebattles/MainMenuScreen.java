@@ -19,18 +19,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
     public void update(float delta) {
 
-        if (game.server != null) {
-            if (!game.server.eventQueue.isEmpty()) {
-                NetEvent event = game.server.eventQueue.poll();
-                game.handlers.handleServerEvent(event);
-            }
-        }
-        if (game.client != null) {
-            if (!game.client.eventQueue.isEmpty()) {
-                NetEvent event = game.client.eventQueue.poll();
-                game.handlers.handleClientEvent(event);
-            }
-        }
+        game.handleNetworkEvents();
         if (game.connected) {
             game.setScreen(new LobbyScreen(game));
         }

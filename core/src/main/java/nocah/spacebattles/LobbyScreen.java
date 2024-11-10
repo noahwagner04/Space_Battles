@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
+import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.NetEvent;
 import nocah.spacebattles.netevents.SpawnEvent;
 
@@ -31,22 +32,18 @@ public class LobbyScreen extends ScreenAdapter {
     }
 
     public void update(float delta) {
-        if (game.server != null) {
-            if (!game.server.eventQueue.isEmpty()) {
-                NetEvent event = game.server.eventQueue.poll();
-                game.handlers.handleServerEvent(event);
-            }
-        }
-        if (game.client != null) {
-            if (!game.client.eventQueue.isEmpty()) {
-                NetEvent event = game.client.eventQueue.poll();
-                game.handlers.handleClientEvent(event);
-            }
-        }
 
-        if (game.players[game.id] != null) {
-            game.players[game.id].update(delta);
-            game.players[game.id].constrain(lobbyBounds);
+        game.handleNetworkEvents();
+
+        Player thisPlayer = game.players[game.id];
+        if (thisPlayer != null) {
+            thisPlayer.update(delta);
+            thisPlayer.constrain(lobbyBounds);
+            game.client.sendEvent(new MoveEvent(game.id,
+                thisPlayer.getX(),
+                thisPlayer.getY(),
+                thisPlayer.getRotation()
+            ));
         }
 
         if (game.gameStarted) {

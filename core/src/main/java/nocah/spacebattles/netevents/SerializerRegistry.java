@@ -21,6 +21,9 @@ public class SerializerRegistry {
         serializeMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, SpawnEvent::serialize);
         deserializeMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, SpawnEvent::deserialize);
 
+        serializeMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, MoveEvent::serialize);
+        deserializeMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, MoveEvent::deserialize);
+
         // at some point im going to add all net events here
     }
 

@@ -16,12 +16,15 @@
 - Add tilemap & collision code to arena
 - Add thruster particles
 - Create proper host join in MainMenu
+- Stream movement from clients
+
 
 ## Open Issues ##
 - asset organization, use texture atlases, replace Tilemap with TiledMap
 - Add player gun fire
 - Add asteroids
-- Stream movement from clients
+- create end of frame event
+- add player lerp / network move function
 - check for client / server instance through bool 
 - add disconnect event
 

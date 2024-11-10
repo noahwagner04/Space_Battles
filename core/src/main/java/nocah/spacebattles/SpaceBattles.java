@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
 import nocah.spacebattles.netevents.HandlerRegistry;
+import nocah.spacebattles.netevents.NetEvent;
 import nocah.spacebattles.netevents.StartGameEvent;
 
 public class SpaceBattles extends Game {
@@ -204,5 +205,29 @@ public class SpaceBattles extends Game {
 
         if (server != null) server.stop();
         if (client != null) client.stop();
+    }
+
+    public void handleNetworkEvents() {
+        if (server != null) {
+            int i = 0;
+            while ( i < 100) {
+                if (!server.eventQueue.isEmpty()) {
+                    NetEvent event = server.eventQueue.poll();
+                    handlers.handleServerEvent(event);
+                }
+                i++;
+            }
+        }
+        if (client != null) {
+            int i = 0;
+            while ( i < 100) {
+                if (!client.eventQueue.isEmpty()) {
+
+                    NetEvent event = client.eventQueue.poll();
+                    handlers.handleClientEvent(event);
+                }
+                i++;
+            }
+        }
     }
 }
