@@ -14,11 +14,15 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.ChatEvent;
 import nocah.spacebattles.netevents.HandlerRegistry;
 import nocah.spacebattles.netevents.NetEvent;
 import nocah.spacebattles.netevents.StartGameEvent;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
@@ -37,6 +41,8 @@ public class SpaceBattles extends Game {
     public int id;
     public boolean connected = false;
     public boolean gameStarted = false;
+
+    public ArrayList<Projectile> projectiles = new ArrayList<>();
 
     public HUD hud;
 
@@ -196,6 +202,33 @@ public class SpaceBattles extends Game {
     public TextureRegion getEntity(String name) {
         TextureAtlas atlas = am.get(SpaceBattles.RSC_ENTITY_ATLAS, TextureAtlas.class);
         return atlas.findRegion(name);
+    }
+
+    public void drawPlayers() {
+        for (Player player: players) {
+            if (player == null) continue;
+            player.draw(batch);
+        }
+    }
+
+    public void drawProjectiles() {
+        for (Projectile projectile : projectiles) {
+            projectile.draw(batch);
+        }
+    }
+
+    public void updateProjectiles(float delta, TiledMap map, Rectangle worldBounds) {
+        Iterator<Projectile> iterator = projectiles.iterator();
+        while (iterator.hasNext()) {
+            Projectile proj = iterator.next();
+            proj.update(delta);
+            if (map != null && proj.checkCollides(map)) {
+                iterator.remove();
+            }
+            if (proj.checkBounds(worldBounds)){
+                iterator.remove();
+            }
+        }
     }
 
     @Override

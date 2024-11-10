@@ -2,16 +2,15 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.ParticleEffect;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class Player extends Sprite {
+    private SpaceBattles game;
+
     private Vector2 velocity = new Vector2(0, 0);
     private float maxSpeed = 6;
     private float acceleration = 12;
@@ -25,8 +24,15 @@ public class Player extends Sprite {
     private float size = 1;
     private ParticleEffect effect;
 
+    private float bulletDamage = 1;
+    private float bulletSpeed = 1;
+    private float bulletCoolDown =1;
+    private float shootTimer = 0;
+    private float shootKnockBack = 3;
+
     public Player(SpaceBattles game) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
+        this.game = game;
         setSize(size, size);
         setOriginCenter();
         setupParticleEffect(game);
@@ -37,6 +43,12 @@ public class Player extends Sprite {
         handleThrust(delta);
         updatePosition(delta);
         updateParticleEffect(delta);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && shootTimer > bulletCoolDown) {
+            shootTimer = 0;
+            fireBullet();
+        }
+        shootTimer += delta;
     }
 
     public void draw(SpriteBatch batch) {
@@ -66,7 +78,7 @@ public class Player extends Sprite {
         }
     }
 
-    public void collide(TiledMap tilemap) {
+    public void collide(TiledMap tiledMap) {
         float playerX = getX() + getOriginX();
         float playerY = getY() + getOriginY();
         float radius = getInCircleRadius();
@@ -77,7 +89,9 @@ public class Player extends Sprite {
         int topTile = (int) ((playerY - radius) / tileSize);
         int bottomTile = (int) ((playerY + radius) / tileSize);
 
-        TiledMapTileLayer layer = (TiledMapTileLayer) tilemap.getLayers().get(0);
+        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+        if (layer == null) return;
+
         for (int tileY = topTile; tileY <= bottomTile; tileY++) {
             for (int tileX = leftTile; tileX <= rightTile; tileX++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(tileX, tileY);
@@ -143,8 +157,8 @@ public class Player extends Sprite {
 
     private void updateParticleEffect(float delta) {
         effect.update(delta);
-        Vector2 origin = new Vector2(getX() + getOriginX(), getY() + getOriginY());
-        Vector2 offset = new Vector2(0, -size / 4).rotateDeg(getRotation());
+        Vector2 origin = getCenter();
+        Vector2 offset = getHeadingDir().scl(-size/4);
         effect.setPosition(origin.x + offset.x, origin.y + offset.y);
 
         effect.getEmitters().forEach(emitter -> {
@@ -173,6 +187,25 @@ public class Player extends Sprite {
             if (Math.abs(nx) > Math.abs(ny)) velocity.x = 0;
             else velocity.y = 0;
         }
+    }
+
+    private void fireBullet() {
+        TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
+        Vector2 heading = getHeadingDir();
+        Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
+        Projectile proj = new Projectile(tex, startPos.x, startPos.y, 10, getRotation() + 90);
+        proj.setSize(0.15f, 0.15f);
+        game.projectiles.add(proj);
+
+        velocity.sub(heading.scl(shootKnockBack));
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(getX() + getOriginX(), getY() + getOriginY());
+    }
+
+    private Vector2 getHeadingDir() {
+        return new Vector2(0, 1).rotateDeg(getRotation());
     }
 
     private float getInCircleRadius() {

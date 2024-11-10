@@ -1,16 +1,9 @@
 package nocah.spacebattles;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
-import nocah.spacebattles.netevents.ChatEvent;
 import nocah.spacebattles.netevents.MoveEvent;
-import nocah.spacebattles.netevents.NetEvent;
 import nocah.spacebattles.netevents.SpawnEvent;
 
 public class LobbyScreen extends ScreenAdapter {
@@ -49,6 +42,7 @@ public class LobbyScreen extends ScreenAdapter {
         if (game.gameStarted) {
             game.setScreen(new ArenaScreen(game));
         }
+        game.updateProjectiles(delta, null, lobbyBounds);
     }
 
     @Override
@@ -56,10 +50,8 @@ public class LobbyScreen extends ScreenAdapter {
         update(delta);
         game.startWorldDraw(camera.getProjMat());
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        for (Player player: game.players) {
-            if (player == null) continue;
-            player.draw(game.batch);
-        }
+        game.drawPlayers();
+        game.drawProjectiles();
         game.endWorldDraw();
 
         game.batch.begin();

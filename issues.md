@@ -17,11 +17,10 @@
 - Add thruster particles
 - Create proper host join in MainMenu
 - Stream movement from clients
-
-
-## Open Issues ##
 - asset organization, use texture atlases, replace Tilemap with TiledMap
 - Add player gun fire
+
+## Open Issues ##
 - Add asteroids
 - create end of frame event
 - add player lerp / network move function
