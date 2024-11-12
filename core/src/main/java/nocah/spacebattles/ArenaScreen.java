@@ -54,7 +54,7 @@ public class ArenaScreen extends ScreenAdapter {
             camera.follow(thisPlayer.getCenter(), delta);
             if (1 / game.numOfPosSends < posTimer) {
                 thisPlayer.sendPlayerMoveEvent();
-                posTimer = 0;
+                posTimer -= 1 / game.numOfPosSends;
             }
         }
         game.updateRemotePlayers(delta);

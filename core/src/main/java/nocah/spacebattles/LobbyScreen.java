@@ -37,7 +37,7 @@ public class LobbyScreen extends ScreenAdapter {
             thisPlayer.constrain(lobbyBounds);
             if (1 / game.numOfPosSends < posTimer) {
                 thisPlayer.sendPlayerMoveEvent();
-                posTimer = 0;
+                posTimer -= 1 / game.numOfPosSends;
             }
         }
 
