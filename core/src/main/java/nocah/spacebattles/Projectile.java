@@ -16,8 +16,7 @@ public class Projectile extends Sprite {
         super(texture);
         setPosition(x, y);
         this.speed = speed;
-        velocity = new Vector2((float)Math.cos(Math.toRadians(angle)), (float)Math.sin(Math.toRadians(angle)));
-        velocity.scl(speed);
+        velocity = new Vector2(speed, 0).rotateDeg(angle);
     }
 
     public void update(float delta) {

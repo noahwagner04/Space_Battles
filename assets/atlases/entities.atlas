@@ -1,27 +1,48 @@
 
 entities.png
-size: 1024, 512
+size: 1024, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-circle
+asteroid1
   rotate: false
   xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+asteroid2
+  rotate: false
+  xy: 132, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+asteroid3
+  rotate: false
+  xy: 262, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+circle
+  rotate: false
+  xy: 392, 2
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1
 square
   rotate: false
-  xy: 260, 2
-  size: 256, 256
-  orig: 256, 256
+  xy: 522, 2
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1
 triangle
   rotate: false
-  xy: 518, 2
-  size: 256, 256
-  orig: 256, 256
+  xy: 652, 2
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1

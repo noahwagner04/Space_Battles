@@ -6,13 +6,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -26,6 +24,7 @@ public class SpaceBattles extends Game {
     public static final String RSC_SQUARE_IMG = "square";
     public static final String RSC_CIRCLE_IMG = "circle";
     public static final String RSC_TRIANGLE_IMG = "triangle";
+    public static final String[] RSC_ASTEROID_IMGS = {"asteroid1", "asteroid2", "asteroid3"};
     public static final String RSC_ENTITY_ATLAS = "atlases/entities.atlas";
     public static final String RSC_PARTICLE_ATLAS = "atlases/particles.atlas";
     public static final String RSC_TILED_MAP = "BattleArena/BattleArena.tmx";
@@ -41,6 +40,7 @@ public class SpaceBattles extends Game {
     public final float numOfPosSends = 20;
 
     public ArrayList<Projectile> projectiles = new ArrayList<>();
+    public ArrayList<Asteroid> asteroids = new ArrayList<>();
 
     public HUD hud;
 
@@ -201,16 +201,16 @@ public class SpaceBattles extends Game {
         return atlas.findRegion(name);
     }
 
-    public void drawPlayers() {
-        for (Player player: players) {
-            if (player == null) continue;
-            player.draw(batch);
+    public void drawSprites(Sprite[] sprites) {
+        for (Sprite s : sprites) {
+            if (s == null) continue;
+            s.draw(batch);
         }
     }
 
-    public void drawProjectiles() {
-        for (Projectile projectile : projectiles) {
-            projectile.draw(batch);
+    public void drawSprites(ArrayList<? extends Sprite> sprites) {
+        for (Sprite s : sprites) {
+            s.draw(batch);
         }
     }
 
@@ -226,6 +226,21 @@ public class SpaceBattles extends Game {
                 iterator.remove();
             }
         }
+    }
+
+    public void updateAsteroids(float delta, Rectangle worldBounds) {
+        for (Asteroid a : asteroids) {
+            a.update(delta);
+            a.bounceOffBounds(worldBounds);
+        }
+    }
+
+    public void spawnRandomAsteroid(Rectangle worldBounds) {
+        TextureRegion tex = getEntity(SpaceBattles.RSC_ASTEROID_IMGS[MathUtils.random(0, 2)]);
+        float size = MathUtils.random(1.5f, 4);
+        float x = MathUtils.random(worldBounds.x, worldBounds.width);
+        float y = MathUtils.random(worldBounds.y, worldBounds.height);
+        asteroids.add(new Asteroid(tex, size, x, y));
     }
 
     @Override

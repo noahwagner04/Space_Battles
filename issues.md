@@ -19,9 +19,11 @@
 - Stream movement from clients
 - asset organization, use texture atlases, replace Tilemap with TiledMap
 - Add player gun fire
+- Add asteroids
 
 ## Open Issues ##
-- Add asteroids
+- Add collision interactions between entities
+- Add damage system
 - create end of frame event
 - add player lerp / network move function
 - check for client / server instance through bool 

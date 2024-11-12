@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import nocah.spacebattles.netevents.MoveEvent;
@@ -79,7 +80,8 @@ public class Player extends Sprite {
         updateParticleEffect(delta);
     }
 
-    public void draw(SpriteBatch batch) {
+    @Override
+    public void draw(Batch batch) {
         super.draw(batch);
         effect.draw(batch);
     }
@@ -204,8 +206,8 @@ public class Player extends Sprite {
         float tileCenterX = tileX * tileSize + tileSize / 2;
         float tileCenterY = tileY * tileSize + tileSize / 2;
 
-        float closestX = clamp(playerX, tileCenterX - tileSize / 2, tileCenterX + tileSize / 2);
-        float closestY = clamp(playerY, tileCenterY - tileSize / 2, tileCenterY + tileSize / 2);
+        float closestX = MathUtils.clamp(playerX, tileCenterX - tileSize / 2, tileCenterX + tileSize / 2);
+        float closestY = MathUtils.clamp(playerY, tileCenterY - tileSize / 2, tileCenterY + tileSize / 2);
 
         float dx = playerX - closestX;
         float dy = playerY - closestY;
@@ -228,6 +230,8 @@ public class Player extends Sprite {
         Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
         Projectile proj = new Projectile(tex, startPos.x, startPos.y, 10, getRotation() + 90);
         proj.setSize(0.15f, 0.15f);
+        proj.setOriginCenter();
+        proj.translate(-proj.getOriginX(), -proj.getOriginY());
         game.projectiles.add(proj);
 
         velocity.sub(heading.scl(shootKnockBack));
@@ -245,10 +249,6 @@ public class Player extends Sprite {
         return size * 0.288675f; // Radius for an equilateral triangle
     }
 
-    private float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
     public void sendPlayerMoveEvent() {
         game.client.sendEvent(new MoveEvent(game.id,
             getX(),
@@ -260,5 +260,4 @@ public class Player extends Sprite {
             thrustAnimationState
         ));
     }
-
 }

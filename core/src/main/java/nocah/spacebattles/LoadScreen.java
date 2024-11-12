@@ -3,6 +3,7 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class LoadScreen extends ScreenAdapter {
@@ -22,6 +23,7 @@ public class LoadScreen extends ScreenAdapter {
 
     public void update(float delta) {
         if (game.am.update(16) && timer > waitTime) {
+            afterLoadCallback();
             game.setScreen(new MainMenuScreen(game));
             return;
         }
@@ -52,5 +54,12 @@ public class LoadScreen extends ScreenAdapter {
             Gdx.graphics.getHeight() / 2f - gdxTex.getHeight() / 2f
         );
         game.batch.end();
+    }
+
+    private void afterLoadCallback() {
+        TextureAtlas entities = game.am.get(SpaceBattles.RSC_ENTITY_ATLAS);
+        for(Texture texture : entities.getTextures()) {
+            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
     }
 }

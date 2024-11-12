@@ -2,15 +2,13 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.MoveEvent;
-import nocah.spacebattles.netevents.NetEvent;
-
-import java.util.Iterator;
 
 public class ArenaScreen extends ScreenAdapter {
     private SpaceBattles game;
@@ -35,6 +33,9 @@ public class ArenaScreen extends ScreenAdapter {
             map.getProperties().get("height", Integer.class)
         );
 
+        for (int i = 0; i < 100; i++) {
+            game.spawnRandomAsteroid(worldBounds);
+        }
         camera = new Camera(15, 15);
     }
 
@@ -58,6 +59,7 @@ public class ArenaScreen extends ScreenAdapter {
         }
         game.updateRemotePlayers(delta);
         game.updateProjectiles(delta, map, worldBounds);
+        game.updateAsteroids(delta, worldBounds);
     }
 
     @Override
@@ -68,8 +70,9 @@ public class ArenaScreen extends ScreenAdapter {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
         mapRenderer.setView(camera.getOrthCamera());
         mapRenderer.render();
-        game.drawPlayers();
-        game.drawProjectiles();
+        game.drawSprites(game.players);
+        game.drawSprites(game.projectiles);
+        game.drawSprites(game.asteroids);
         game.endWorldDraw();
 
         game.batch.begin();

@@ -55,8 +55,8 @@ public class LobbyScreen extends ScreenAdapter {
         update(delta);
         game.startWorldDraw(camera.getProjMat());
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        game.drawPlayers();
-        game.drawProjectiles();
+        game.drawSprites(game.players);
+        game.drawSprites(game.projectiles);
         game.endWorldDraw();
 
         game.batch.begin();
