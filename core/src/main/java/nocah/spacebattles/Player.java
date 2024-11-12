@@ -7,16 +7,17 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import nocah.spacebattles.netevents.MoveEvent;
 
 public class Player extends Sprite {
     private SpaceBattles game;
 
-    private Vector2 velocity = new Vector2(0, 0);
+    public Vector2 velocity = new Vector2(0, 0);
     private float maxSpeed = 6;
     private float acceleration = 12;
     private float friction = 4;
 
-    private float rotVelocity = 0;
+    public float rotVelocity = 0;
     private float maxRotSpeed = 270;
     private float rotAcceleration = 360 * 4;
     private float rotFriction = 360 * 2;
@@ -29,6 +30,9 @@ public class Player extends Sprite {
     private float bulletCoolDown =1;
     private float shootTimer = 0;
     private float shootKnockBack = 3;
+
+    public byte thrustAnimationState = 2;
+
 
     public Player(SpaceBattles game) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
@@ -49,6 +53,30 @@ public class Player extends Sprite {
             fireBullet();
         }
         shootTimer += delta;
+    }
+
+    public void updateRemotePlayer(float delta) {
+        float x = getX();
+        float y = getY();
+        float r = getRotation();
+
+        x += velocity.x * delta;
+        y += velocity.y * delta;
+        r += rotVelocity * delta;
+
+        setX(x);
+        setY(y);
+        setRotation(r);
+
+        if (thrustAnimationState == 0 && effect.isComplete()) {
+            effect.start();
+        } else if (thrustAnimationState == 1) {
+            effect.start();
+        } else if (thrustAnimationState == 2) {
+            effect.allowCompletion();
+        }
+
+        updateParticleEffect(delta);
     }
 
     public void draw(SpriteBatch batch) {
@@ -139,9 +167,14 @@ public class Player extends Sprite {
         Vector2 direction = new Vector2(0, 1).rotateDeg(getRotation());
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            thrustAnimationState = 0;
             velocity.add(direction.scl(acceleration * delta));
-            if (Gdx.input.isKeyJustPressed(Input.Keys.W)) effect.start();
+            if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
+                thrustAnimationState = 1;
+                effect.start();
+            }
         } else {
+            thrustAnimationState = 2;
             effect.allowCompletion();
             velocity.sub(velocity.cpy().nor().scl(friction * delta));
             if (velocity.len() < friction * delta) velocity.setLength(0);
@@ -215,4 +248,17 @@ public class Player extends Sprite {
     private float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
     }
+
+    public void sendPlayerMoveEvent() {
+        game.client.sendEvent(new MoveEvent(game.id,
+            getX(),
+            getY(),
+            getRotation(),
+            velocity.x,
+            velocity.y,
+            rotVelocity,
+            thrustAnimationState
+        ));
+    }
+
 }

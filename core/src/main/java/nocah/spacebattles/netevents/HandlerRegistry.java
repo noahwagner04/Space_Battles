@@ -59,6 +59,11 @@ public class HandlerRegistry {
                 game.players[e.playerID].setX(e.x);
                 game.players[e.playerID].setY(e.y);
                 game.players[e.playerID].setRotation(e.rotation);
+                game.players[e.playerID].velocity.x = e.xVel;
+                game.players[e.playerID].velocity.y = e.yVel;
+                game.players[e.playerID].rotVelocity = e.rotVel;
+                game.players[e.playerID].thrustAnimationState = e.thrustAnimationState;
+
             }
         });
         serverMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {

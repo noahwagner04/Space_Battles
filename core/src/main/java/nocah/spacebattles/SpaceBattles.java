@@ -16,10 +16,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
-import nocah.spacebattles.netevents.ChatEvent;
-import nocah.spacebattles.netevents.HandlerRegistry;
-import nocah.spacebattles.netevents.NetEvent;
-import nocah.spacebattles.netevents.StartGameEvent;
+import nocah.spacebattles.netevents.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,6 +38,7 @@ public class SpaceBattles extends Game {
     public int id;
     public boolean connected = false;
     public boolean gameStarted = false;
+    public final float numOfPosSends = 20;
 
     public ArrayList<Projectile> projectiles = new ArrayList<>();
 
@@ -61,7 +59,6 @@ public class SpaceBattles extends Game {
         int fb_h = (int)(Gdx.graphics.getHeight() * res);
         frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, fb_w, fb_h, false);
         handlers = new HandlerRegistry(this);
-
         am.load(RSC_LIBGDX_IMG, Texture.class);
 
         am.load(RSC_ENTITY_ATLAS, TextureAtlas.class);
@@ -241,25 +238,31 @@ public class SpaceBattles extends Game {
     }
 
     public void handleNetworkEvents() {
+        int maxEventsToHandle = 100;
+
         if (server != null) {
             int i = 0;
-            while ( i < 100) {
-                if (!server.eventQueue.isEmpty()) {
-                    NetEvent event = server.eventQueue.poll();
-                    handlers.handleServerEvent(event);
-                }
+            while (!server.eventQueue.isEmpty() && i < maxEventsToHandle) {
+                NetEvent event = server.eventQueue.poll();
+                handlers.handleServerEvent(event);
                 i++;
             }
         }
         if (client != null) {
             int i = 0;
-            while ( i < 100) {
-                if (!client.eventQueue.isEmpty()) {
-
-                    NetEvent event = client.eventQueue.poll();
-                    handlers.handleClientEvent(event);
-                }
+            while (!client.eventQueue.isEmpty() && i < maxEventsToHandle) {
+                NetEvent event = client.eventQueue.poll();
+                handlers.handleClientEvent(event);
                 i++;
+            }
+        }
+    }
+
+    public void updateRemotePlayers(float delta) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
+                if (i == id) continue;
+                players[i].updateRemotePlayer(delta);
             }
         }
     }

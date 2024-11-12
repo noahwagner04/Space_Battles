@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -18,10 +19,11 @@ public class ArenaScreen extends ScreenAdapter {
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
     private Rectangle worldBounds;
+    private float posTimer;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
-
+        posTimer = 0;
         thisPlayer = game.players[game.id];
         thisPlayer.setPosition(1, 1);
         map = game.am.get(SpaceBattles.RSC_TILED_MAP);
@@ -42,18 +44,19 @@ public class ArenaScreen extends ScreenAdapter {
     }
 
     public void update(float delta) {
+        posTimer += delta;
         game.handleNetworkEvents();
 
         if (thisPlayer != null) {
             thisPlayer.update(delta);
             thisPlayer.collide(map);
             camera.follow(thisPlayer.getCenter(), delta);
-            game.client.sendEvent(new MoveEvent(game.id,
-                thisPlayer.getX(),
-                thisPlayer.getY(),
-                thisPlayer.getRotation()
-            ));
+            if (1 / game.numOfPosSends < posTimer) {
+                thisPlayer.sendPlayerMoveEvent();
+                posTimer = 0;
+            }
         }
+        game.updateRemotePlayers(delta);
         game.updateProjectiles(delta, map, worldBounds);
     }
 
