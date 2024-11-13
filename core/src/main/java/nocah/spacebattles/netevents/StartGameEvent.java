@@ -4,18 +4,17 @@ import java.nio.ByteBuffer;
 
 public class StartGameEvent implements NetEvent{
 
-    public int getEventID() {return NetConstants.START_GAME_EVENT_ID;}
-    public int getDataByteSize() {return 0;}
+    public byte getEventID() {return NetConstants.START_GAME_EVENT_ID;}
+    public short getDataByteSize() {return 0;}
 
-    public static byte[] serialize(NetEvent e) {
-        StartGameEvent event = (StartGameEvent) e;
+    public byte[] serialize() {
 
-        // EventID, Event size, playerID
-        int totalSize = 4 + 4 + event.getDataByteSize();;
+        // EventID, Event size
+        int totalSize = 1 + 2 + getDataByteSize();;
         ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 
-        buffer.putInt(event.getEventID());
-        buffer.putInt(event.getDataByteSize());
+        buffer.put(getEventID());
+        buffer.putShort(getDataByteSize());
         return buffer.array();
     }
 

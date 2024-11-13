@@ -22,10 +22,13 @@
 - Add asteroids
 - fix number of position sends per second
 - add player lerp / network move function
+- add disconnect event
+- have one message receiver for server and client to use
 
 ## Open Issues ##
 - Add collision interactions between entities
 - Add damage system
+- create generic spawn event
+- spawn asteroids
 - check for client / server instance through bool 
-- add disconnect event
 

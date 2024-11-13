@@ -34,7 +34,7 @@ public class SpaceBattles extends Game {
     public String name;
     public HandlerRegistry handlers;
     public Player[] players = new Player[4];
-    public int id;
+    public byte id;
     public boolean connected = false;
     public boolean gameStarted = false;
 

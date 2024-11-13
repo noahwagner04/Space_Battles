@@ -3,7 +3,7 @@ package nocah.spacebattles.netevents;
 import java.nio.ByteBuffer;
 
 public class MoveEvent implements NetEvent{
-    public final int playerID;
+    public final byte playerID;
     public final float x;
     public final float y;
     public final float rotation;
@@ -12,7 +12,7 @@ public class MoveEvent implements NetEvent{
     public final float rotVel;
     public final byte thrustAnimationState;
 
-    public MoveEvent(int playerID, float x, float y, float rotation, float xVel, float yVel, float rotVel, byte thrustAnimationState) {
+    public MoveEvent(byte playerID, float x, float y, float rotation, float xVel, float yVel, float rotVel, byte thrustAnimationState) {
         this.playerID = playerID;
         this.x = x;
         this.y = y;
@@ -23,27 +23,25 @@ public class MoveEvent implements NetEvent{
         this.thrustAnimationState = thrustAnimationState;
     }
 
-    public int getEventID() {return NetConstants.MOVE_PLAYER_EVENT_ID;}
+    public byte getEventID() {return NetConstants.MOVE_PLAYER_EVENT_ID;}
 
-    public int getDataByteSize() {return 4*7 + 1;}
+    public short getDataByteSize() {return 1 + 4*6 + 1;}
 
-    public static byte[] serialize(NetEvent e) {
-        MoveEvent event = (MoveEvent) e;
-
-        // EventID, Event size, playerID, x, y, rotation
-        int totalSize = 4 + 4 + event.getDataByteSize();
+    public byte[] serialize() {
+        // EventID, Event size, playerID, x, y, rotation, xvel, yvel, rvel, tanimation
+        int totalSize = 1 + 2 + getDataByteSize();
         ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 
-        buffer.putInt(event.getEventID());
-        buffer.putInt(event.getDataByteSize());
-        buffer.putInt(event.playerID);
-        buffer.putFloat(event.x);
-        buffer.putFloat(event.y);
-        buffer.putFloat(event.rotation);
-        buffer.putFloat(event.xVel);
-        buffer.putFloat(event.yVel);
-        buffer.putFloat(event.rotVel);
-        buffer.put(event.thrustAnimationState);
+        buffer.put(getEventID());
+        buffer.putShort(getDataByteSize());
+        buffer.put(playerID);
+        buffer.putFloat(x);
+        buffer.putFloat(y);
+        buffer.putFloat(rotation);
+        buffer.putFloat(xVel);
+        buffer.putFloat(yVel);
+        buffer.putFloat(rotVel);
+        buffer.put(thrustAnimationState);
 
         return buffer.array();
     }
@@ -52,15 +50,15 @@ public class MoveEvent implements NetEvent{
         // remember that it's just the data, so we don't expect the eventid or event size to be in here
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
-        int playerID = buffer.getInt();
+        byte playerID = buffer.get();
         float x = buffer.getFloat();
         float y = buffer.getFloat();
         float rotation = buffer.getFloat();
         float xVel = buffer.getFloat();
         float yVel = buffer.getFloat();
         float rotVel = buffer.getFloat();
-        byte thustAnimationState = buffer.get();
+        byte thrustAnimationState = buffer.get();
 
-        return new MoveEvent(playerID, x, y, rotation, xVel, yVel, rotVel, thustAnimationState);
+        return new MoveEvent(playerID, x, y, rotation, xVel, yVel, rotVel, thrustAnimationState);
     }
 }

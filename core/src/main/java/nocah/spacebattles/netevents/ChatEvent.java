@@ -12,26 +12,25 @@ public class ChatEvent implements NetEvent {
         this.sender = sender;
     }
 
-    public int getEventID() {return NetConstants.CHAT_EVENT_ID;}
-    public int getDataByteSize() {
-        return 4 + message.getBytes(StandardCharsets.UTF_8).length + 4 + sender.getBytes(StandardCharsets.UTF_8).length;
+    public byte getEventID() {return NetConstants.CHAT_EVENT_ID;}
+    public short getDataByteSize() {
+        return (short)(2 + message.getBytes(StandardCharsets.UTF_8).length + 2 + sender.getBytes(StandardCharsets.UTF_8).length);
     }
 
-    public static byte[] serialize(NetEvent e) {
-        ChatEvent chatEvent = (ChatEvent) e;
+    public byte[] serialize() {
 
-        byte[] messageBytes = chatEvent.message.getBytes(StandardCharsets.UTF_8);
-        byte[] senderBytes = chatEvent.sender.getBytes(StandardCharsets.UTF_8);
+        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        byte[] senderBytes = sender.getBytes(StandardCharsets.UTF_8);
 
         // EventID, Event size, sender length, sender string, message length, message string
-        int totalSize = 4 + 4 + chatEvent.getDataByteSize();
-        ByteBuffer buffer = ByteBuffer.allocate(totalSize );
+        int totalSize = 1 + 2 + getDataByteSize();
+        ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 
-        buffer.putInt(chatEvent.getEventID());
-        buffer.putInt(chatEvent.getDataByteSize());
-        buffer.putInt(senderBytes.length);
+        buffer.put(getEventID());
+        buffer.putShort(getDataByteSize());
+        buffer.putShort((short)senderBytes.length);
         buffer.put(senderBytes);
-        buffer.putInt(messageBytes.length);
+        buffer.putShort((short)messageBytes.length);
         buffer.put(messageBytes);
 
         return buffer.array();
@@ -41,12 +40,12 @@ public class ChatEvent implements NetEvent {
         // remember that it's just the data, so we don't expect the eventid or event size to be in here
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
-        int senderLength = buffer.getInt();
+        short senderLength = buffer.getShort();
         byte[] senderBytes = new byte[senderLength];
         buffer.get(senderBytes);
         String sender = new String(senderBytes, StandardCharsets.UTF_8);
 
-        int messageLength = buffer.getInt();
+        short messageLength = buffer.getShort();
         byte[] messageBytes = new byte[messageLength];
         buffer.get(messageBytes);
         String message = new String(messageBytes, StandardCharsets.UTF_8);

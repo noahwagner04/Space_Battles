@@ -49,7 +49,7 @@ public class HandlerRegistry {
             game.server.broadcastExcept(event, e.playerID);
             for (int i = 0; i < game.server.clientSockets.length; i++) {
                 Socket client = game.server.clientSockets[i];
-                if (client != null) game.server.sendEvent(new SpawnEvent(i), e.playerID);
+                if (client != null) game.server.sendEvent(new SpawnEvent((byte)i), e.playerID);
             }
             game.players[e.playerID] = new Player(game);
         });
@@ -84,20 +84,20 @@ public class HandlerRegistry {
     }
 
     public void handleServerEvent(NetEvent event) {
-        Consumer<NetEvent> handler = serverMap.get(event.getEventID());
+        Consumer<NetEvent> handler = serverMap.get((int)event.getEventID());
         if (handler != null) {
             handler.accept(event);
         } else {
-            System.out.println("No handler registered for event ID: " + event.getEventID());
+            System.err.println("No handler registered for event ID: " + event.getEventID());
         }
     }
 
     public void handleClientEvent(NetEvent event) {
-        Consumer<NetEvent> handler = clientMap.get(event.getEventID());
+        Consumer<NetEvent> handler = clientMap.get((int)event.getEventID());
         if (handler != null) {
             handler.accept(event);
         } else {
-            System.out.println("No handler registered for event ID: " + event.getEventID());
+            System.err.println("No handler registered for event ID: " + event.getEventID());
         }
     }
 }
