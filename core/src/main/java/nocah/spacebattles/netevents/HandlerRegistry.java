@@ -37,6 +37,7 @@ public class HandlerRegistry {
         });
         serverMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
             game.server.broadcastEvent(event);
+            game.server.stopListening();
         });
 
         clientMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
@@ -71,6 +72,15 @@ public class HandlerRegistry {
             game.server.broadcastExcept(event, e.playerID);
         });
 
+        clientMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
+            DisconnectEvent e = (DisconnectEvent) event;
+            game.players[e.playerID] = null;
+        });
+        serverMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
+            DisconnectEvent e = (DisconnectEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
+            game.server.clientSockets[e.playerID] = null;
+        });
     }
 
     public void handleServerEvent(NetEvent event) {

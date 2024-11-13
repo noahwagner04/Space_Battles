@@ -32,13 +32,7 @@ public class Server {
 
     public void stop() {
         exit = true;
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                System.err.println("Error closing server socket: " + e.getMessage());
-            }
-        }
+        stopListening();
 
         for (Socket client : clientSockets) {
             if (client == null) continue;
@@ -46,6 +40,16 @@ public class Server {
                 client.close();
             } catch (IOException e) {
                 System.err.println("Error closing client socket: " + e.getMessage());
+            }
+        }
+    }
+
+    public void stopListening() {
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing server socket: " + e.getMessage());
             }
         }
     }

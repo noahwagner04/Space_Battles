@@ -249,7 +249,10 @@ public class SpaceBattles extends Game {
         am.dispose();
 
         if (server != null) server.stop();
-        if (client != null) client.stop();
+        if (client != null) {
+            client.sendEvent(new DisconnectEvent(id));
+            client.stop();
+        }
     }
 
     public void handleNetworkEvents() {
