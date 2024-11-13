@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -37,6 +38,11 @@ public class Projectile extends Sprite {
 
         MapProperties properties = cell.getTile().getProperties();
         return properties.containsKey("collides");
+    }
+
+    public boolean checkCollides(Circle c) {
+        float dst = new Vector2(c.x, c.y).dst(getX() + getOriginX(), getY() + getOriginY());
+        return dst < c.radius + getWidth();
     }
 
     public boolean checkBounds(Rectangle worldBounds) {

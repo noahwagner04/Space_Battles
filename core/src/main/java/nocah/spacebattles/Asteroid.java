@@ -3,6 +3,8 @@ package nocah.spacebattles;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -59,5 +61,9 @@ public class Asteroid extends Sprite {
             setY(bounds.y + bounds.height - getHeight());
             velocity.y = -velocity.y;
         }
+    }
+
+    public Circle getCircle() {
+        return new Circle(getX() + getOriginX(), getY() + getOriginY(), size / 3f);
     }
 }

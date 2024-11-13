@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -28,9 +29,11 @@ public class Player extends Sprite {
 
     private float bulletDamage = 1;
     private float bulletSpeed = 1;
-    private float bulletCoolDown =1;
+    private float bulletCoolDown = 1f;
     private float shootTimer = 0;
     private float shootKnockBack = 3;
+
+    private float asteroidRepulsion = 3;
 
     public byte thrustAnimationState = 2;
 
@@ -133,6 +136,14 @@ public class Player extends Sprite {
         }
     }
 
+    public void collide(Circle c) {
+        float dst = getCenter().dst(c.x, c.y);
+        if (c.radius + getInCircleRadius() < dst) return;
+        Vector2 btw = getCenter().sub(c.x, c.y);
+        setCenter(c.x + btw.x, c.y + btw.y);
+        velocity = getCenter().sub(c.x, c.y).setLength(asteroidRepulsion);
+    }
+
     private void setupParticleEffect(SpaceBattles game) {
         effect = new ParticleEffect();
         effect.load(
@@ -214,7 +225,8 @@ public class Player extends Sprite {
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
         if (distance < radius) {
-            float overlap = radius - distance;
+            // add small delta to over-correct
+            float overlap = radius - distance + 1e-5f;
             float nx = dx / distance;
             float ny = dy / distance;
 
@@ -259,5 +271,9 @@ public class Player extends Sprite {
             rotVelocity,
             thrustAnimationState
         ));
+    }
+
+    public Circle getCirle() {
+        return new Circle(getX() + getOriginX(), getY() + getOriginY(), getInCircleRadius());
     }
 }

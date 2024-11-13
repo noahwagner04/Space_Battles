@@ -37,7 +37,9 @@ public class SpaceBattles extends Game {
     public int id;
     public boolean connected = false;
     public boolean gameStarted = false;
+
     public final float numOfPosSends = 20;
+    float posTimer = 0;
 
     public ArrayList<Projectile> projectiles = new ArrayList<>();
     public ArrayList<Asteroid> asteroids = new ArrayList<>();
@@ -214,16 +216,58 @@ public class SpaceBattles extends Game {
         }
     }
 
+    public void updateMainPlayer(float delta, TiledMap map, Rectangle worldBounds) {
+        Player p = players[id];
+        p.update(delta);
+
+        for (Asteroid a : asteroids) {
+            p.collide(a.getCircle());
+        }
+
+        if (worldBounds != null) {
+            p.constrain(worldBounds);
+        }
+
+        if (map != null) {
+            p.collide(map);
+        }
+
+        if (1 / numOfPosSends < posTimer) {
+            p.sendPlayerMoveEvent();
+            posTimer -= 1 / numOfPosSends;
+        }
+    }
+
     public void updateProjectiles(float delta, TiledMap map, Rectangle worldBounds) {
         Iterator<Projectile> iterator = projectiles.iterator();
         while (iterator.hasNext()) {
             Projectile proj = iterator.next();
             proj.update(delta);
-            if (map != null && proj.checkCollides(map)) {
-                iterator.remove();
-            }
+
             if (proj.checkBounds(worldBounds)){
                 iterator.remove();
+                continue;
+            }
+
+            if (map != null && proj.checkCollides(map)) {
+                iterator.remove();
+                continue;
+            }
+
+            for (int i = 0; i < players.length; i++) {
+                Player p = players[i];
+                if (p == null || i == id) continue;
+                if (proj.checkCollides(p.getCirle())) {
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            for (Asteroid a : asteroids) {
+                if (proj.checkCollides(a.getCircle())) {
+                    iterator.remove();
+                    break;
+                }
             }
         }
     }
