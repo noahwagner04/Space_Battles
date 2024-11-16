@@ -93,7 +93,7 @@ public class Asteroid extends Sprite implements Damageable {
     public void heal(float amount) { }
 
     @Override
-    public Shape2D getCollider() {
+    public Shape2D getDamageArea() {
         return new Circle(getX() + getOriginX(), getY() + getOriginY(), size / 3f);
     }
 }

@@ -2,6 +2,7 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -136,7 +137,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void collide(Circle c) {
-        if (!((Circle)getCollider()).overlaps(c)) return;
+        if (!((Circle) getDamageArea()).overlaps(c)) return;
         Vector2 btw = getCenter().sub(c.x, c.y);
         setCenter(c.x + btw.x, c.y + btw.y);
         velocity = getCenter().sub(c.x, c.y).setLength(asteroidRepulsion);
@@ -306,7 +307,15 @@ public class Player extends Sprite implements Damageable {
     }
 
     @Override
-    public Shape2D getCollider() {
+    public Shape2D getDamageArea() {
+        return getOutCircle();
+    }
+
+    public Circle getInCircle() {
         return new Circle(getCenter(), getInCircleRadius());
+    }
+
+    public Circle getOutCircle() {
+        return new Circle(getCenter(), size / 2);
     }
 }

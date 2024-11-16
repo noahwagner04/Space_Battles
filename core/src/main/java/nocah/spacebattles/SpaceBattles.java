@@ -19,7 +19,6 @@ import nocah.spacebattles.netevents.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Random;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
@@ -226,7 +225,7 @@ public class SpaceBattles extends Game {
         p.update(delta);
 
         for (Asteroid a : asteroids) {
-            p.collide((Circle)a.getCollider());
+            p.collide((Circle)a.getDamageArea());
         }
 
         if (worldBounds != null) {
@@ -262,7 +261,7 @@ public class SpaceBattles extends Game {
             for (int i = 0; i < players.length; i++) {
                 Player p = players[i];
                 if (p == null || i == id) continue;
-                if (p.getCollider().contains(proj.getX(), proj.getY())) {
+                if (p.getDamageArea().contains(proj.getCenter())) {
                     iterator.remove();
                     p.damage(proj.damageAmount);
                     break;
@@ -270,7 +269,7 @@ public class SpaceBattles extends Game {
             }
 
             for (Asteroid a : asteroids) {
-                if (a.getCollider().contains(proj.getX(), proj.getY())) {
+                if (a.getDamageArea().contains(proj.getCenter())) {
                     iterator.remove();
                     if (a.damage(proj.damageAmount)) {
                         a.randomizePosition(worldBounds);

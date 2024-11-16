@@ -6,5 +6,5 @@ public interface Damageable {
     float getHealth();
     boolean damage(float amount);
     void heal(float amount);
-    Shape2D getCollider();
+    Shape2D getDamageArea();
 }

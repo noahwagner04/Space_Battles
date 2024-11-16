@@ -54,4 +54,8 @@ public class Projectile extends Sprite {
             myRect.y + myRect.height < worldBounds.y ||
             myRect.y > worldBounds.y + worldBounds.height;
     }
+
+    public Vector2 getCenter() {
+        return new Vector2(getX() + getOriginX(), getY() + getOriginY());
+    }
 }
