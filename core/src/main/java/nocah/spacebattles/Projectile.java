@@ -12,12 +12,18 @@ import com.badlogic.gdx.math.Vector2;
 public class Projectile extends Sprite {
     private Vector2 velocity;
     private float speed;
+    public float damageAmount = 0;
+    public Damageable target = null;
 
     public Projectile(TextureRegion texture, float x, float y, float speed, float angle) {
         super(texture);
         setPosition(x, y);
         this.speed = speed;
         velocity = new Vector2(speed, 0).rotateDeg(angle);
+    }
+
+    public void setTarget(Damageable target) {
+        this.target = target;
     }
 
     public void update(float delta) {
@@ -38,11 +44,6 @@ public class Projectile extends Sprite {
 
         MapProperties properties = cell.getTile().getProperties();
         return properties.containsKey("collides");
-    }
-
-    public boolean checkCollides(Circle c) {
-        float dst = new Vector2(c.x, c.y).dst(getX() + getOriginX(), getY() + getOriginY());
-        return dst < c.radius + getWidth();
     }
 
     public boolean checkBounds(Rectangle worldBounds) {

@@ -3,20 +3,26 @@ package nocah.spacebattles;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 
-public class Asteroid extends Sprite {
+public class Asteroid extends Sprite implements Damageable {
     private Vector2 velocity;
     private float rotationSpeed;
     private float size;
+    private float health;
 
-    public Asteroid(TextureRegion texture, float size, float x, float y) {
+    public Asteroid(TextureRegion texture, Rectangle worldBounds) {
         super(texture);
-        this.size = size;
+        randomizeAttributes();
+        randomizePosition(worldBounds);
+    }
+
+    public void randomizeAttributes() {
+        size = MathUtils.random(1.5f, 4);
+        health = size * size * 20;
+        setSize(size, size);
+        setOriginCenter();
+
         Color tint = new Color(0.7f, 0.6f, 0.5f, 1);
         float brightness = MathUtils.random(0.5f, 1);
         setColor(
@@ -25,11 +31,15 @@ public class Asteroid extends Sprite {
             tint.b * brightness,
             1
         );
-        setSize(size, size);
-        setPosition(x, y);
-        setOriginCenter();
+
         velocity = new Vector2(MathUtils.random(), 0).rotateDeg(MathUtils.random(0, 360));
         this.rotationSpeed = MathUtils.random() * 90;
+    }
+
+    public void randomizePosition(Rectangle worldBounds) {
+        float x = MathUtils.random(worldBounds.x, worldBounds.width);
+        float y = MathUtils.random(worldBounds.y, worldBounds.height);
+        setPosition(x, y);
     }
 
     public void setSpeed(float speed) {
@@ -63,7 +73,27 @@ public class Asteroid extends Sprite {
         }
     }
 
-    public Circle getCircle() {
+    @Override
+    public float getHealth() {
+        return health;
+    }
+
+    @Override
+    public boolean damage(float amount) {
+        if (amount < 0) return false;
+        health -= amount;
+        if (health <= 0) {
+            randomizeAttributes();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void heal(float amount) { }
+
+    @Override
+    public Shape2D getCollider() {
         return new Circle(getX() + getOriginX(), getY() + getOriginY(), size / 3f);
     }
 }

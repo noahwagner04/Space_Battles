@@ -5,13 +5,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import nocah.spacebattles.netevents.MoveEvent;
 
-public class Player extends Sprite {
+public class Player extends Sprite implements Damageable {
     private SpaceBattles game;
 
     public Vector2 velocity = new Vector2(0, 0);
@@ -27,16 +24,18 @@ public class Player extends Sprite {
     private float size = 1;
     private ParticleEffect effect;
 
-    private float bulletDamage = 1;
-    private float bulletSpeed = 1;
+    private float bulletDamage = 30;
+    private float bulletSpeed = 10;
     private float bulletCoolDown = 1f;
     private float shootTimer = 0;
-    private float shootKnockBack = 3;
+    private float shootKnockBack = 2f;
 
     private float asteroidRepulsion = 3;
 
     public byte thrustAnimationState = 2;
 
+    private float health = 100;
+    private float maxHealth = 100;
 
     public Player(SpaceBattles game) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
@@ -119,13 +118,13 @@ public class Player extends Sprite {
 
         int leftTile = (int) ((playerX - radius) / tileSize);
         int rightTile = (int) ((playerX + radius) / tileSize);
-        int topTile = (int) ((playerY - radius) / tileSize);
-        int bottomTile = (int) ((playerY + radius) / tileSize);
+        int topTile = (int) ((playerY + radius) / tileSize);
+        int bottomTile = (int) ((playerY - radius) / tileSize);
 
         TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
         if (layer == null) return;
 
-        for (int tileY = topTile; tileY <= bottomTile; tileY++) {
+        for (int tileY = bottomTile; tileY <= topTile; tileY++) {
             for (int tileX = leftTile; tileX <= rightTile; tileX++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(tileX, tileY);
                 if (cell == null) continue;
@@ -137,11 +136,11 @@ public class Player extends Sprite {
     }
 
     public void collide(Circle c) {
-        float dst = getCenter().dst(c.x, c.y);
-        if (c.radius + getInCircleRadius() < dst) return;
+        if (!((Circle)getCollider()).overlaps(c)) return;
         Vector2 btw = getCenter().sub(c.x, c.y);
         setCenter(c.x + btw.x, c.y + btw.y);
         velocity = getCenter().sub(c.x, c.y).setLength(asteroidRepulsion);
+        damage(10);
     }
 
     private void setupParticleEffect(SpaceBattles game) {
@@ -225,10 +224,11 @@ public class Player extends Sprite {
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
         if (distance < radius) {
-            // add small delta to over-correct
             float overlap = radius - distance + 1e-5f;
             float nx = dx / distance;
             float ny = dy / distance;
+
+            if (Float.isNaN(nx) || Float.isNaN(ny)) return;
 
             translate(nx * overlap, ny * overlap);
             if (Math.abs(nx) > Math.abs(ny)) velocity.x = 0;
@@ -240,10 +240,11 @@ public class Player extends Sprite {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = getHeadingDir();
         Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
-        Projectile proj = new Projectile(tex, startPos.x, startPos.y, 10, getRotation() + 90);
+        Projectile proj = new Projectile(tex, startPos.x, startPos.y, bulletSpeed, getRotation() + 90);
         proj.setSize(0.15f, 0.15f);
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
+        proj.damageAmount = bulletDamage;
         game.projectiles.add(proj);
 
         velocity.sub(heading.scl(shootKnockBack));
@@ -273,7 +274,39 @@ public class Player extends Sprite {
         ));
     }
 
-    public Circle getCirle() {
-        return new Circle(getX() + getOriginX(), getY() + getOriginY(), getInCircleRadius());
+    @Override
+    public float getHealth() {
+        return health;
+    }
+
+    @Override
+    public boolean damage(float amount) {
+        if (amount < 0) return false;
+        health -= amount;
+        if (health <= 0) {
+            respawn();
+            return true;
+        }
+        return false;
+    }
+
+    private void respawn() {
+        health = maxHealth;
+        velocity = Vector2.Zero;
+        rotVelocity = 0;
+        setRotation(0);
+        setCenter(1.5f,1.5f);
+    }
+
+    @Override
+    public void heal(float amount) {
+        if (amount < 0) return;
+        health += amount;
+        health = Math.min(health, maxHealth);
+    }
+
+    @Override
+    public Shape2D getCollider() {
+        return new Circle(getCenter(), getInCircleRadius());
     }
 }

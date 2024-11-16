@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
@@ -18,6 +19,7 @@ import nocah.spacebattles.netevents.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
@@ -54,6 +56,9 @@ public class SpaceBattles extends Game {
 
     @Override
     public void create() {
+        // pick random seed on server, send to clients
+        MathUtils.random.setSeed(0);
+
         am = new AssetManager();
         batch = new SpriteBatch();
         hud = new HUD(new BitmapFont());
@@ -221,7 +226,7 @@ public class SpaceBattles extends Game {
         p.update(delta);
 
         for (Asteroid a : asteroids) {
-            p.collide(a.getCircle());
+            p.collide((Circle)a.getCollider());
         }
 
         if (worldBounds != null) {
@@ -257,15 +262,19 @@ public class SpaceBattles extends Game {
             for (int i = 0; i < players.length; i++) {
                 Player p = players[i];
                 if (p == null || i == id) continue;
-                if (proj.checkCollides(p.getCirle())) {
+                if (p.getCollider().contains(proj.getX(), proj.getY())) {
                     iterator.remove();
+                    p.damage(proj.damageAmount);
                     break;
                 }
             }
 
             for (Asteroid a : asteroids) {
-                if (proj.checkCollides(a.getCircle())) {
+                if (a.getCollider().contains(proj.getX(), proj.getY())) {
                     iterator.remove();
+                    if (a.damage(proj.damageAmount)) {
+                        a.randomizePosition(worldBounds);
+                    }
                     break;
                 }
             }
@@ -281,10 +290,7 @@ public class SpaceBattles extends Game {
 
     public void spawnRandomAsteroid(Rectangle worldBounds) {
         TextureRegion tex = getEntity(SpaceBattles.RSC_ASTEROID_IMGS[MathUtils.random(0, 2)]);
-        float size = MathUtils.random(1.5f, 4);
-        float x = MathUtils.random(worldBounds.x, worldBounds.width);
-        float y = MathUtils.random(worldBounds.y, worldBounds.height);
-        asteroids.add(new Asteroid(tex, size, x, y));
+        asteroids.add(new Asteroid(tex, worldBounds));
     }
 
     @Override
