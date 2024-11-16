@@ -260,7 +260,7 @@ public class SpaceBattles extends Game {
 
             for (int i = 0; i < players.length; i++) {
                 Player p = players[i];
-                if (p == null || i == id) continue;
+                if (p == null) continue;
                 if (p.getDamageArea().contains(proj.getCenter())) {
                     iterator.remove();
                     p.damage(proj.damageAmount);

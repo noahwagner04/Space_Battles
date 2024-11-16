@@ -81,6 +81,15 @@ public class HandlerRegistry {
             game.server.broadcastExcept(event, e.playerID);
             game.server.clientSockets[e.playerID] = null;
         });
+
+        clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
+            ShootEvent e = (ShootEvent) event;
+            game.players[e.playerID].fireBullet();
+        });
+        serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
+            ShootEvent e = (ShootEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
+        });
     }
 
     public void handleServerEvent(NetEvent event) {

@@ -27,7 +27,7 @@ public class ArenaScreen extends ScreenAdapter {
             map.getProperties().get("height", Integer.class)
         );
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 20; i++) {
             game.spawnRandomAsteroid(worldBounds);
         }
         camera = new Camera(15, 15);

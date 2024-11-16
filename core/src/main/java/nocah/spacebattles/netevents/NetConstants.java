@@ -7,4 +7,5 @@ public class NetConstants {
     public static final int SPAWN_PLAYER_EVENT_ID = 4;
     public static final int MOVE_PLAYER_EVENT_ID = 5;
     public static final int DISCONNECT_EVENT_ID = 6;
+    public static final int SHOOT_EVENT_ID = 7;
 }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
 import nocah.spacebattles.netevents.MoveEvent;
+import nocah.spacebattles.netevents.ShootEvent;
 
 public class Player extends Sprite implements Damageable {
     private SpaceBattles game;
@@ -55,6 +56,7 @@ public class Player extends Sprite implements Damageable {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && shootTimer > bulletCoolDown) {
             shootTimer = 0;
             fireBullet();
+            game.client.sendEvent(new ShootEvent(game.id));
         }
         shootTimer += delta;
     }
@@ -237,7 +239,7 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    private void fireBullet() {
+    public void fireBullet() {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = getHeadingDir();
         Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
@@ -293,7 +295,7 @@ public class Player extends Sprite implements Damageable {
 
     private void respawn() {
         health = maxHealth;
-        velocity = Vector2.Zero;
+        velocity = new Vector2(0,0);
         rotVelocity = 0;
         setRotation(0);
         setCenter(1.5f,1.5f);
