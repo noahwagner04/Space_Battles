@@ -1,13 +1,12 @@
 package nocah.spacebattles.netevents;
 
-import com.badlogic.gdx.Game;
+import nocah.spacebattles.Asteroid;
 import nocah.spacebattles.Player;
 import nocah.spacebattles.SpaceBattles;
 
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class HandlerRegistry {
@@ -88,6 +87,29 @@ public class HandlerRegistry {
         serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
             game.server.broadcastExcept(event, e.playerID);
+        });
+
+        // clients handle collision damage, server handles projectiles
+        // clients have the most accurate information regarding collisions
+        // to keep consistency for bullets across clients, the server handles these
+        clientMap.put(NetConstants.DAMAGE_EVENT_ID, (event) -> {
+            DamageEvent e = (DamageEvent) event;
+            switch(e.entityType) {
+                case NetConstants.PLAYER_ENTITY_TYPE:
+                    game.players[e.entityId].damage(e.damageAmount);
+                    break;
+                case NetConstants.PROJECTILE_ENTITY_TYPE:
+                    // this essentially acts as a way to despawn the projectiles
+                    game.projectiles.remove(e.entityId);
+                    break;
+                case NetConstants.ASTEROID_ENTITY_TYPE:
+                    game.asteroids.get(e.entityId).damage(e.damageAmount);
+                    break;
+            }
+        });
+        serverMap.put(NetConstants.DAMAGE_EVENT_ID, (event) -> {
+            DamageEvent e = (DamageEvent) event;
+            game.server.broadcastExcept(e, e.entityId);
         });
     }
 

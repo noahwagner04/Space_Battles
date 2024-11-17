@@ -10,9 +10,12 @@ public class Asteroid extends Sprite implements Damageable {
     private float rotationSpeed;
     private float size;
     private float health;
+    private SpaceBattles game;
+    private Rectangle worldBounds;
 
-    public Asteroid(TextureRegion texture, Rectangle worldBounds) {
-        super(texture);
+    public Asteroid(SpaceBattles game, Rectangle worldBounds) {
+        super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[MathUtils.random(0, 2)]));
+        this.worldBounds = worldBounds;
         randomizeAttributes();
         randomizePosition(worldBounds);
     }
@@ -83,6 +86,7 @@ public class Asteroid extends Sprite implements Damageable {
         health -= Math.max(amount, 0);
         if (health <= 0) {
             randomizeAttributes();
+            randomizePosition(worldBounds);
             return true;
         }
         return false;

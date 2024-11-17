@@ -31,7 +31,7 @@ public class ArenaScreen extends ScreenAdapter {
         thisPlayer.respawn();
 
         for (int i = 0; i < 20; i++) {
-            game.spawnRandomAsteroid(worldBounds);
+            game.asteroids.add(new Asteroid(game, worldBounds));
         }
         camera = new Camera(15, 15);
     }

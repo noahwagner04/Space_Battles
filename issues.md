@@ -27,9 +27,9 @@
 - Add collision interactions between entities
 - Add damage system
 - Add player bases and spectator mode
+- Network damage system
 
 ## Open Issues ##
-- create generic spawn event
-- spawn asteroids
+- make asteroids consistent between clients
 - check for client / server instance through bool 
 

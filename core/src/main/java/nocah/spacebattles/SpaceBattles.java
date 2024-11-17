@@ -250,8 +250,15 @@ public class SpaceBattles extends Game {
 
         for (Asteroid a : asteroids) {
             Circle asteroidCircle = (Circle)a.getDamageArea();
+            float damageAmount = 10;
             if (!p.getInCircle().overlaps(asteroidCircle)) continue;
-            p.damage(10);
+            client.sendEvent(new DamageEvent(
+                (byte)NetConstants.PLAYER_ENTITY_TYPE,
+                id,
+                damageAmount,
+                a.getHealth()
+            ));
+            p.damage(damageAmount);
             p.collide(asteroidCircle, 3);
         }
 
@@ -274,24 +281,47 @@ public class SpaceBattles extends Game {
 
     public void updateProjectiles(float delta, TiledMap map, Rectangle worldBounds) {
         Iterator<Projectile> iterator = projectiles.iterator();
+        int projID = 0;
         while (iterator.hasNext()) {
             Projectile proj = iterator.next();
             proj.update(delta);
+            if (server == null) continue;
+
+            DamageEvent despawnProjectile = new DamageEvent(
+                (byte)NetConstants.PROJECTILE_ENTITY_TYPE,
+                projID,
+                0,
+                0
+            );
 
             if (proj.checkBounds(worldBounds)){
                 iterator.remove();
+                server.broadcastExcept(despawnProjectile, id);
                 continue;
             }
 
             if (map != null && proj.checkCollides(map)) {
                 iterator.remove();
+                server.broadcastExcept(despawnProjectile, id);
                 continue;
             }
 
             for (Player p : players) {
                 if (p == null || p.id == proj.team) continue;
                 if (p.getDamageArea().contains(proj.getCenter())) {
+                    server.broadcastExcept(
+                        new DamageEvent(
+                            (byte)NetConstants.PLAYER_ENTITY_TYPE,
+                            p.id,
+                            proj.damageAmount,
+                            p.getHealth()
+                        ),
+                        id
+                    );
+
                     p.damage(proj.damageAmount);
+
+                    server.broadcastExcept(despawnProjectile, id);
                     iterator.remove();
                     break;
                 }
@@ -307,15 +337,27 @@ public class SpaceBattles extends Game {
                 }
             }
 
-            for (Asteroid a : asteroids) {
+            for (int i = 0; i < asteroids.size(); i++) {
+                Asteroid a = asteroids.get(i);
                 if (a.getDamageArea().contains(proj.getCenter())) {
-                    if (a.damage(proj.damageAmount)) {
-                        a.randomizePosition(worldBounds);
-                    }
+                    server.broadcastExcept(
+                        new DamageEvent(
+                            (byte)NetConstants.ASTEROID_ENTITY_TYPE,
+                            i,
+                            proj.damageAmount,
+                            a.getHealth()
+                        ),
+                        id
+                    );
+
+                    a.damage(proj.damageAmount);
+
+                    server.broadcastExcept(despawnProjectile, id);
                     iterator.remove();
                     break;
                 }
             }
+            projID++;
         }
     }
 
@@ -324,11 +366,6 @@ public class SpaceBattles extends Game {
             a.update(delta);
             a.bounceOffBounds(worldBounds);
         }
-    }
-
-    public void spawnRandomAsteroid(Rectangle worldBounds) {
-        TextureRegion tex = getEntity(SpaceBattles.RSC_ASTEROID_IMGS[MathUtils.random(0, 2)]);
-        asteroids.add(new Asteroid(tex, worldBounds));
     }
 
     @Override
@@ -366,10 +403,9 @@ public class SpaceBattles extends Game {
 
     public void updateRemotePlayers(float delta) {
         for (int i = 0; i < players.length; i++) {
-            if (players[i] != null) {
-                if (i == id) continue;
-                players[i].updateRemotePlayer(delta);
-            }
+            Player player = players[i];
+            if (i == id || player == null) continue;
+            player.updateRemotePlayer(delta);
         }
     }
 }

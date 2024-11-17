@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
+import nocah.spacebattles.netevents.DamageEvent;
 import nocah.spacebattles.netevents.MoveEvent;
+import nocah.spacebattles.netevents.NetConstants;
 import nocah.spacebattles.netevents.ShootEvent;
 
 public class Player extends Sprite implements Damageable {
@@ -46,6 +48,7 @@ public class Player extends Sprite implements Damageable {
         setSize(size, size);
         setOriginCenter();
         setupParticleEffect(game);
+        setCenter(0, 0);
     }
 
     public void update(float delta) {
@@ -88,6 +91,11 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void updateRemotePlayer(float delta) {
+        if (isSpectator) {
+            updateParticleEffect(delta);
+            return;
+        }
+
         float x = getX();
         float y = getY();
         float r = getRotation();
@@ -314,6 +322,10 @@ public class Player extends Sprite implements Damageable {
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
         if (health <= 0) {
+            if (!game.gameStarted) {
+                respawn();
+                return true;
+            }
             setIsSpectator(true);
             game.bases[id].setRespawnTimer();
             return true;
@@ -327,7 +339,10 @@ public class Player extends Sprite implements Damageable {
         velocity = new Vector2(0, 0);
         rotVelocity = 0;
         setRotation(0);
-        Vector2 spawn = game.bases[game.id].spawnPoint;
+        Vector2 spawn = new Vector2(0, 0);
+        if (game.gameStarted) {
+            spawn = game.bases[game.id].spawnPoint;
+        }
         setCenter(spawn.x, spawn.y);
     }
 
