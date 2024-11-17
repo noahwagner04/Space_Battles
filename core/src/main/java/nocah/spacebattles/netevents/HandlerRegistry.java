@@ -42,7 +42,7 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
             SpawnEvent e = (SpawnEvent) event;
-            game.players[e.playerID] = new Player(game);
+            game.players[e.playerID] = new Player(game, e.playerID);
         });
         serverMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
             SpawnEvent e = (SpawnEvent) event;
@@ -51,7 +51,6 @@ public class HandlerRegistry {
                 Socket client = game.server.clientSockets[i];
                 if (client != null) game.server.sendEvent(new SpawnEvent((byte)i), e.playerID);
             }
-            game.players[e.playerID] = new Player(game);
         });
 
         clientMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {

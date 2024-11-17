@@ -2,7 +2,6 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -12,6 +11,7 @@ import nocah.spacebattles.netevents.ShootEvent;
 
 public class Player extends Sprite implements Damageable {
     private SpaceBattles game;
+    public int id;
 
     public Vector2 velocity = new Vector2(0, 0);
     private float maxSpeed = 6;
@@ -32,22 +32,29 @@ public class Player extends Sprite implements Damageable {
     private float shootTimer = 0;
     private float shootKnockBack = 2f;
 
-    private float asteroidRepulsion = 3;
-
     public byte thrustAnimationState = 2;
 
     private float health = 100;
     private float maxHealth = 100;
 
-    public Player(SpaceBattles game) {
+    private boolean isSpectator = false;
+
+    public Player(SpaceBattles game, int id) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
         this.game = game;
+        this.id = id;
         setSize(size, size);
         setOriginCenter();
         setupParticleEffect(game);
     }
 
     public void update(float delta) {
+        if (isSpectator) {
+            updateSpectator(delta);
+            updateParticleEffect(delta);
+            return;
+        }
+
         handleRotation(delta);
         handleThrust(delta);
         updatePosition(delta);
@@ -59,6 +66,25 @@ public class Player extends Sprite implements Damageable {
             game.client.sendEvent(new ShootEvent(game.id));
         }
         shootTimer += delta;
+    }
+
+    private void updateSpectator(float delta) {
+        Vector2 deltaPos = new Vector2(0, 0);
+        float speed = 15;
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            deltaPos.y += 1;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            deltaPos.y -= 1;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            deltaPos.x -= 1;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            deltaPos.x += 1;
+        }
+        deltaPos.setLength(speed).scl(delta);
+        translate(deltaPos.x, deltaPos.y);
     }
 
     public void updateRemotePlayer(float delta) {
@@ -138,12 +164,11 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    public void collide(Circle c) {
-        if (!((Circle) getDamageArea()).overlaps(c)) return;
+    public void collide(Circle c, float bounce) {
+        if (!getInCircle().overlaps(c)) return;
         Vector2 btw = getCenter().sub(c.x, c.y);
         setCenter(c.x + btw.x, c.y + btw.y);
-        velocity = getCenter().sub(c.x, c.y).setLength(asteroidRepulsion);
-        damage(10);
+        velocity = getCenter().sub(c.x, c.y).setLength(bounce);
     }
 
     private void setupParticleEffect(SpaceBattles game) {
@@ -205,6 +230,8 @@ public class Player extends Sprite implements Damageable {
 
     private void updateParticleEffect(float delta) {
         effect.update(delta);
+        if (isSpectator) return;
+
         Vector2 origin = getCenter();
         Vector2 offset = getHeadingDir().scl(-size/4);
         effect.setPosition(origin.x + offset.x, origin.y + offset.y);
@@ -248,6 +275,7 @@ public class Player extends Sprite implements Damageable {
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
         proj.damageAmount = bulletDamage;
+        proj.team = id;
         game.projectiles.add(proj);
 
         velocity.sub(heading.scl(shootKnockBack));
@@ -284,27 +312,42 @@ public class Player extends Sprite implements Damageable {
 
     @Override
     public boolean damage(float amount) {
-        if (amount < 0) return false;
-        health -= amount;
+        health -= Math.max(amount, 0);
         if (health <= 0) {
-            respawn();
+            setIsSpectator(true);
+            game.bases[id].setRespawnTimer();
             return true;
         }
         return false;
     }
 
-    private void respawn() {
+    public void respawn() {
+        setIsSpectator(false);
         health = maxHealth;
-        velocity = new Vector2(0,0);
+        velocity = new Vector2(0, 0);
         rotVelocity = 0;
         setRotation(0);
-        setCenter(1.5f,1.5f);
+        Vector2 spawn = game.bases[game.id].spawnPoint;
+        setCenter(spawn.x, spawn.y);
+    }
+
+    public void setIsSpectator(boolean isSpectator) {
+        if (isSpectator) {
+            setAlpha(0);
+            effect.allowCompletion();
+        } else {
+            setAlpha(1);
+        }
+        this.isSpectator = isSpectator;
+    }
+
+    public boolean getIsSpectator() {
+        return isSpectator;
     }
 
     @Override
     public void heal(float amount) {
-        if (amount < 0) return;
-        health += amount;
+        health += Math.max(amount, 0);
         health = Math.min(health, maxHealth);
     }
 

@@ -4,6 +4,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class ArenaScreen extends ScreenAdapter {
@@ -17,7 +18,6 @@ public class ArenaScreen extends ScreenAdapter {
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
         thisPlayer = game.players[game.id];
-        thisPlayer.setPosition(1, 1);
         map = game.am.get(SpaceBattles.RSC_TILED_MAP);
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1f/map.getProperties().get("tilewidth", Integer.class));
         worldBounds = new Rectangle(
@@ -26,6 +26,9 @@ public class ArenaScreen extends ScreenAdapter {
             map.getProperties().get("width", Integer.class),
             map.getProperties().get("height", Integer.class)
         );
+
+        game.setBases(worldBounds);
+        thisPlayer.respawn();
 
         for (int i = 0; i < 20; i++) {
             game.spawnRandomAsteroid(worldBounds);
@@ -47,6 +50,7 @@ public class ArenaScreen extends ScreenAdapter {
             camera.follow(thisPlayer.getCenter(), delta);
         }
 
+        game.updateBases(delta);
         game.updateRemotePlayers(delta);
         game.updateProjectiles(delta, map, worldBounds);
         game.updateAsteroids(delta, worldBounds);
@@ -63,6 +67,7 @@ public class ArenaScreen extends ScreenAdapter {
         game.drawSprites(game.players);
         game.drawSprites(game.projectiles);
         game.drawSprites(game.asteroids);
+        game.drawSprites(game.bases);
         game.endWorldDraw();
 
         game.batch.begin();

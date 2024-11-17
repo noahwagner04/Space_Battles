@@ -10,10 +10,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.*;
 
@@ -35,6 +32,7 @@ public class SpaceBattles extends Game {
     public String name;
     public HandlerRegistry handlers;
     public Player[] players = new Player[4];
+    public PlayerBase[] bases = new PlayerBase[4];
     public byte id;
     public boolean connected = false;
     public boolean gameStarted = false;
@@ -207,6 +205,22 @@ public class SpaceBattles extends Game {
         return atlas.findRegion(name);
     }
 
+    public void setBases(Rectangle worldBounds) {
+        Vector2 pad = new Vector2(3, 3);
+        // bottom left
+        bases[0] = new PlayerBase(this, 0, pad.x, pad.y);
+        bases[0].spawnPoint.y += 2;
+        // top right
+        bases[1] = new PlayerBase(this, 1, worldBounds.width - pad.x, worldBounds.height - pad.y);
+        bases[1].spawnPoint.y -= 2;
+        // bottom right
+        bases[2] = new PlayerBase(this, 2, worldBounds.width - pad.x, pad.y);
+        bases[2].spawnPoint.y += 2;
+        // top left
+        bases[3] = new PlayerBase(this, 3, pad.x, worldBounds.height - pad.y);
+        bases[3].spawnPoint.y -= 2;
+    }
+
     public void drawSprites(Sprite[] sprites) {
         for (Sprite s : sprites) {
             if (s == null) continue;
@@ -224,21 +238,37 @@ public class SpaceBattles extends Game {
         Player p = players[id];
         p.update(delta);
 
-        for (Asteroid a : asteroids) {
-            p.collide((Circle)a.getDamageArea());
-        }
-
         if (worldBounds != null) {
             p.constrain(worldBounds);
         }
+
+        if (p.getIsSpectator()) return;
 
         if (map != null) {
             p.collide(map);
         }
 
+        for (Asteroid a : asteroids) {
+            Circle asteroidCircle = (Circle)a.getDamageArea();
+            if (!p.getInCircle().overlaps(asteroidCircle)) continue;
+            p.damage(10);
+            p.collide(asteroidCircle, 3);
+        }
+
+        for (PlayerBase b : bases) {
+            if (b == null || b.getIsDestroyed()) continue;
+            p.collide((Circle)b.getDamageArea(), 2);
+        }
+
         if (1 / numOfPosSends < posTimer) {
             p.sendPlayerMoveEvent();
             posTimer -= 1 / numOfPosSends;
+        }
+    }
+
+    public void updateBases(float delta) {
+        for(PlayerBase b : bases) {
+            b.update(delta);
         }
     }
 
@@ -258,22 +288,31 @@ public class SpaceBattles extends Game {
                 continue;
             }
 
-            for (int i = 0; i < players.length; i++) {
-                Player p = players[i];
-                if (p == null) continue;
+            for (Player p : players) {
+                if (p == null || p.id == proj.team) continue;
                 if (p.getDamageArea().contains(proj.getCenter())) {
-                    iterator.remove();
                     p.damage(proj.damageAmount);
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            for (int i = 0; i < bases.length; i++) {
+                PlayerBase b = bases[i];
+                if (b == null || i == proj.team || b.getIsDestroyed()) continue;
+                if (b.getDamageArea().contains(proj.getCenter())) {
+                    b.damage(proj.damageAmount);
+                    iterator.remove();
                     break;
                 }
             }
 
             for (Asteroid a : asteroids) {
                 if (a.getDamageArea().contains(proj.getCenter())) {
-                    iterator.remove();
                     if (a.damage(proj.damageAmount)) {
                         a.randomizePosition(worldBounds);
                     }
+                    iterator.remove();
                     break;
                 }
             }

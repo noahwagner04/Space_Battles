@@ -26,6 +26,7 @@
 - have one message receiver for server and client to use
 - Add collision interactions between entities
 - Add damage system
+- Add player bases and spectator mode
 
 ## Open Issues ##
 - create generic spawn event

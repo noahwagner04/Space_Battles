@@ -80,8 +80,7 @@ public class Asteroid extends Sprite implements Damageable {
 
     @Override
     public boolean damage(float amount) {
-        if (amount < 0) return false;
-        health -= amount;
+        health -= Math.max(amount, 0);
         if (health <= 0) {
             randomizeAttributes();
             return true;

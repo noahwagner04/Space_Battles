@@ -15,6 +15,9 @@ public class Projectile extends Sprite {
     public float damageAmount = 0;
     public Damageable target = null;
 
+    // 0-3, indicates what team fired this bullet
+    public int team;
+
     public Projectile(TextureRegion texture, float x, float y, float speed, float angle) {
         super(texture);
         setPosition(x, y);
