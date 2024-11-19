@@ -14,20 +14,20 @@ public class Asteroid extends Sprite implements Damageable {
     private Rectangle worldBounds;
 
     public Asteroid(SpaceBattles game, Rectangle worldBounds) {
-        super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[MathUtils.random(0, 2)]));
+        super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
         this.worldBounds = worldBounds;
         randomizeAttributes();
         randomizePosition(worldBounds);
     }
 
     public void randomizeAttributes() {
-        size = MathUtils.random(1.5f, 4);
+        size = SpaceBattles.random.nextFloat(1.5f, 4);
         health = size * size * 20;
         setSize(size, size);
         setOriginCenter();
 
         Color tint = new Color(0.7f, 0.6f, 0.5f, 1);
-        float brightness = MathUtils.random(0.5f, 1);
+        float brightness = SpaceBattles.random.nextFloat(0.5f, 1);
         setColor(
             tint.r * brightness,
             tint.g * brightness,
@@ -35,13 +35,14 @@ public class Asteroid extends Sprite implements Damageable {
             1
         );
 
-        velocity = new Vector2(MathUtils.random(), 0).rotateDeg(MathUtils.random(0, 360));
-        this.rotationSpeed = MathUtils.random() * 90;
+        velocity = new Vector2(SpaceBattles.random.nextFloat(), 0);
+        velocity.rotateDeg(SpaceBattles.random.nextFloat(360));
+        this.rotationSpeed = SpaceBattles.random.nextFloat() * 90;
     }
 
     public void randomizePosition(Rectangle worldBounds) {
-        float x = MathUtils.random(worldBounds.x, worldBounds.width);
-        float y = MathUtils.random(worldBounds.y, worldBounds.height);
+        float x = SpaceBattles.random.nextFloat(worldBounds.x, worldBounds.width);
+        float y = SpaceBattles.random.nextFloat(worldBounds.y, worldBounds.height);
         setPosition(x, y);
     }
 

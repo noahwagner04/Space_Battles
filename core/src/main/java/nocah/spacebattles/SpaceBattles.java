@@ -16,6 +16,7 @@ import nocah.spacebattles.netevents.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 public class SpaceBattles extends Game {
     public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
@@ -48,14 +49,14 @@ public class SpaceBattles extends Game {
     SpriteBatch batch;
     AssetManager am;
 
+    // pick random seed on server, send to clients
+    public static Random random = new Random(0);
+
     float res = 0.35f;
     FrameBuffer frameBuffer;
 
     @Override
     public void create() {
-        // pick random seed on server, send to clients
-        MathUtils.random.setSeed(0);
-
         am = new AssetManager();
         batch = new SpriteBatch();
         hud = new HUD(new BitmapFont());

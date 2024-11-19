@@ -28,8 +28,8 @@
 - Add damage system
 - Add player bases and spectator mode
 - Network damage system
+- make asteroids consistent between clients
 
 ## Open Issues ##
-- make asteroids consistent between clients
 - check for client / server instance through bool 
 
