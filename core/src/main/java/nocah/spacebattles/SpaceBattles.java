@@ -75,7 +75,7 @@ public class SpaceBattles extends Game {
         setScreen(new LoadScreen(this));
 
         name = "default_name";
-
+        SpaceBattles game = this;
         hud.registerAction("server", new HUDActionCommand() {
             static final String help = "creates server to listen for clients, and connects this client to it";
 
@@ -84,8 +84,10 @@ public class SpaceBattles extends Game {
                 try {
                     if (server != null) return "server already hosting";
                     server = new Server();
-                    server.startServer();
-                    client = new Client("localhost");
+                    server.startServer(game);
+                    //spawn in a new client
+                    handlers.handleClientEvent(new SpawnEvent((byte)0));
+                    connected = true;
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -122,7 +124,7 @@ public class SpaceBattles extends Game {
             @Override
             public String execute(String[] cmd) {
                 try {
-                    client.sendEvent(new ChatEvent(name, cmd[1]));
+                    sendEvent(new ChatEvent(name, cmd[1]));
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -159,7 +161,8 @@ public class SpaceBattles extends Game {
             public String execute(String[] cmd) {
                 try {
                     if (server == null) return "only the host can start a game!";
-                    client.sendEvent(new StartGameEvent());
+                    sendEvent(new StartGameEvent());
+                    gameStarted = true;
                     return "ok!";
                 } catch (Exception e) {
                     return help;
@@ -253,7 +256,7 @@ public class SpaceBattles extends Game {
             Circle asteroidCircle = (Circle)a.getDamageArea();
             float damageAmount = 10;
             if (!p.getInCircle().overlaps(asteroidCircle)) continue;
-            client.sendEvent(new DamageEvent(
+            sendEvent(new DamageEvent(
                 (byte)NetConstants.PLAYER_ENTITY_TYPE,
                 id,
                 damageAmount,
@@ -287,6 +290,7 @@ public class SpaceBattles extends Game {
             Projectile proj = iterator.next();
             proj.update(delta);
             if (server == null) continue;
+            boolean removed = false;
 
             DamageEvent despawnProjectile = new DamageEvent(
                 (byte)NetConstants.PROJECTILE_ENTITY_TYPE,
@@ -297,63 +301,65 @@ public class SpaceBattles extends Game {
 
             if (proj.checkBounds(worldBounds)){
                 iterator.remove();
-                server.broadcastExcept(despawnProjectile, id);
+                sendEvent(despawnProjectile);
                 continue;
             }
 
             if (map != null && proj.checkCollides(map)) {
                 iterator.remove();
-                server.broadcastExcept(despawnProjectile, id);
+                sendEvent(despawnProjectile);
                 continue;
             }
 
             for (Player p : players) {
                 if (p == null || p.id == proj.team) continue;
                 if (p.getDamageArea().contains(proj.getCenter())) {
-                    server.broadcastExcept(
+                    sendEvent(
                         new DamageEvent(
                             (byte)NetConstants.PLAYER_ENTITY_TYPE,
                             p.id,
                             proj.damageAmount,
                             p.getHealth()
-                        ),
-                        id
+                        )
                     );
 
                     p.damage(proj.damageAmount);
 
-                    server.broadcastExcept(despawnProjectile, id);
+                    sendEvent(despawnProjectile);
                     iterator.remove();
+                    removed = true;
                     break;
                 }
             }
 
+            if (removed) continue;
             for (int i = 0; i < bases.length; i++) {
                 PlayerBase b = bases[i];
                 if (b == null || i == proj.team || b.getIsDestroyed()) continue;
                 if (b.getDamageArea().contains(proj.getCenter())) {
                     b.damage(proj.damageAmount);
                     iterator.remove();
+                    removed = true;
                     break;
                 }
             }
 
+            if (removed) continue;
             for (int i = 0; i < asteroids.size(); i++) {
                 Asteroid a = asteroids.get(i);
                 if (a.getDamageArea().contains(proj.getCenter())) {
-                    server.broadcastExcept(
+                    sendEvent(
                         new DamageEvent(
                             (byte)NetConstants.ASTEROID_ENTITY_TYPE,
                             i,
                             proj.damageAmount,
                             a.getHealth()
-                        ),
-                        id
+                        )
                     );
 
                     a.damage(proj.damageAmount);
 
-                    server.broadcastExcept(despawnProjectile, id);
+                    sendEvent(despawnProjectile);
                     iterator.remove();
                     break;
                 }
@@ -376,7 +382,7 @@ public class SpaceBattles extends Game {
 
         if (server != null) server.stop();
         if (client != null) {
-            client.sendEvent(new DisconnectEvent(id));
+            sendEvent(new DisconnectEvent(id));
             client.stop();
         }
     }
@@ -407,6 +413,14 @@ public class SpaceBattles extends Game {
             Player player = players[i];
             if (i == id || player == null) continue;
             player.updateRemotePlayer(delta);
+        }
+    }
+
+    public void sendEvent(NetEvent e) {
+        if (server != null) {
+            server.broadcastEvent(e);
+        } else if (client != null) {
+            client.sendEvent(e);
         }
     }
 }

@@ -18,13 +18,15 @@ public class Server {
     private static final int PORT = 12345;
     private List<DataReceiver> dataReceivers = new ArrayList<>();
     public ConcurrentLinkedQueue<NetEvent> eventQueue;
-    public Socket[] clientSockets = new Socket[4];
+    public Socket[] clientSockets = new Socket[3];
     ServerSocket serverSocket;
     private boolean exit = false;
+    private SpaceBattles game;
 
-    public void startServer() {
+    public void startServer(SpaceBattles game) {
         this.eventQueue = new ConcurrentLinkedQueue<>();
         new Thread(new ServerListener()).start();
+        this.game = game;
     }
 
     public void stop() {
@@ -68,7 +70,7 @@ public class Server {
     public void sendEvent(NetEvent event, int playerID) {
         byte[] outData = event.serialize();
         try {
-            DataOutputStream out = new DataOutputStream(clientSockets[playerID].getOutputStream());
+            DataOutputStream out = new DataOutputStream(clientSockets[playerID - 1].getOutputStream());
             out.write(outData);
             out.flush();
         } catch (IOException e) {
@@ -80,7 +82,7 @@ public class Server {
         byte[] outData = event.serialize();
         for (int i = 0; i < clientSockets.length; i++) {
             Socket client = clientSockets[i];
-            if (client == null || i == playerID) continue;
+            if (client == null || i == playerID - 1) continue;
 
             try {
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
@@ -102,10 +104,10 @@ public class Server {
                 System.out.println("Chat server started on port " + PORT);
                 while (!exit) {
                     Socket clientSocket = serverSocket.accept();
-                    int index = Arrays.asList(clientSockets).indexOf(null);
-                    clientSockets[index] = clientSocket;
+                    int index = Arrays.asList(game.players).indexOf(null);
+                    clientSockets[index - 1] = clientSocket;
                     sendEvent(new ConnectedEvent((byte)index), index);
-                    DataReceiver dataReceiver = new DataReceiver(clientSocket, eventQueue);
+                    DataReceiver dataReceiver = new DataReceiver(new DataInputStream(clientSocket.getInputStream()), eventQueue);
                     dataReceivers.add(dataReceiver);
                     new Thread(dataReceiver).start();
                 }

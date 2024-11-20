@@ -21,7 +21,7 @@ public class LobbyScreen extends ScreenAdapter {
     @Override
     public void show() {
         System.out.println("Show LobbyScreen");
-        game.client.sendEvent(new SpawnEvent(game.id));
+        game.sendEvent(new SpawnEvent(game.id));
     }
 
     public void update(float delta) {

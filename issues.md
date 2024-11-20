@@ -29,7 +29,9 @@
 - Add player bases and spectator mode
 - Network damage system
 - make asteroids consistent between clients
+- don't use client for server client
 
 ## Open Issues ##
+- cap players to 4
 - check for client / server instance through bool 
 

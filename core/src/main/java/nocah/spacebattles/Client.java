@@ -25,7 +25,7 @@ public class Client {
             socket = new Socket(serverAddress, SERVER_PORT);
             out = new DataOutputStream(socket.getOutputStream());
             System.out.println("Connected to the chat server.");
-            msgReceiver = new DataReceiver(socket, eventQueue);
+            msgReceiver = new DataReceiver(new DataInputStream(socket.getInputStream()), eventQueue);
             new Thread(msgReceiver).start();
 
         } catch (IOException e) {

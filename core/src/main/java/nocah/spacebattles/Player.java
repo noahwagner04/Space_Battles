@@ -11,9 +11,11 @@ import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.NetConstants;
 import nocah.spacebattles.netevents.ShootEvent;
 
+import java.net.Socket;
+
 public class Player extends Sprite implements Damageable {
     private SpaceBattles game;
-    public int id;
+    public byte id;
 
     public Vector2 velocity = new Vector2(0, 0);
     private float maxSpeed = 6;
@@ -41,7 +43,7 @@ public class Player extends Sprite implements Damageable {
 
     private boolean isSpectator = false;
 
-    public Player(SpaceBattles game, int id) {
+    public Player(SpaceBattles game, byte id) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
         this.game = game;
         this.id = id;
@@ -66,7 +68,7 @@ public class Player extends Sprite implements Damageable {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && shootTimer > bulletCoolDown) {
             shootTimer = 0;
             fireBullet();
-            game.client.sendEvent(new ShootEvent(game.id));
+            game.sendEvent(new ShootEvent(game.id));
         }
         shootTimer += delta;
     }
@@ -302,7 +304,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void sendPlayerMoveEvent() {
-        game.client.sendEvent(new MoveEvent(game.id,
+        game.sendEvent(new MoveEvent(game.id,
             getX(),
             getY(),
             getRotation(),

@@ -10,20 +10,17 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DataReceiver implements Runnable {
-    private final Socket socket;
     private DataInputStream in;
     private ConcurrentLinkedQueue<NetEvent> eventQueue;
 
-    public DataReceiver(Socket socket, ConcurrentLinkedQueue<NetEvent> eventQueue) {
-        this.socket = socket;
+    public DataReceiver(DataInputStream in, ConcurrentLinkedQueue<NetEvent> eventQueue) {
+        this.in = in;
         this.eventQueue = eventQueue;
     }
 
     @Override
     public void run() {
         try {
-            in = new DataInputStream(socket.getInputStream());
-
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -48,12 +45,6 @@ public class DataReceiver implements Runnable {
             }
         } catch (IOException e) {
             System.err.println("Error reading: " + e.getMessage());
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                System.err.println("Error closing reading socket: " + e.getMessage());
-            }
         }
     }
 }

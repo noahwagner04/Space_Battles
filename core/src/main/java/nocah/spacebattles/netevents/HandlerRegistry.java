@@ -46,9 +46,8 @@ public class HandlerRegistry {
         serverMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
             SpawnEvent e = (SpawnEvent) event;
             game.server.broadcastExcept(event, e.playerID);
-            for (int i = 0; i < game.server.clientSockets.length; i++) {
-                Socket client = game.server.clientSockets[i];
-                if (client != null) game.server.sendEvent(new SpawnEvent((byte)i), e.playerID);
+            for (Player player: game.players) {
+                if (player != null) game.server.sendEvent(new SpawnEvent(player.id), e.playerID);
             }
         });
 
@@ -77,7 +76,7 @@ public class HandlerRegistry {
         serverMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
             DisconnectEvent e = (DisconnectEvent) event;
             game.server.broadcastExcept(event, e.playerID);
-            game.server.clientSockets[e.playerID] = null;
+            game.server.clientSockets[e.playerID - 1] = null;
         });
 
         clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
@@ -115,6 +114,8 @@ public class HandlerRegistry {
 
     public void handleServerEvent(NetEvent event) {
         Consumer<NetEvent> handler = serverMap.get((int)event.getEventID());
+        //handle event for this server client
+        handleClientEvent(event);
         if (handler != null) {
             handler.accept(event);
         } else {
