@@ -15,11 +15,16 @@ public class PlayerBase extends Sprite implements Damageable {
 
     public Vector2 spawnPoint;
 
-    private boolean isDestroyed = false;
+    private boolean destroyed = false;
 
     private boolean respawnQueued = false;
     private float respawnTimer = 0;
     private float respawnInterval = 5;
+
+    private int maxMinionCount = 5;
+    private int minionCount = 0;
+    private float minionSpawnTimer = 0;
+    private float minionSpawnInterval = 5;
 
     private int team;
 
@@ -34,24 +39,40 @@ public class PlayerBase extends Sprite implements Damageable {
     }
 
     public void update(float delta) {
-        if (isDestroyed) return;
+        if (destroyed) return;
         respawnTimer += delta;
         if (respawnQueued && respawnTimer > respawnInterval) {
             respawnQueued = false;
             respawnTimer = 0;
             game.players[team].respawn();
         }
+
+        if (minionSpawnTimer > minionSpawnInterval) {
+            spawnMinion();
+            minionSpawnTimer = 0;
+        } else if (minionCount < maxMinionCount) {
+            minionSpawnTimer += delta;
+        }
+
         heal(healRate * delta);
+    }
+
+    private void spawnMinion() {
+        Minion m = game.getNextMinion(team);
+        minionCount++;
+        Vector2 pos = new Vector2(1.5f, 0).rotateDeg(360f / maxMinionCount * minionCount);
+        pos.add(getX() + getOriginX(), getY() + getOriginY());
+        m.setCenter(pos.x, pos.y);
     }
 
     @Override
     public void draw(Batch batch) {
-        if (isDestroyed) return;
+        if (destroyed) return;
         super.draw(batch);
     }
 
-    public boolean getIsDestroyed() {
-        return isDestroyed;
+    public boolean isDestroyed() {
+        return destroyed;
     }
 
     @Override
@@ -63,7 +84,7 @@ public class PlayerBase extends Sprite implements Damageable {
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
         if (health <= 0) {
-            isDestroyed = true;
+            destroyed = true;
             return true;
         }
         return false;
@@ -81,7 +102,7 @@ public class PlayerBase extends Sprite implements Damageable {
     }
 
     public void setRespawnTimer() {
-        if (isDestroyed) return;
+        if (destroyed) return;
         respawnQueued = true;
         respawnTimer = 0;
     }

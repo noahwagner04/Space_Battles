@@ -6,9 +6,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
-import nocah.spacebattles.netevents.DamageEvent;
 import nocah.spacebattles.netevents.MoveEvent;
-import nocah.spacebattles.netevents.NetConstants;
 import nocah.spacebattles.netevents.ShootEvent;
 
 import java.net.Socket;
@@ -42,7 +40,7 @@ public class Player extends Sprite implements Damageable {
     private float health = 100;
     private float maxHealth = 100;
 
-    private boolean isSpectator = false;
+    private boolean spectating = false;
 
     public Player(SpaceBattles game, byte id) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
@@ -55,7 +53,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void update(float delta) {
-        if (isSpectator) {
+        if (spectating) {
             updateSpectator(delta);
             updateParticleEffect(delta);
             return;
@@ -99,7 +97,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void updateRemotePlayer(float delta) {
-        if (isSpectator) {
+        if (spectating) {
             updateParticleEffect(delta);
             return;
         }
@@ -232,8 +230,8 @@ public class Player extends Sprite implements Damageable {
         } else {
             thrustAnimationState = 2;
             effect.allowCompletion();
-            velocity.sub(velocity.cpy().nor().scl(friction * delta));
             if (velocity.len() < friction * delta) velocity.setLength(0);
+            else velocity.sub(velocity.cpy().setLength(friction * delta));
         }
 
         velocity.clamp(0, maxSpeed);
@@ -246,7 +244,7 @@ public class Player extends Sprite implements Damageable {
 
     private void updateParticleEffect(float delta) {
         effect.update(delta);
-        if (isSpectator) return;
+        if (spectating) return;
 
         Vector2 origin = getCenter();
         Vector2 offset = getHeadingDir().scl(-size/4);
@@ -334,7 +332,7 @@ public class Player extends Sprite implements Damageable {
                 respawn();
                 return true;
             }
-            setIsSpectator(true);
+            setSpectating(true);
             game.bases[id].setRespawnTimer();
             return true;
         }
@@ -342,7 +340,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void respawn() {
-        setIsSpectator(false);
+        setSpectating(false);
         health = maxHealth;
         velocity = new Vector2(0, 0);
         rotVelocity = 0;
@@ -354,18 +352,18 @@ public class Player extends Sprite implements Damageable {
         setCenter(spawn.x, spawn.y);
     }
 
-    public void setIsSpectator(boolean isSpectator) {
+    public void setSpectating(boolean isSpectator) {
         if (isSpectator) {
             setAlpha(0);
             effect.allowCompletion();
         } else {
             setAlpha(1);
         }
-        this.isSpectator = isSpectator;
+        this.spectating = isSpectator;
     }
 
-    public boolean getIsSpectator() {
-        return isSpectator;
+    public boolean isSpectating() {
+        return spectating;
     }
 
     @Override

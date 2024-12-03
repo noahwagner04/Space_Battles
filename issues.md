@@ -31,8 +31,10 @@
 - make asteroids consistent between clients
 - don't use client for server client
 - properly id bullets
+- Add basic minions that can move towards the player
 
 ## Open Issues ##
+- Kill minions if they manage to clip outside the world boundaries
 - cap players to 4
 - fix stop listening logic
 - check for client / server instance through bool 

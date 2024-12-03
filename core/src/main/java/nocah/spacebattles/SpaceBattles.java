@@ -28,12 +28,16 @@ public class SpaceBattles extends Game {
     public static final String RSC_PARTICLE_ATLAS = "atlases/particles.atlas";
     public static final String RSC_TILED_MAP = "BattleArena/BattleArena.tmx";
 
+    public static final int MAX_PLAYERS = 4;
+    public static final int MAX_ASTEROIDS = 20;
+    public static final int MAX_MINIONS = 20;
+
     public Server server;
     public Client client;
     public String name;
     public HandlerRegistry handlers;
-    public Player[] players = new Player[4];
-    public PlayerBase[] bases = new PlayerBase[4];
+    public Player[] players = new Player[MAX_PLAYERS];
+    public PlayerBase[] bases = new PlayerBase[MAX_PLAYERS];
     public byte id;
     public boolean connected = false;
     public boolean gameStarted = false;
@@ -43,7 +47,8 @@ public class SpaceBattles extends Game {
     float posTimer = 0;
 
     public ArrayList<Projectile> projectiles = new ArrayList<>();
-    public ArrayList<Asteroid> asteroids = new ArrayList<>();
+    public Asteroid[] asteroids = new Asteroid[MAX_ASTEROIDS];
+    public Minion[][] minions = new Minion[MAX_PLAYERS][MAX_MINIONS];
 
     public HUD hud;
 
@@ -212,16 +217,24 @@ public class SpaceBattles extends Game {
 
     public void setBases(Rectangle worldBounds) {
         Vector2 pad = new Vector2(3, 3);
+
         // bottom left
+        if (players[0] == null) return;
         bases[0] = new PlayerBase(this, 0, pad.x, pad.y);
         bases[0].spawnPoint.y += 2;
+
         // top right
+        if (players[1] == null) return;
         bases[1] = new PlayerBase(this, 1, worldBounds.width - pad.x, worldBounds.height - pad.y);
         bases[1].spawnPoint.y -= 2;
+
         // bottom right
+        if (players[2] == null) return;
         bases[2] = new PlayerBase(this, 2, worldBounds.width - pad.x, pad.y);
         bases[2].spawnPoint.y += 2;
+
         // top left
+        if (players[3] == null) return;
         bases[3] = new PlayerBase(this, 3, pad.x, worldBounds.height - pad.y);
         bases[3].spawnPoint.y -= 2;
     }
@@ -247,13 +260,14 @@ public class SpaceBattles extends Game {
             p.constrain(worldBounds);
         }
 
-        if (p.getIsSpectator()) return;
+        if (p.isSpectating()) return;
 
         if (map != null) {
             p.collide(map);
         }
 
         for (Asteroid a : asteroids) {
+            if (a == null) continue;
             Circle asteroidCircle = (Circle)a.getDamageArea();
             float damageAmount = 10;
             if (!p.getInCircle().overlaps(asteroidCircle)) continue;
@@ -268,7 +282,7 @@ public class SpaceBattles extends Game {
         }
 
         for (PlayerBase b : bases) {
-            if (b == null || b.getIsDestroyed()) continue;
+            if (b == null || b.isDestroyed()) continue;
             p.collide((Circle)b.getDamageArea(), 2);
         }
 
@@ -280,6 +294,7 @@ public class SpaceBattles extends Game {
 
     public void updateBases(float delta) {
         for(PlayerBase b : bases) {
+            if (b == null) continue;
             b.update(delta);
         }
     }
@@ -335,7 +350,7 @@ public class SpaceBattles extends Game {
             if (removed) continue;
             for (int i = 0; i < bases.length; i++) {
                 PlayerBase b = bases[i];
-                if (b == null || i == proj.team || b.getIsDestroyed()) continue;
+                if (b == null || i == proj.team || b.isDestroyed()) continue;
                 if (b.getDamageArea().contains(proj.getCenter())) {
                     sendEvent(
                         new DamageEvent(
@@ -356,8 +371,10 @@ public class SpaceBattles extends Game {
             }
 
             if (removed) continue;
-            for (int i = 0; i < asteroids.size(); i++) {
-                Asteroid a = asteroids.get(i);
+
+            for (int i = 0; i < asteroids.length; i++) {
+                Asteroid a = asteroids[i];
+                if (a == null) continue;
                 if (a.getDamageArea().contains(proj.getCenter())) {
                     sendEvent(
                         new DamageEvent(
@@ -436,6 +453,38 @@ public class SpaceBattles extends Game {
             server.broadcastEvent(e);
         } else if (client != null) {
             client.sendEvent(e);
+        }
+    }
+
+    public Minion getNextMinion(int team) {
+        Minion m = null;
+        int i;
+        for (i = 0; i < minions[team].length; i++) {
+            m = minions[team][i];
+            if (m == null || m.isDead()) {
+                break;
+            }
+        }
+        if (m == null) {
+            m = new Minion(this, team);
+            minions[team][i] = m;
+        }
+        return m;
+    }
+
+    public void updateMinions(float delta, TiledMap map) {
+        for (int team = 0; team < MAX_PLAYERS; team++) {
+            for (int i = 0; i < MAX_MINIONS; i++) {
+                Minion m = minions[team][i];
+                if (m == null) continue;
+                m.update(delta);
+                m.collide(map);
+                for (Asteroid a : asteroids) {
+                    Circle c = (Circle)a.getDamageArea();
+                    c.radius *= 1.25f;
+                    m.collide(c);
+                }
+            }
         }
     }
 }

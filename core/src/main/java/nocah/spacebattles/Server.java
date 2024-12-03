@@ -18,7 +18,7 @@ public class Server {
     private static final int PORT = 12345;
     private List<DataReceiver> dataReceivers = new ArrayList<>();
     public ConcurrentLinkedQueue<NetEvent> eventQueue;
-    public Socket[] clientSockets = new Socket[3];
+    public Socket[] clientSockets = new Socket[SpaceBattles.MAX_PLAYERS - 1];
     ServerSocket serverSocket;
     private boolean exit = false;
     private SpaceBattles game;
