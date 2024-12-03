@@ -24,6 +24,7 @@ public class HandlerRegistry {
             System.out.println(e.sender + ": " + e.message);
         });
         serverMap.put(NetConstants.CHAT_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             game.server.broadcastEvent(event);
         });
 
@@ -37,6 +38,7 @@ public class HandlerRegistry {
             game.gameStarted = true;
         });
         serverMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             game.server.broadcastEvent(event);
             game.server.stopListening();
         });
@@ -46,6 +48,7 @@ public class HandlerRegistry {
             game.players[e.playerID] = new Player(game, e.playerID);
         });
         serverMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             SpawnEvent e = (SpawnEvent) event;
             game.server.broadcastExcept(event, e.playerID);
             for (Player player: game.players) {
@@ -67,6 +70,7 @@ public class HandlerRegistry {
             }
         });
         serverMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             MoveEvent e = (MoveEvent) event;
             game.server.broadcastExcept(event, e.playerID);
         });
@@ -76,6 +80,7 @@ public class HandlerRegistry {
             game.players[e.playerID] = null;
         });
         serverMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             DisconnectEvent e = (DisconnectEvent) event;
             game.server.broadcastExcept(event, e.playerID);
             game.server.clientSockets[e.playerID - 1] = null;
@@ -83,7 +88,7 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
-            if (game.server == null) game.players[e.playerID].fireBullet(e.bulletID);
+            game.players[e.playerID].fireBullet(e.bulletID);
         });
         serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
@@ -117,6 +122,7 @@ public class HandlerRegistry {
             }
         });
         serverMap.put(NetConstants.DAMAGE_EVENT_ID, (event) -> {
+            handleClientEvent(event);
             DamageEvent e = (DamageEvent) event;
             game.server.broadcastExcept(e, e.entityId);
         });
@@ -124,8 +130,6 @@ public class HandlerRegistry {
 
     public void handleServerEvent(NetEvent event) {
         Consumer<NetEvent> handler = serverMap.get((int)event.getEventID());
-        //handle event for this server client
-        handleClientEvent(event);
         if (handler != null) {
             handler.accept(event);
         } else {
