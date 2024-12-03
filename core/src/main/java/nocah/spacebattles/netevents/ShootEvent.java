@@ -4,13 +4,15 @@ import java.nio.ByteBuffer;
 
 public class ShootEvent implements NetEvent{
     public final byte playerID;
+    public final int bulletID;
 
-    public ShootEvent(byte playerID) {
+    public ShootEvent(byte playerID, int bulletID) {
         this.playerID = playerID;
+        this.bulletID = bulletID;
     }
 
     public byte getEventID() {return NetConstants.SHOOT_EVENT_ID;}
-    public short getDataByteSize() {return 1;}
+    public short getDataByteSize() {return 1 + 4;}
 
     public byte[] serialize() {
 
@@ -21,6 +23,7 @@ public class ShootEvent implements NetEvent{
         buffer.put(getEventID());
         buffer.putShort(getDataByteSize());
         buffer.put(playerID);
+        buffer.putInt(bulletID);
 
         return buffer.array();
     }
@@ -30,7 +33,8 @@ public class ShootEvent implements NetEvent{
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         byte playerID = buffer.get();
+        int bulletID = buffer.getInt();
 
-        return new ShootEvent(playerID);
+        return new ShootEvent(playerID, bulletID);
     }
 }

@@ -30,8 +30,11 @@
 - Network damage system
 - make asteroids consistent between clients
 - don't use client for server client
+- properly id bullets
 
 ## Open Issues ##
 - cap players to 4
+- fix stop listening logic
 - check for client / server instance through bool 
+- have server handlers directly call client handlers in their own handler functions
 

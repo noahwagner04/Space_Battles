@@ -37,6 +37,7 @@ public class SpaceBattles extends Game {
     public byte id;
     public boolean connected = false;
     public boolean gameStarted = false;
+    private int nextBulletId = 0;
 
     public final float numOfPosSends = 20;
     float posTimer = 0;
@@ -285,7 +286,6 @@ public class SpaceBattles extends Game {
 
     public void updateProjectiles(float delta, TiledMap map, Rectangle worldBounds) {
         Iterator<Projectile> iterator = projectiles.iterator();
-        int projID = 0;
         while (iterator.hasNext()) {
             Projectile proj = iterator.next();
             proj.update(delta);
@@ -294,7 +294,7 @@ public class SpaceBattles extends Game {
 
             DamageEvent despawnProjectile = new DamageEvent(
                 (byte)NetConstants.PROJECTILE_ENTITY_TYPE,
-                projID,
+                proj.getID(),
                 0,
                 0
             );
@@ -337,7 +337,18 @@ public class SpaceBattles extends Game {
                 PlayerBase b = bases[i];
                 if (b == null || i == proj.team || b.getIsDestroyed()) continue;
                 if (b.getDamageArea().contains(proj.getCenter())) {
+                    sendEvent(
+                        new DamageEvent(
+                            (byte)NetConstants.BASE_ENTITY_TYPE,
+                            i,
+                            proj.damageAmount,
+                            b.getHealth()
+                        )
+                    );
+
                     b.damage(proj.damageAmount);
+
+                    sendEvent(despawnProjectile);
                     iterator.remove();
                     removed = true;
                     break;
@@ -364,8 +375,12 @@ public class SpaceBattles extends Game {
                     break;
                 }
             }
-            projID++;
         }
+    }
+
+    public int getBulletID() {
+        nextBulletId++;
+        return nextBulletId;
     }
 
     public void updateAsteroids(float delta, Rectangle worldBounds) {

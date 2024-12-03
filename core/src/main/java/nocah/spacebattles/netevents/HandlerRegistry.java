@@ -2,10 +2,12 @@ package nocah.spacebattles.netevents;
 
 import nocah.spacebattles.Asteroid;
 import nocah.spacebattles.Player;
+import nocah.spacebattles.Projectile;
 import nocah.spacebattles.SpaceBattles;
 
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -81,11 +83,13 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
-            game.players[e.playerID].fireBullet();
+            if (game.server == null) game.players[e.playerID].fireBullet(e.bulletID);
         });
         serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
-            game.server.broadcastExcept(event, e.playerID);
+            int bulletID  = game.getBulletID();
+            game.players[e.playerID].fireBullet(bulletID);
+            game.server.broadcastEvent(new ShootEvent(e.playerID, bulletID));
         });
 
         // clients handle collision damage, server handles projectiles
@@ -99,7 +103,13 @@ public class HandlerRegistry {
                     break;
                 case NetConstants.PROJECTILE_ENTITY_TYPE:
                     // this essentially acts as a way to despawn the projectiles
-                    game.projectiles.remove(e.entityId);
+                    Iterator<Projectile> iterator = game.projectiles.iterator();
+                    while (iterator.hasNext()) {
+                        Projectile proj = iterator.next();
+                        if (proj.getID() == e.entityId) {
+                            iterator.remove();
+                        }
+                    }
                     break;
                 case NetConstants.ASTEROID_ENTITY_TYPE:
                     game.asteroids.get(e.entityId).damage(e.damageAmount);

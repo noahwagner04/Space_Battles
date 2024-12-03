@@ -14,15 +14,18 @@ public class Projectile extends Sprite {
     private float speed;
     public float damageAmount = 0;
     public Damageable target = null;
+    private int id;
+
 
     // 0-3, indicates what team fired this bullet
     public int team;
 
-    public Projectile(TextureRegion texture, float x, float y, float speed, float angle) {
+    public Projectile(int id, TextureRegion texture, float x, float y, float speed, float angle) {
         super(texture);
         setPosition(x, y);
         this.speed = speed;
         velocity = new Vector2(speed, 0).rotateDeg(angle);
+        this.id = id;
     }
 
     public void setTarget(Damageable target) {
@@ -60,5 +63,9 @@ public class Projectile extends Sprite {
 
     public Vector2 getCenter() {
         return new Vector2(getX() + getOriginX(), getY() + getOriginY());
+    }
+
+    public int getID() {
+        return id;
     }
 }

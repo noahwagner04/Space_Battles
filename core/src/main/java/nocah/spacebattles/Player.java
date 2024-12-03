@@ -12,6 +12,7 @@ import nocah.spacebattles.netevents.NetConstants;
 import nocah.spacebattles.netevents.ShootEvent;
 
 import java.net.Socket;
+import java.util.Random;
 
 public class Player extends Sprite implements Damageable {
     private SpaceBattles game;
@@ -67,8 +68,13 @@ public class Player extends Sprite implements Damageable {
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && shootTimer > bulletCoolDown) {
             shootTimer = 0;
-            fireBullet();
-            game.sendEvent(new ShootEvent(game.id));
+            if(game.server != null) {
+                int bullet_id = game.getBulletID();
+                game.sendEvent(new ShootEvent(game.id, bullet_id));
+                fireBullet(bullet_id);
+            } else {
+                game.sendEvent(new ShootEvent(game.id, 0));
+            }
         }
         shootTimer += delta;
     }
@@ -276,11 +282,11 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    public void fireBullet() {
+    public void fireBullet(int bulletID) {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = getHeadingDir();
         Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
-        Projectile proj = new Projectile(tex, startPos.x, startPos.y, bulletSpeed, getRotation() + 90);
+        Projectile proj = new Projectile(bulletID, tex, startPos.x, startPos.y, bulletSpeed, getRotation() + 90);
         proj.setSize(0.15f, 0.15f);
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
