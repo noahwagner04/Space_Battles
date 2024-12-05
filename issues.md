@@ -32,11 +32,13 @@
 - don't use client for server client
 - properly id bullets
 - Add basic minions that can move towards the player
+- have server handlers directly call client handlers in their own handler functions
+- stream minion positions
 
 ## Open Issues ##
 - Kill minions if they manage to clip outside the world boundaries
 - cap players to 4
-- fix stop listening logic
 - check for client / server instance through bool 
-- have server handlers directly call client handlers in their own handler functions
+- have server explicitly call stop listening
+- on disconnect, remove all data associated with player (minions, bases, score, etc.)
 

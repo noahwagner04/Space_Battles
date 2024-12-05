@@ -309,6 +309,7 @@ public class Player extends Sprite implements Damageable {
 
     public void sendPlayerMoveEvent() {
         game.sendEvent(new MoveEvent(game.id,
+            (byte)-1,
             getX(),
             getY(),
             getRotation(),

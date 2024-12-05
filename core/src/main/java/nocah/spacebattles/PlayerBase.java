@@ -46,15 +46,15 @@ public class PlayerBase extends Sprite implements Damageable {
             respawnTimer = 0;
             game.players[team].respawn();
         }
+        heal(healRate * delta);
 
+        if (game.server == null) return;
         if (minionSpawnTimer > minionSpawnInterval) {
             spawnMinion();
             minionSpawnTimer = 0;
         } else if (minionCount < maxMinionCount) {
             minionSpawnTimer += delta;
         }
-
-        heal(healRate * delta);
     }
 
     private void spawnMinion() {

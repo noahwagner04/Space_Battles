@@ -1,9 +1,6 @@
 package nocah.spacebattles.netevents;
 
-import nocah.spacebattles.Asteroid;
-import nocah.spacebattles.Player;
-import nocah.spacebattles.Projectile;
-import nocah.spacebattles.SpaceBattles;
+import nocah.spacebattles.*;
 
 import java.net.Socket;
 import java.util.HashMap;
@@ -37,6 +34,7 @@ public class HandlerRegistry {
         clientMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
             game.gameStarted = true;
         });
+        // this is never called for main client
         serverMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
             handleClientEvent(event);
             game.server.broadcastEvent(event);
@@ -58,16 +56,30 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {
             MoveEvent e = (MoveEvent) event;
-            if(game.players[e.playerID] != null) {
-                game.players[e.playerID].setX(e.x);
-                game.players[e.playerID].setY(e.y);
-                game.players[e.playerID].setRotation(e.rotation);
-                game.players[e.playerID].velocity.x = e.xVel;
-                game.players[e.playerID].velocity.y = e.yVel;
-                game.players[e.playerID].rotVelocity = e.rotVel;
-                game.players[e.playerID].thrustAnimationState = e.thrustAnimationState;
+            Player player = game.players[e.playerID];
+            if (e.minionID == -1) {
+                if (player != null) {
+                    player.setX(e.x);
+                    player.setY(e.y);
+                    player.setRotation(e.rotation);
+                    player.velocity.x = e.xVel;
+                    player.velocity.y = e.yVel;
+                    player.rotVelocity = e.rotVel;
+                    player.thrustAnimationState = e.thrustAnimationState;
 
+                }
+            } else {
+                if (game.minions[e.playerID][e.minionID] == null) {
+                    game.minions[e.playerID][e.minionID] = new Minion(game, e.playerID);
+                }
+                Minion minion = game.minions[e.playerID][e.minionID];
+                minion.setX(e.x);
+                minion.setY(e.y);
+                minion.setRotation(e.rotation);
+                minion.velocity.x = e.xVel;
+                minion.velocity.y = e.yVel;
             }
+
         });
         serverMap.put(NetConstants.MOVE_PLAYER_EVENT_ID, (event) -> {
             handleClientEvent(event);
@@ -75,6 +87,7 @@ public class HandlerRegistry {
             game.server.broadcastExcept(event, e.playerID);
         });
 
+        // this can cause bugs, not the best way to do it
         clientMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
             DisconnectEvent e = (DisconnectEvent) event;
             game.players[e.playerID] = null;

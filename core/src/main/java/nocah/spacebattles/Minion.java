@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
+import nocah.spacebattles.netevents.MoveEvent;
 
 public class Minion extends Sprite implements Damageable {
     SpaceBattles game;
@@ -14,7 +15,7 @@ public class Minion extends Sprite implements Damageable {
     private final int team;
     private boolean dead;
 
-    private Vector2 velocity = new Vector2();
+    public Vector2 velocity = new Vector2();
     private float maxSpeed = 5f;
     private float acceleration = 15f;
     private float friction = 10f;
@@ -83,6 +84,20 @@ public class Minion extends Sprite implements Damageable {
         // possible boid like herding behavior with other minions
     }
 
+    public void updateRemoteMinion(float delta) {
+
+        float x = getX();
+        float y = getY();
+        float r = getRotation();
+
+        x += velocity.x * delta;
+        y += velocity.y * delta;
+
+        setX(x);
+        setY(y);
+        setRotation(r);
+    }
+
     public void collide(TiledMap map) {
         // Get the position of the minion's center
         Vector2 center = getCenter();
@@ -135,5 +150,18 @@ public class Minion extends Sprite implements Damageable {
     @Override
     public Shape2D getDamageArea() {
         return null;
+    }
+
+    public void sendMinionMoveEvent(byte teamID, byte minionID) {
+        game.sendEvent(new MoveEvent(teamID,
+            minionID,
+            getX(),
+            getY(),
+            getRotation(),
+            velocity.x,
+            velocity.y,
+            10f,
+            (byte)0
+        ));
     }
 }

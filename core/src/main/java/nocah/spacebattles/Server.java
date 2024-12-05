@@ -101,7 +101,7 @@ public class Server {
         public void run() {
             try {
                 serverSocket = new ServerSocket(PORT);
-                System.out.println("Chat server started on port " + PORT);
+                System.out.println("server started on port " + PORT);
                 while (!exit) {
                     Socket clientSocket = serverSocket.accept();
                     int index = Arrays.asList(game.players).indexOf(null);

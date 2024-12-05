@@ -43,6 +43,7 @@ public class ArenaScreen extends ScreenAdapter {
 
     public void update(float delta) {
         game.posTimer += delta;
+        game.minionPosTimer += delta;
         game.handleNetworkEvents();
 
         if (thisPlayer != null) {
@@ -55,6 +56,7 @@ public class ArenaScreen extends ScreenAdapter {
         game.updateProjectiles(delta, map, worldBounds);
         game.updateAsteroids(delta, worldBounds);
         game.updateMinions(delta, map);
+
     }
 
     @Override

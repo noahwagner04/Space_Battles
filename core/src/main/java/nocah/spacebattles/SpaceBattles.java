@@ -45,6 +45,7 @@ public class SpaceBattles extends Game {
 
     public final float numOfPosSends = 20;
     float posTimer = 0;
+    float minionPosTimer = 0;
 
     public ArrayList<Projectile> projectiles = new ArrayList<>();
     public Asteroid[] asteroids = new Asteroid[MAX_ASTEROIDS];
@@ -473,17 +474,49 @@ public class SpaceBattles extends Game {
     }
 
     public void updateMinions(float delta, TiledMap map) {
+        if (server != null) {
+
+            for (int team = 0; team < MAX_PLAYERS; team++) {
+                for (int i = 0; i < MAX_MINIONS; i++) {
+                    Minion m = minions[team][i];
+                    if (m == null) continue;
+                    m.update(delta);
+                    m.collide(map);
+                    for (Asteroid a : asteroids) {
+                        Circle c = (Circle)a.getDamageArea();
+                        c.radius *= 1.25f;
+                        m.collide(c);
+                    }
+
+                    if (1 / numOfPosSends < minionPosTimer) {
+                        sendMinionsPos();
+                        minionPosTimer -= 1 / numOfPosSends;
+                    }
+                }
+            }
+
+        } else {
+            updateRemoteMinions(delta);
+        }
+
+    }
+
+    public void sendMinionsPos() {
         for (int team = 0; team < MAX_PLAYERS; team++) {
             for (int i = 0; i < MAX_MINIONS; i++) {
-                Minion m = minions[team][i];
-                if (m == null) continue;
-                m.update(delta);
-                m.collide(map);
-                for (Asteroid a : asteroids) {
-                    Circle c = (Circle)a.getDamageArea();
-                    c.radius *= 1.25f;
-                    m.collide(c);
-                }
+                Minion minion = minions[team][i];
+                if (minion == null) continue;
+                minion.sendMinionMoveEvent((byte) team, (byte) i);
+            }
+        }
+    }
+
+    public void updateRemoteMinions(float delta) {
+        for (int team = 0; team < MAX_PLAYERS; team++) {
+            for (int i = 0; i < MAX_MINIONS; i++) {
+                Minion minion = minions[team][i];
+                if (minion == null) continue;
+                minion.updateRemoteMinion(delta);
             }
         }
     }
