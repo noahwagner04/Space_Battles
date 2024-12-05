@@ -119,6 +119,9 @@ public class HandlerRegistry {
                 case NetConstants.ASTEROID_ENTITY_TYPE:
                     game.asteroids[e.entityId].damage(e.damageAmount);
                     break;
+                case NetConstants.BASE_ENTITY_TYPE:
+                    game.bases[e.entityId].damage(e.damageAmount);
+                    break;
             }
         });
         serverMap.put(NetConstants.DAMAGE_EVENT_ID, (event) -> {
