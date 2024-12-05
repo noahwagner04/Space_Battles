@@ -34,9 +34,10 @@
 - Add basic minions that can move towards the player
 - have server handlers directly call client handlers in their own handler functions
 - stream minion positions
+- Make minions shoot and get damaged
+- Kill minions if they manage to clip outside the world boundaries
 
 ## Open Issues ##
-- Kill minions if they manage to clip outside the world boundaries
 - cap players to 4
 - check for client / server instance through bool 
 - have server explicitly call stop listening

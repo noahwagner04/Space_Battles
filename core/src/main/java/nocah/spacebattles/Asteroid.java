@@ -77,6 +77,10 @@ public class Asteroid extends Sprite implements Damageable {
         }
     }
 
+    public Vector2 getCenter() {
+        return new Vector2(getX() + getOriginX(), getY() + getOriginY());
+    }
+
     @Override
     public float getHealth() {
         return health;

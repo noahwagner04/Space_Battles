@@ -1,12 +1,11 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Shape2D;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import nocah.spacebattles.netevents.MoveEvent;
 
 public class Minion extends Sprite implements Damageable {
@@ -22,13 +21,26 @@ public class Minion extends Sprite implements Damageable {
     private float repulse = 20f;
     private float repulseDist = 0.5f;
     private float rotationSpeed = 10f;
+    private float collisionBounce = 5f;
 
     private float minFollowDist = 2f;
     private float maxFollowDist = 10f;
 
+    private float shootRange = 8f;
+    private float bulletDamage = 8f;
+    private float bulletSpeed = 3f;
+    private float shootKnockBack = 0.75f;
+    private float shootInterval = 2f;
+    private float shootTimer = 0;
+
+    private float maxHealth = 20f;
+    private float health = maxHealth;
+
+    private float size = 0.6f;
+
     public Minion(SpaceBattles game, int team) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
-        setSize(0.6f, 0.6f);
+        setSize(size, size);
         setOriginCenter();
         this.game = game;
         this.team = team;
@@ -75,13 +87,91 @@ public class Minion extends Sprite implements Damageable {
             setRotation(newRot);
         }
 
-        // do the following in order (prioritize shooting players, ..., lastly asteroid)
-        // shoot nearest player enemy
-        // shoot nearest player base
-        // shoot nearest enemy minions
-        // shoot nearest asteroid (within range z)
+        if (shootTimer < shootInterval) {
+            shootTimer += delta;
+            return;
+        }
 
-        // possible boid like herding behavior with other minions
+        shootTimer = 0;
+
+        Vector2 target = null;
+        float shortestDst = Float.MAX_VALUE;
+
+        for (Player p : game.players) {
+            if (p == null || p == game.players[team] || p.isSpectating()) continue;
+            float dst = p.getCenter().dst(getCenter());
+            if (dst < shootRange && dst < shortestDst) {
+                target = p.getCenter();
+                shortestDst = dst;
+            }
+        }
+
+        if (target != null) {
+            shootAt(target);
+            return;
+        }
+
+        shortestDst = Float.MAX_VALUE;
+        for (PlayerBase b : game.bases) {
+            if (b == null || b == game.bases[team] || b.isDestroyed()) continue;
+            float dst = b.getCenter().dst(getCenter());
+            if (dst < shootRange && dst < shortestDst) {
+                target = b.getCenter();
+                shortestDst = dst;
+            }
+        }
+
+        if (target != null) {
+            shootAt(target);
+            return;
+        }
+
+        shortestDst = Float.MAX_VALUE;
+        for (Minion[] ms : game.minions) {
+            if (ms == null || ms == game.minions[team]) continue;
+            for (Minion m : ms) {
+                if (m == null || m == this || m.isDead()) continue;
+                float dst = m.getCenter().dst(getCenter());
+                if (dst < shootRange && dst < shortestDst) {
+                    target = m.getCenter();
+                    shortestDst = dst;
+                }
+            }
+        }
+
+        if (target != null) {
+            shootAt(target);
+            return;
+        }
+
+        shortestDst = Float.MAX_VALUE;
+        for (Asteroid a : game.asteroids) {
+            float dst = a.getCenter().dst(getCenter());
+            if (dst < shootRange && dst < shortestDst) {
+                target = a.getCenter();
+                shortestDst = dst;
+            }
+        }
+
+        if (target != null) {
+            shootAt(target);
+            return;
+        }
+    }
+
+    private void shootAt(Vector2 target) {
+        TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
+        Vector2 heading = target.sub(getCenter());
+        Vector2 startPos = getCenter().add(heading.cpy().setLength(size/2));
+        Projectile proj = new Projectile(-1, tex, startPos.x, startPos.y, bulletSpeed, heading.angleDeg());
+        proj.setSize(0.15f, 0.15f);
+        proj.setOriginCenter();
+        proj.translate(-proj.getOriginX(), -proj.getOriginY());
+        proj.damageAmount = bulletDamage;
+        proj.team = team;
+        game.projectiles.add(proj);
+
+        velocity.sub(heading.scl(shootKnockBack));
     }
 
     public void updateRemoteMinion(float delta) {
@@ -112,16 +202,25 @@ public class Minion extends Sprite implements Damageable {
         if (cell != null) {
             float tileCenterX = tileX + 0.5f;
             float tileCenterY = tileY + 0.5f;
-            Vector2 knockback = center.sub(tileCenterX, tileCenterY).setLength(repulse);
-            velocity.add(knockback);
+            Vector2 knockBack = center.sub(tileCenterX, tileCenterY).setLength(collisionBounce);
+            velocity.add(knockBack);
         }
     }
 
     public void collide(Circle c) {
         Vector2 center = getCenter();
         if (!c.contains(center)) return;
-        Vector2 knockback = center.sub(c.x, c.y).setLength(repulse);
+        Vector2 knockback = center.sub(c.x, c.y).setLength(collisionBounce);
         velocity.add(knockback);
+    }
+
+    public boolean checkBounds(Rectangle worldBounds) {
+        Vector2 center = getCenter();
+
+        return center.x < worldBounds.x ||
+            center.x > worldBounds.x + worldBounds.width ||
+            center.y < worldBounds.y ||
+            center.y > worldBounds.y + worldBounds.height;
     }
 
     public Vector2 getCenter() {
@@ -132,24 +231,46 @@ public class Minion extends Sprite implements Damageable {
         return dead;
     }
 
+    public void destroy() {
+        damage(health + 1);
+    }
+
+    @Override
+    public void draw(Batch batch) {
+        if (dead) return;
+        super.draw(batch);
+    }
+
     @Override
     public float getHealth() {
-        return 0;
+        return health;
     }
 
     @Override
     public boolean damage(float amount) {
+        health -= Math.max(amount, 0);
+        if (health <= 0) {
+            game.bases[team].minionCount--;
+            dead = true;
+            return true;
+        }
         return false;
     }
 
     @Override
     public void heal(float amount) {
-
+        health += Math.max(amount, 0);
     }
 
     @Override
     public Shape2D getDamageArea() {
-        return null;
+        Vector2 center = getCenter();
+        return new Circle(center.x, center.y, size);
+    }
+
+    public void revive() {
+        health = maxHealth;
+        dead = false;
     }
 
     public void sendMinionMoveEvent(byte teamID, byte minionID) {

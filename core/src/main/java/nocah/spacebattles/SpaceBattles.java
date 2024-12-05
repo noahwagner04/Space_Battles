@@ -30,7 +30,7 @@ public class SpaceBattles extends Game {
 
     public static final int MAX_PLAYERS = 4;
     public static final int MAX_ASTEROIDS = 20;
-    public static final int MAX_MINIONS = 20;
+    public static final int MAX_MINIONS = 10;
 
     public Server server;
     public Client client;
@@ -328,7 +328,7 @@ public class SpaceBattles extends Game {
             }
 
             for (Player p : players) {
-                if (p == null || p.id == proj.team) continue;
+                if (p == null || p.id == proj.team || p.isSpectating()) continue;
                 if (p.getDamageArea().contains(proj.getCenter())) {
                     sendEvent(
                         new DamageEvent(
@@ -390,7 +390,23 @@ public class SpaceBattles extends Game {
 
                     sendEvent(despawnProjectile);
                     iterator.remove();
+                    removed = true;
                     break;
+                }
+            }
+
+            if (removed) continue;
+
+            for (Minion[] ms : minions) {
+                if (ms == null || ms == minions[proj.team]) continue;
+                for (Minion m : ms) {
+                    if (m == null || m.isDead()) continue;
+                    if (m.getDamageArea().contains(proj.getCenter())) {
+                        m.damage(proj.damageAmount);
+                        iterator.remove();
+                        removed = true;
+                        break;
+                    }
                 }
             }
         }
@@ -466,39 +482,48 @@ public class SpaceBattles extends Game {
                 break;
             }
         }
-        if (m == null) {
+        if (m == null && i < MAX_MINIONS) {
             m = new Minion(this, team);
             minions[team][i] = m;
         }
         return m;
     }
 
-    public void updateMinions(float delta, TiledMap map) {
+    public void updateMinions(float delta, TiledMap map, Rectangle worldBounds) {
         if (server != null) {
-
             for (int team = 0; team < MAX_PLAYERS; team++) {
                 for (int i = 0; i < MAX_MINIONS; i++) {
                     Minion m = minions[team][i];
                     if (m == null) continue;
                     m.update(delta);
                     m.collide(map);
+
+                    if (m.checkBounds(worldBounds)) {
+                        m.destroy();
+                        break;
+                    }
+
+                    for (PlayerBase b : bases) {
+                        if (b == null) continue;
+                        Circle c = (Circle)b.getDamageArea();
+                        c.radius *= 1.25f;
+                        m.collide(c);
+                    }
+
                     for (Asteroid a : asteroids) {
                         Circle c = (Circle)a.getDamageArea();
                         c.radius *= 1.25f;
                         m.collide(c);
                     }
-
-                    if (1 / numOfPosSends < minionPosTimer) {
-                        sendMinionsPos();
-                        minionPosTimer -= 1 / numOfPosSends;
-                    }
                 }
             }
-
+            if (1 / numOfPosSends < minionPosTimer) {
+                sendMinionsPos();
+                minionPosTimer -= 1 / numOfPosSends;
+            }
         } else {
             updateRemoteMinions(delta);
         }
-
     }
 
     public void sendMinionsPos() {

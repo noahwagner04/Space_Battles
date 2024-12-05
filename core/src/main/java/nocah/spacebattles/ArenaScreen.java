@@ -55,8 +55,7 @@ public class ArenaScreen extends ScreenAdapter {
         game.updateRemotePlayers(delta);
         game.updateProjectiles(delta, map, worldBounds);
         game.updateAsteroids(delta, worldBounds);
-        game.updateMinions(delta, map);
-
+        game.updateMinions(delta, map, worldBounds);
     }
 
     @Override

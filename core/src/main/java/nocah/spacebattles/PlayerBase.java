@@ -22,7 +22,7 @@ public class PlayerBase extends Sprite implements Damageable {
     private float respawnInterval = 5;
 
     private int maxMinionCount = 5;
-    private int minionCount = 0;
+    public int minionCount = 0;
     private float minionSpawnTimer = 0;
     private float minionSpawnInterval = 5;
 
@@ -61,8 +61,13 @@ public class PlayerBase extends Sprite implements Damageable {
         Minion m = game.getNextMinion(team);
         minionCount++;
         Vector2 pos = new Vector2(1.5f, 0).rotateDeg(360f / maxMinionCount * minionCount);
-        pos.add(getX() + getOriginX(), getY() + getOriginY());
+        pos.add(getCenter());
         m.setCenter(pos.x, pos.y);
+        m.revive();
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(getX() + getOriginX(), getY() + getOriginY());
     }
 
     @Override
