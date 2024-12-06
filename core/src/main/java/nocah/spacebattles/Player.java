@@ -68,10 +68,10 @@ public class Player extends Sprite implements Damageable {
             shootTimer = 0;
             if(game.server != null) {
                 int bullet_id = game.getBulletID();
-                game.sendEvent(new ShootEvent(game.id, bullet_id));
+                game.sendEvent(new ShootEvent(game.id, (byte)-1, bullet_id, 0));
                 fireBullet(bullet_id);
             } else {
-                game.sendEvent(new ShootEvent(game.id, 0));
+                game.sendEvent(new ShootEvent(game.id, (byte)-1, 0, 0));
             }
         }
         shootTimer += delta;

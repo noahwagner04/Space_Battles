@@ -1,5 +1,6 @@
 package nocah.spacebattles.netevents;
 
+import com.badlogic.gdx.math.Vector2;
 import nocah.spacebattles.*;
 
 import java.net.Socket;
@@ -70,12 +71,17 @@ public class HandlerRegistry {
                 }
             } else {
                 if (game.minions[e.playerID][e.minionID] == null) {
-                    game.minions[e.playerID][e.minionID] = new Minion(game, e.playerID);
+                    game.minions[e.playerID][e.minionID] = new Minion(game, e.playerID, e.minionID);
                 }
+
                 Minion minion = game.minions[e.playerID][e.minionID];
+
+                if (minion.isDead()) {
+                    minion.revive();
+                }
+
                 minion.setX(e.x);
                 minion.setY(e.y);
-                minion.setRotation(e.rotation);
                 minion.velocity.x = e.xVel;
                 minion.velocity.y = e.yVel;
             }
@@ -101,13 +107,19 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
-            game.players[e.playerID].fireBullet(e.bulletID);
+            if (e.minionID == -1) {
+                game.players[e.playerID].fireBullet(e.bulletID);
+            } else {
+                Minion m = game.minions[e.playerID][e.minionID];
+                Vector2 target = m.getCenter().add( new Vector2(1, 0).rotateRad(e.rotation));
+                m.shootAt(target, e.bulletID);
+            }
         });
         serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
             int bulletID  = game.getBulletID();
             game.players[e.playerID].fireBullet(bulletID);
-            game.server.broadcastEvent(new ShootEvent(e.playerID, bulletID));
+            game.server.broadcastEvent(new ShootEvent(e.playerID, (byte) -1, bulletID, 0));
         });
 
         // clients handle collision damage, server handles projectiles
@@ -134,6 +146,11 @@ public class HandlerRegistry {
                     break;
                 case NetConstants.BASE_ENTITY_TYPE:
                     game.bases[e.entityId].damage(e.damageAmount);
+                    break;
+                case NetConstants.MINION_ENTITY_TYPE:
+                    byte team = (byte)(e.entityId / SpaceBattles.MAX_MINIONS);
+                    byte minion = (byte)(e.entityId % SpaceBattles.MAX_MINIONS);
+                    game.minions[team][minion].damage(e.damageAmount);
                     break;
             }
         });

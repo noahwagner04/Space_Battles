@@ -59,7 +59,7 @@ public class SpaceBattles extends Game {
     // pick random seed on server, send to clients
     public static Random random = new Random(0);
 
-    float res = 0.35f;
+    float res = 1f;
     FrameBuffer frameBuffer;
 
     @Override
@@ -399,10 +399,23 @@ public class SpaceBattles extends Game {
 
             for (Minion[] ms : minions) {
                 if (ms == null || ms == minions[proj.team]) continue;
-                for (Minion m : ms) {
+                for (int i = 0; i < ms.length; i++) {
+                    Minion m = ms[i];
                     if (m == null || m.isDead()) continue;
                     if (m.getDamageArea().contains(proj.getCenter())) {
+
+                        sendEvent(
+                            new DamageEvent(
+                                (byte)NetConstants.MINION_ENTITY_TYPE,
+                                i + (m.getTeam() * MAX_MINIONS),
+                                proj.damageAmount,
+                                m.getHealth()
+                            )
+                        );
+
                         m.damage(proj.damageAmount);
+
+                        sendEvent(despawnProjectile);
                         iterator.remove();
                         removed = true;
                         break;
@@ -483,7 +496,7 @@ public class SpaceBattles extends Game {
             }
         }
         if (m == null && i < MAX_MINIONS) {
-            m = new Minion(this, team);
+            m = new Minion(this, (byte)team, (byte)i);
             minions[team][i] = m;
         }
         return m;
@@ -530,7 +543,7 @@ public class SpaceBattles extends Game {
         for (int team = 0; team < MAX_PLAYERS; team++) {
             for (int i = 0; i < MAX_MINIONS; i++) {
                 Minion minion = minions[team][i];
-                if (minion == null) continue;
+                if (minion == null || minion.isDead()) continue;
                 minion.sendMinionMoveEvent((byte) team, (byte) i);
             }
         }

@@ -7,11 +7,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
 import nocah.spacebattles.netevents.MoveEvent;
+import nocah.spacebattles.netevents.ShootEvent;
 
 public class Minion extends Sprite implements Damageable {
     SpaceBattles game;
     Player playerLeader;
-    private final int team;
+    private final byte team;
+    private final byte id;
     private boolean dead;
 
     public Vector2 velocity = new Vector2();
@@ -38,12 +40,13 @@ public class Minion extends Sprite implements Damageable {
 
     private float size = 0.6f;
 
-    public Minion(SpaceBattles game, int team) {
+    public Minion(SpaceBattles game, byte team, byte id) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
         setSize(size, size);
         setOriginCenter();
         this.game = game;
         this.team = team;
+        this.id = id;
         playerLeader = game.players[team];
     }
 
@@ -80,12 +83,7 @@ public class Minion extends Sprite implements Damageable {
         translateX(velocity.x * delta);
         translateY(velocity.y * delta);
 
-        if (velocity.len2() > 0) {
-            float rot = getRotation();
-            float targetRot = velocity.angleDeg() - 90;
-            float newRot = MathUtils.lerpAngleDeg(rot, targetRot, delta * rotationSpeed);
-            setRotation(newRot);
-        }
+        lerpRotate(delta);
 
         if (shootTimer < shootInterval) {
             shootTimer += delta;
@@ -107,7 +105,9 @@ public class Minion extends Sprite implements Damageable {
         }
 
         if (target != null) {
-            shootAt(target);
+            int bulletID = game.getBulletID();
+            shootAt(target, bulletID);
+            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
             return;
         }
 
@@ -122,7 +122,9 @@ public class Minion extends Sprite implements Damageable {
         }
 
         if (target != null) {
-            shootAt(target);
+            int bulletID = game.getBulletID();
+            shootAt(target, bulletID);
+            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
             return;
         }
 
@@ -140,7 +142,9 @@ public class Minion extends Sprite implements Damageable {
         }
 
         if (target != null) {
-            shootAt(target);
+            int bulletID = game.getBulletID();
+            shootAt(target, bulletID);
+            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
             return;
         }
 
@@ -154,16 +158,18 @@ public class Minion extends Sprite implements Damageable {
         }
 
         if (target != null) {
-            shootAt(target);
+            int bulletID = game.getBulletID();
+            shootAt(target, bulletID);
+            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
             return;
         }
     }
 
-    private void shootAt(Vector2 target) {
+    public void shootAt(Vector2 target, int bulletID) {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = target.sub(getCenter());
         Vector2 startPos = getCenter().add(heading.cpy().setLength(size/2));
-        Projectile proj = new Projectile(-1, tex, startPos.x, startPos.y, bulletSpeed, heading.angleDeg());
+        Projectile proj = new Projectile(bulletID, tex, startPos.x, startPos.y, bulletSpeed, heading.angleDeg());
         proj.setSize(0.15f, 0.15f);
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
@@ -178,14 +184,24 @@ public class Minion extends Sprite implements Damageable {
 
         float x = getX();
         float y = getY();
-        float r = getRotation();
 
         x += velocity.x * delta;
         y += velocity.y * delta;
 
+        lerpRotate(delta);
         setX(x);
         setY(y);
-        setRotation(r);
+    }
+
+    public void lerpRotate(float delta) {
+        if (velocity.len2() <= 0) {
+            return;
+        }
+
+        float rot = getRotation();
+        float targetRot = velocity.angleDeg() - 90;
+        float newRot = MathUtils.lerpAngleDeg(rot, targetRot, delta * rotationSpeed);
+        setRotation(newRot);
     }
 
     public void collide(TiledMap map) {
@@ -284,5 +300,9 @@ public class Minion extends Sprite implements Damageable {
             10f,
             (byte)0
         ));
+    }
+
+    public byte getTeam() {
+        return team;
     }
 }
