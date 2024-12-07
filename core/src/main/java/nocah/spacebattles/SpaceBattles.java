@@ -180,6 +180,39 @@ public class SpaceBattles extends Game {
                 return help;
             }
         });
+
+        hud.registerAction("upgrade", new HUDActionCommand() {
+            static final String help = "upgrade <defence, attack, speed, base_defence, minions>";
+
+            @Override
+            public String execute(String[] cmd) {
+                if (players[id].getStatPoints() == 0) {
+                    return "No stat points to spend!";
+                }
+                try {
+                    if (cmd[1].contentEquals("defence")) {
+                        players[id].upgradeStat(Player.Stat.DEFENCE);
+                    } else if (cmd[1].contentEquals("attack")) {
+                        players[id].upgradeStat(Player.Stat.ATTACK);
+                    } else if (cmd[1].contentEquals("speed")) {
+                        players[id].upgradeStat(Player.Stat.SPEED);
+                    } else if (cmd[1].contentEquals("base_defence")) {
+                        players[id].upgradeStat(Player.Stat.BASE_DEFENCE);
+                    } else if (cmd[1].contentEquals("minions")) {
+                        players[id].upgradeStat(Player.Stat.MINIONS);
+                    } else {
+                        return help;
+                    }
+                } catch (Exception e) {
+                    return help;
+                }
+                return "ok! (" + players[id].getStatPoints() + " stat points remaining)";
+            }
+
+            public String help(String[] cmd) {
+                return help;
+            }
+        });
     }
 
     public void startWorldDraw(Matrix4 proj) {
@@ -339,7 +372,11 @@ public class SpaceBattles extends Game {
                         )
                     );
 
-                    p.damage(proj.damageAmount);
+                    if (p.damage(proj.damageAmount)) {
+                        Player shooter = players[proj.team];
+                        float lvlDiff = p.getLevel() - shooter.getLevel();
+                        players[proj.team].gainExperience(Math.max(6 * lvlDiff + 12, 12));
+                    }
 
                     sendEvent(despawnProjectile);
                     iterator.remove();
@@ -362,7 +399,9 @@ public class SpaceBattles extends Game {
                         )
                     );
 
-                    b.damage(proj.damageAmount);
+                    if (b.damage(proj.damageAmount)) {
+                        players[proj.team].gainExperience(100);
+                    }
 
                     sendEvent(despawnProjectile);
                     iterator.remove();
@@ -386,7 +425,11 @@ public class SpaceBattles extends Game {
                         )
                     );
 
-                    a.damage(proj.damageAmount);
+                    if (a.damage(proj.damageAmount)) {
+                        players[proj.team].gainExperience(a.xp);
+                        a.randomizeAttributes();
+                        a.randomizePosition(worldBounds);
+                    }
 
                     sendEvent(despawnProjectile);
                     iterator.remove();
@@ -403,7 +446,6 @@ public class SpaceBattles extends Game {
                     Minion m = ms[i];
                     if (m == null || m.isDead()) continue;
                     if (m.getDamageArea().contains(proj.getCenter())) {
-
                         sendEvent(
                             new DamageEvent(
                                 (byte)NetConstants.MINION_ENTITY_TYPE,
@@ -413,7 +455,9 @@ public class SpaceBattles extends Game {
                             )
                         );
 
-                        m.damage(proj.damageAmount);
+                        if (m.damage(proj.damageAmount)) {
+                            players[proj.team].gainExperience(5);
+                        }
 
                         sendEvent(despawnProjectile);
                         iterator.remove();
@@ -507,7 +551,7 @@ public class SpaceBattles extends Game {
             for (int team = 0; team < MAX_PLAYERS; team++) {
                 for (int i = 0; i < MAX_MINIONS; i++) {
                     Minion m = minions[team][i];
-                    if (m == null) continue;
+                    if (m == null || m.isDead()) continue;
                     m.update(delta);
                     m.collide(map);
 

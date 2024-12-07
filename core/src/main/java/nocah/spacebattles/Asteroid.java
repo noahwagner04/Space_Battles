@@ -12,6 +12,7 @@ public class Asteroid extends Sprite implements Damageable {
     private float health;
     private SpaceBattles game;
     private Rectangle worldBounds;
+    public float xp;
 
     public Asteroid(SpaceBattles game, Rectangle worldBounds) {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
@@ -25,9 +26,18 @@ public class Asteroid extends Sprite implements Damageable {
         health = size * size * 20;
         setSize(size, size);
         setOriginCenter();
+        xp = size * size * 0.6f;
 
         Color tint = new Color(0.7f, 0.6f, 0.5f, 1);
         float brightness = SpaceBattles.random.nextFloat(0.5f, 1);
+
+        if (size > 3.85) {
+            xp *= 6;
+            health *= 3;
+            tint.g += 3f;
+            brightness = 1;
+        }
+
         setColor(
             tint.r * brightness,
             tint.g * brightness,
@@ -89,12 +99,7 @@ public class Asteroid extends Sprite implements Damageable {
     @Override
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
-        if (health <= 0) {
-            randomizeAttributes();
-            randomizePosition(worldBounds);
-            return true;
-        }
-        return false;
+        return health <= 0;
     }
 
     @Override

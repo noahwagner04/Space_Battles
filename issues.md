@@ -36,6 +36,10 @@
 - stream minion positions
 - Make minions shoot and get damaged
 - Kill minions if they manage to clip outside the world boundaries
+- Make players get xp from killing asteroids, minions, and bases
+- Implement leveling, players choose what stat to increase (like diep.io)
+- Add special xp rich asteroids
+- Fix minions spawn past cap
 
 ## Open Issues ##
 - cap players to 4

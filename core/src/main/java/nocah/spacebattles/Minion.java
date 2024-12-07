@@ -28,15 +28,15 @@ public class Minion extends Sprite implements Damageable {
     private float minFollowDist = 2f;
     private float maxFollowDist = 10f;
 
-    private float shootRange = 8f;
-    private float bulletDamage = 8f;
-    private float bulletSpeed = 3f;
-    private float shootKnockBack = 0.75f;
-    private float shootInterval = 2f;
+    private float shootRange;
+    private float bulletDamage;
+    private float bulletSpeed;
+    private float shootKnockBack;
+    private float shootInterval;
     private float shootTimer = 0;
 
-    private float maxHealth = 20f;
-    private float health = maxHealth;
+    private float maxHealth;
+    private float health;
 
     private float size = 0.6f;
 
@@ -48,6 +48,7 @@ public class Minion extends Sprite implements Damageable {
         this.team = team;
         this.id = id;
         playerLeader = game.players[team];
+        setLevel(0);
     }
 
     public void update(float delta) {
@@ -177,7 +178,7 @@ public class Minion extends Sprite implements Damageable {
         proj.team = team;
         game.projectiles.add(proj);
 
-        velocity.sub(heading.scl(shootKnockBack));
+        velocity.sub(heading.setLength(shootKnockBack));
     }
 
     public void updateRemoteMinion(float delta) {
@@ -304,5 +305,15 @@ public class Minion extends Sprite implements Damageable {
 
     public byte getTeam() {
         return team;
+    }
+    public void setLevel(int minionLevel) {
+        shootRange = 8f + minionLevel / 2f;
+        bulletDamage = 8f + minionLevel / 1.5f;
+        bulletSpeed = 3f + minionLevel / 3f;
+        shootKnockBack = Math.max(4f - minionLevel / 2f, 1f);
+        shootInterval = Math.max(2f - minionLevel / 6f, 1f);
+
+        maxHealth = 20f + minionLevel * 2f;
+        health = maxHealth;
     }
 }

@@ -9,20 +9,19 @@ import com.badlogic.gdx.math.*;
 import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.ShootEvent;
 
-import java.net.Socket;
-import java.util.Random;
-
 public class Player extends Sprite implements Damageable {
+    enum Stat { DEFENCE, ATTACK, SPEED, BASE_DEFENCE, MINIONS };
+
     private SpaceBattles game;
     public byte id;
 
     public Vector2 velocity = new Vector2(0, 0);
-    private float maxSpeed = 6;
-    private float acceleration = 12;
+    private float maxSpeed = 5;
+    private float acceleration = 10;
     private float friction = 4;
 
     public float rotVelocity = 0;
-    private float maxRotSpeed = 270;
+    private float maxRotSpeed = 200;
     private float rotAcceleration = 360 * 4;
     private float rotFriction = 360 * 2;
 
@@ -40,6 +39,10 @@ public class Player extends Sprite implements Damageable {
     private float health = 100;
     private float maxHealth = 100;
 
+    private float experience = 0;
+    private int level = 0;
+    private int statPoints = 0;
+
     private boolean spectating = false;
 
     public Player(SpaceBattles game, byte id) {
@@ -50,6 +53,70 @@ public class Player extends Sprite implements Damageable {
         setOriginCenter();
         setupParticleEffect(game);
         setCenter(0, 0);
+    }
+
+    public void gainExperience(float xp) {
+        if (level >= 10) return;
+        experience += xp;
+        while (experience >= xpThreshold(level)) {
+            levelUp();
+        }
+    }
+
+    private void levelUp() {
+        experience -= xpThreshold(level);
+        level++;
+        statPoints += (int)Math.max(level * 0.5, 1);
+        if (level >= 10) {
+            System.out.println("Max Level 10! (second ability unlock)");
+        } else if (level == 5){
+            System.out.println("Level 5! (first ability unlock)");
+        } else {
+            System.out.println("Level " + level + "!");
+        }
+    }
+
+    public void upgradeStat(Stat s) {
+        if (statPoints <= 0) {
+            statPoints = 0;
+            System.out.println("No stat points to spend!");
+            return;
+        }
+
+        statPoints--;
+
+        switch (s) {
+            case DEFENCE:
+                health += 15;
+                maxHealth += 15;
+                shootKnockBack -= shootKnockBack * 0.05f;
+                break;
+            case SPEED:
+                maxSpeed += 0.25f;
+                acceleration += 1.5f;
+                friction += 0.8f;
+                maxRotSpeed += 8;
+                rotAcceleration += 150;
+                rotFriction += 80;
+                break;
+            case ATTACK:
+                bulletDamage += 4;
+                bulletSpeed += 0.25f;
+                bulletSpeed = Math.min(bulletSpeed, 15f);
+                bulletCoolDown -= bulletCoolDown * 0.08f;
+                bulletCoolDown = Math.max(bulletCoolDown, 0.45f);
+                break;
+            case BASE_DEFENCE:
+                game.bases[id].upgradeDefence();
+                break;
+            case MINIONS:
+                game.bases[id].upgradeMinions();
+                break;
+        }
+    }
+
+    private float xpThreshold(float level) {
+        return (float)(10 * Math.pow(1.25f, level - 1));
     }
 
     public void update(float delta) {
@@ -384,5 +451,13 @@ public class Player extends Sprite implements Damageable {
 
     public Circle getOutCircle() {
         return new Circle(getCenter(), size / 2);
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getStatPoints() {
+        return statPoints;
     }
 }
