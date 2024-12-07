@@ -40,10 +40,11 @@
 - Implement leveling, players choose what stat to increase (like diep.io)
 - Add special xp rich asteroids
 - Fix minions spawn past cap
+- have server explicitly call stop listening
+- Add buttons for starting / joining game
 
 ## Open Issues ##
 - cap players to 4
 - check for client / server instance through bool 
-- have server explicitly call stop listening
 - on disconnect, remove all data associated with player (minions, bases, score, etc.)
 

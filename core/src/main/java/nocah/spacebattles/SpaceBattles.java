@@ -375,7 +375,7 @@ public class SpaceBattles extends Game {
                     if (p.damage(proj.damageAmount)) {
                         Player shooter = players[proj.team];
                         float lvlDiff = p.getLevel() - shooter.getLevel();
-                        players[proj.team].gainExperience(Math.max(6 * lvlDiff + 12, 12));
+                        shooter.gainExperience(Math.max(6 * lvlDiff + 12, 12));
                     }
 
                     sendEvent(despawnProjectile);
@@ -428,7 +428,7 @@ public class SpaceBattles extends Game {
                     if (a.damage(proj.damageAmount)) {
                         players[proj.team].gainExperience(a.xp);
                         a.randomizeAttributes();
-                        a.randomizePosition(worldBounds);
+                        a.randomizePosition();
                     }
 
                     sendEvent(despawnProjectile);

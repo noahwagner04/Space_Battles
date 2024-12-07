@@ -35,12 +35,6 @@ public class HandlerRegistry {
         clientMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
             game.gameStarted = true;
         });
-        // this is never called for main client
-        serverMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
-            handleClientEvent(event);
-            game.server.broadcastEvent(event);
-            game.server.stopListening();
-        });
 
         clientMap.put(NetConstants.SPAWN_PLAYER_EVENT_ID, (event) -> {
             SpawnEvent e = (SpawnEvent) event;
@@ -142,7 +136,11 @@ public class HandlerRegistry {
                     }
                     break;
                 case NetConstants.ASTEROID_ENTITY_TYPE:
-                    game.asteroids[e.entityId].damage(e.damageAmount);
+                    Asteroid a = game.asteroids[e.entityId];
+                    if (a.damage(e.damageAmount)) {
+                        a.randomizeAttributes();
+                        a.randomizePosition();
+                    }
                     break;
                 case NetConstants.BASE_ENTITY_TYPE:
                     game.bases[e.entityId].damage(e.damageAmount);

@@ -3,13 +3,22 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.SpawnEvent;
+import nocah.spacebattles.netevents.StartGameEvent;
 
 public class LobbyScreen extends ScreenAdapter {
     private SpaceBattles game;
     private Camera camera;
+    private Stage stage;
+    private Skin skin;
 
     private Rectangle lobbyBounds = new Rectangle(-6, -6, 12, 12);
 
@@ -20,7 +29,29 @@ public class LobbyScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        System.out.println("Show LobbyScreen");
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.bottom();
+        stage.addActor(table);
+
+        TextButton startButton = new TextButton("Start Game", skin);
+        startButton.setSize(100, 25);
+        startButton.getLabel().setFontScale(1.5f);
+        startButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                if (game.server != null) {
+                    game.sendEvent(new StartGameEvent());
+                    game.gameStarted = true;
+                }
+            }
+        });
+        table.add(startButton).pad(20).width(300).height(80);
         game.sendEvent(new SpawnEvent(game.id));
     }
 
@@ -38,6 +69,7 @@ public class LobbyScreen extends ScreenAdapter {
 
         if (game.gameStarted) {
             game.setScreen(new ArenaScreen(game));
+            if (game.server != null) game.server.stopListening();
         }
         game.updateProjectiles(delta, null, lobbyBounds);
     }
@@ -45,14 +77,30 @@ public class LobbyScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         update(delta);
+
         game.startWorldDraw(camera.getProjMat());
         ScreenUtils.clear(0f, 0f, 0f, 1f);
         game.drawSprites(game.players);
         game.drawSprites(game.projectiles);
         game.endWorldDraw();
 
+        if (game.server != null) {
+            stage.act(delta);
+            stage.draw();
+        }
         game.batch.begin();
         game.hud.draw(game.batch);
         game.batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
+    @Override
+    public void hide() {
+        stage.dispose();
+        skin.dispose();
     }
 }

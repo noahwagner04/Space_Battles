@@ -18,7 +18,7 @@ public class Asteroid extends Sprite implements Damageable {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
         this.worldBounds = worldBounds;
         randomizeAttributes();
-        randomizePosition(worldBounds);
+        randomizePosition();
     }
 
     public void randomizeAttributes() {
@@ -50,7 +50,7 @@ public class Asteroid extends Sprite implements Damageable {
         this.rotationSpeed = SpaceBattles.random.nextFloat() * 90;
     }
 
-    public void randomizePosition(Rectangle worldBounds) {
+    public void randomizePosition() {
         float x = SpaceBattles.random.nextFloat(worldBounds.x, worldBounds.width);
         float y = SpaceBattles.random.nextFloat(worldBounds.y, worldBounds.height);
         setPosition(x, y);
