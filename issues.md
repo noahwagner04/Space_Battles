@@ -47,6 +47,7 @@
 
 ## Open Issues ##
 - Finish game loop (add win condition / win & lose screen)
+- Make players, bases, and minions different colors
 - Add UI (Health bars, upgrade buttons, etc.)
 - Add Health Regen
 - Add better Art & sound effects

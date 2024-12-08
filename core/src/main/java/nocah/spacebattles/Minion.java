@@ -60,7 +60,8 @@ public class Minion extends Sprite implements Damageable {
 
         if (toPlayer.len() > minFollowDist &&
             toPlayer.len() < maxFollowDist &&
-            !playerLeader.isSpectating()) {
+            !playerLeader.isSpectating() &&
+            !playerLeader.isInvisible) {
             velocity.add(toPlayer.setLength(acceleration).scl(delta));
         } else {
             applyFriction = true;
@@ -97,7 +98,7 @@ public class Minion extends Sprite implements Damageable {
         float shortestDst = Float.MAX_VALUE;
 
         for (Player p : game.players) {
-            if (p == null || p == game.players[team] || p.isSpectating()) continue;
+            if (p == null || p == game.players[team] || p.isSpectating() || p.isInvisible) continue;
             float dst = p.getCenter().dst(getCenter());
             if (dst < shootRange && dst < shortestDst) {
                 target = p.getCenter();
