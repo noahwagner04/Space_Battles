@@ -31,7 +31,7 @@ public class Asteroid extends Sprite implements Damageable {
         Color tint = new Color(0.7f, 0.6f, 0.5f, 1);
         float brightness = SpaceBattles.random.nextFloat(0.5f, 1);
 
-        if (size > 3.85) {
+        if (size > 3.9) {
             xp *= 6;
             health *= 3;
             tint.g += 3f;

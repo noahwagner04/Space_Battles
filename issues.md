@@ -42,8 +42,14 @@
 - Fix minions spawn past cap
 - have server explicitly call stop listening
 - Add buttons for starting / joining game
+- Add the 5 player abilities (Dash, rapid fire, bomb, force field, invisibility)
 
 ## Open Issues ##
+- Finish game loop (add win condition / win & lose screen)
+- Add UI (Health bars, upgrade buttons, etc.)
+- Add Health Regen
+- Add better Art & sound effects
+- Add HUD cheat-codes
 - cap players to 4
 - check for client / server instance through bool 
 - on disconnect, remove all data associated with player (minions, bases, score, etc.)

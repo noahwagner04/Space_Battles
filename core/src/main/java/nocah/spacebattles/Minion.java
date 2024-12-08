@@ -307,13 +307,13 @@ public class Minion extends Sprite implements Damageable {
         return team;
     }
     public void setLevel(int minionLevel) {
-        shootRange = 8f + minionLevel / 2f;
-        bulletDamage = 8f + minionLevel / 1.5f;
-        bulletSpeed = 3f + minionLevel / 3f;
-        shootKnockBack = Math.max(4f - minionLevel / 2f, 1f);
-        shootInterval = Math.max(2f - minionLevel / 6f, 1f);
+        shootRange = 8f + minionLevel / 4f;
+        bulletDamage = 8f + minionLevel / 4f;
+        bulletSpeed = 3f + minionLevel / 8f;
+        shootKnockBack = Math.max(4f - minionLevel / 8f, 1f);
+        shootInterval = Math.max(2f - minionLevel / 24f, 1f);
 
-        maxHealth = 20f + minionLevel * 2f;
+        maxHealth = 20f + minionLevel * 1.5f;
         health = maxHealth;
     }
 }

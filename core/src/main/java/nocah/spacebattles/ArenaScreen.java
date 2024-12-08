@@ -56,6 +56,7 @@ public class ArenaScreen extends ScreenAdapter {
         game.updateProjectiles(delta, map, worldBounds);
         game.updateAsteroids(delta, worldBounds);
         game.updateMinions(delta, map, worldBounds);
+        game.updateBombs(delta);
     }
 
     @Override
@@ -68,11 +69,12 @@ public class ArenaScreen extends ScreenAdapter {
         mapRenderer.render();
         game.drawSprites(game.players);
         game.drawSprites(game.projectiles);
-        game.drawSprites(game.asteroids);
         game.drawSprites(game.bases);
         for(int i = 0; i < SpaceBattles.MAX_PLAYERS; i++) {
             game.drawSprites(game.minions[i]);
         }
+        game.drawSprites(game.bombs);
+        game.drawSprites(game.asteroids);
         game.endWorldDraw();
 
         game.batch.begin();

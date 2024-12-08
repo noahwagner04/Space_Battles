@@ -51,6 +51,8 @@ public class SpaceBattles extends Game {
     public Asteroid[] asteroids = new Asteroid[MAX_ASTEROIDS];
     public Minion[][] minions = new Minion[MAX_PLAYERS][MAX_MINIONS];
 
+    public ArrayList<Bomb> bombs = new ArrayList<>();
+
     public HUD hud;
 
     SpriteBatch batch;
@@ -213,6 +215,55 @@ public class SpaceBattles extends Game {
                 return help;
             }
         });
+
+        SpaceBattles self = this;
+        hud.registerAction("unlock", new HUDActionCommand() {
+            static final String help = "unlock <dash, rapid_fire, bomb, force_field, invisibility> (no repeats!)";
+
+            @Override
+            public String execute(String[] cmd) {
+                Player p = players[id];
+                if (!p.unlockAbility1) {
+                    return "Too low level! (next ability unlock at level 5)";
+                }
+
+                if (p.ability1 != null && !p.unlockAbility2) {
+                    return "Too low level! (next ability unlock at level 10)";
+                }
+
+                if (p.ability2 != null) {
+                    return "Max number of abilities is unlocked!";
+                }
+
+                try {
+                    if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
+                        if (p.ability1 == null) p.ability1 = new Dash(p, self);
+                        else p.ability2 = new Dash(p, self);
+                    } else if (cmd[1].contentEquals("rapid_fire") && !(p.ability1 instanceof RapidFire)) {
+                        if (p.ability1 == null) p.ability1 = new RapidFire(p, self);
+                        else p.ability2 = new RapidFire(p, self);
+                    } else if (cmd[1].contentEquals("bomb") && !(p.ability1 instanceof BombDeploy)) {
+                        if (p.ability1 == null) p.ability1 = new BombDeploy(p, self);
+                        else p.ability2 = new BombDeploy(p, self);
+                    } else if (cmd[1].contentEquals("force_field") && !(p.ability1 instanceof ForceField)) {
+                        if (p.ability1 == null) p.ability1 = new ForceField(p, self);
+                        else p.ability2 = new ForceField(p, self);
+                    } else if (cmd[1].contentEquals("invisibility") && !(p.ability1 instanceof Invisibility)) {
+                        if (p.ability1 == null) p.ability1 = new Invisibility(p, self);
+                        else p.ability2 = new Invisibility(p, self);
+                    } else {
+                        return help;
+                    }
+                } catch (Exception e) {
+                    return help;
+                }
+                return "ok!";
+            }
+
+            public String help(String[] cmd) {
+                return help;
+            }
+        });
     }
 
     public void startWorldDraw(Matrix4 proj) {
@@ -362,6 +413,15 @@ public class SpaceBattles extends Game {
 
             for (Player p : players) {
                 if (p == null || p.id == proj.team || p.isSpectating()) continue;
+
+                Circle forceFieldCircle = new Circle(p.getCenter(), ForceField.RADIUS);
+                if (p.isInvincible && forceFieldCircle.contains(proj.getCenter())) {
+                    sendEvent(despawnProjectile);
+                    iterator.remove();
+                    removed = true;
+                    break;
+                }
+
                 if (p.getDamageArea().contains(proj.getCenter())) {
                     sendEvent(
                         new DamageEvent(
@@ -599,6 +659,18 @@ public class SpaceBattles extends Game {
                 Minion minion = minions[team][i];
                 if (minion == null) continue;
                 minion.updateRemoteMinion(delta);
+            }
+        }
+    }
+
+    public void updateBombs(float delta) {
+        Iterator<Bomb> iterator = bombs.iterator();
+        while (iterator.hasNext()) {
+            Bomb b = iterator.next();
+            if (!b.hasDetonated) {
+                b.update(delta);
+            } else {
+                iterator.remove();
             }
         }
     }

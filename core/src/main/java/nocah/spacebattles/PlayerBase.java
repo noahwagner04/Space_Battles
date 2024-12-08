@@ -19,7 +19,7 @@ public class PlayerBase extends Sprite implements Damageable {
 
     private boolean respawnQueued = false;
     private float respawnTimer = 0;
-    private float respawnInterval = 5;
+    private float respawnInterval = 8;
 
     private int maxMinionCount = 5;
     public int minionCount = 0;

@@ -16,32 +16,41 @@ public class Player extends Sprite implements Damageable {
     public byte id;
 
     public Vector2 velocity = new Vector2(0, 0);
-    private float maxSpeed = 5;
-    private float acceleration = 10;
-    private float friction = 4;
+    public float maxSpeed = 5;
+    public float acceleration = 10;
+    public float friction = 4;
 
     public float rotVelocity = 0;
-    private float maxRotSpeed = 200;
-    private float rotAcceleration = 360 * 4;
-    private float rotFriction = 360 * 2;
+    public float maxRotSpeed = 200;
+    public float rotAcceleration = 360 * 4;
+    public float rotFriction = 360 * 2;
 
     private float size = 1;
-    private ParticleEffect effect;
+    public ParticleEffect effect;
 
     private float bulletDamage = 30;
     private float bulletSpeed = 10;
-    private float bulletCoolDown = 1f;
+    public float bulletCoolDown = 1f;
     private float shootTimer = 0;
-    private float shootKnockBack = 2f;
+    public float shootKnockBack = 2f;
+    public boolean fireGun = false;
 
     public byte thrustAnimationState = 2;
 
-    private float health = 100;
-    private float maxHealth = 100;
+    private float health = 80;
+    private float maxHealth = 80;
+
+    public boolean isInvincible = false;
+    public boolean isInvisible = false;
 
     private float experience = 0;
     private int level = 0;
     private int statPoints = 0;
+
+    public Ability ability1;
+    public Ability ability2;
+    public boolean unlockAbility1 = false;
+    public boolean unlockAbility2 = false;
 
     private boolean spectating = false;
 
@@ -69,8 +78,10 @@ public class Player extends Sprite implements Damageable {
         statPoints += (int)Math.max(level * 0.5, 1);
         if (level >= 10) {
             System.out.println("Max Level 10! (second ability unlock)");
+            unlockAbility2 = true;
         } else if (level == 5){
             System.out.println("Level 5! (first ability unlock)");
+            unlockAbility1 = true;
         } else {
             System.out.println("Level " + level + "!");
         }
@@ -92,17 +103,16 @@ public class Player extends Sprite implements Damageable {
                 shootKnockBack -= shootKnockBack * 0.05f;
                 break;
             case SPEED:
-                maxSpeed += 0.25f;
+                maxSpeed += 0.15f;
                 acceleration += 1.5f;
                 friction += 0.8f;
-                maxRotSpeed += 8;
+                maxRotSpeed += 6;
                 rotAcceleration += 150;
                 rotFriction += 80;
                 break;
             case ATTACK:
-                bulletDamage += 4;
+                bulletDamage += 2;
                 bulletSpeed += 0.25f;
-                bulletSpeed = Math.min(bulletSpeed, 15f);
                 bulletCoolDown -= bulletCoolDown * 0.08f;
                 bulletCoolDown = Math.max(bulletCoolDown, 0.45f);
                 break;
@@ -131,7 +141,23 @@ public class Player extends Sprite implements Damageable {
         updatePosition(delta);
         updateParticleEffect(delta);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && shootTimer > bulletCoolDown) {
+        if (ability1 != null) {
+            ability1.update(delta);
+        }
+
+        if (ability2 != null) {
+            ability2.update(delta);
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.Q) && ability1 != null) {
+            ability1.activate();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.E) && ability2 != null) {
+            ability2.activate();
+        }
+
+        if ((Gdx.input.isKeyPressed(Input.Keys.SPACE) || fireGun) && shootTimer > bulletCoolDown) {
             shootTimer = 0;
             if(game.server != null) {
                 int bullet_id = game.getBulletID();
@@ -194,8 +220,17 @@ public class Player extends Sprite implements Damageable {
 
     @Override
     public void draw(Batch batch) {
+        if (isSpectating()) return;
+        if (this != game.players[game.id] && isInvisible) return;
         super.draw(batch);
-        effect.draw(batch);
+        if (!isInvisible) effect.draw(batch);
+        if (isInvincible) {
+            float radius = ForceField.RADIUS;
+            Vector2 pos = getCenter().sub(radius, radius);
+            batch.setColor(0.5f, 1, 1, 0.25f);
+            batch.draw(game.getEntity(SpaceBattles.RSC_CIRCLE_IMG), pos.x, pos.y, radius * 2, radius * 2);
+            batch.setColor(1, 1, 1, 1);
+        }
     }
 
     public void constrain(Rectangle bounds) {
@@ -394,6 +429,7 @@ public class Player extends Sprite implements Damageable {
 
     @Override
     public boolean damage(float amount) {
+        if (isInvincible) return false;
         health -= Math.max(amount, 0);
         if (health <= 0) {
             if (!game.gameStarted) {
@@ -422,10 +458,7 @@ public class Player extends Sprite implements Damageable {
 
     public void setSpectating(boolean isSpectator) {
         if (isSpectator) {
-            setAlpha(0);
             effect.allowCompletion();
-        } else {
-            setAlpha(1);
         }
         this.spectating = isSpectator;
     }
