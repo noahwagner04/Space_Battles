@@ -25,7 +25,7 @@ public class PlayerBase extends Sprite implements Damageable {
     public int minionCount = 0;
     private float minionSpawnTimer = 0;
     private float minionSpawnInterval = 5;
-    private int minionLevel = 0;
+    public int minionLevel = 0;
 
     private int team;
 
@@ -65,7 +65,7 @@ public class PlayerBase extends Sprite implements Damageable {
         pos.add(getCenter());
         m.setCenter(pos.x, pos.y);
         m.revive();
-        m.setLevel(minionLevel);
+        m.setStats(minionLevel);
     }
 
     public Vector2 getCenter() {
@@ -121,9 +121,13 @@ public class PlayerBase extends Sprite implements Damageable {
 
     public void upgradeMinions() {
         minionLevel++;
-        minionSpawnInterval -= minionSpawnTimer * 0.1f;
-        if (maxMinionCount < SpaceBattles.MAX_MINIONS && minionLevel % 2 == 0) {
+        minionSpawnInterval -= minionSpawnTimer * 0.05f;
+        if (maxMinionCount < SpaceBattles.MAX_MINIONS && minionLevel % 3 == 0) {
             maxMinionCount++;
+        }
+        for(Minion m : game.minions[team]) {
+            if (m == null) continue;
+            m.setStats(minionLevel);
         }
     }
 }

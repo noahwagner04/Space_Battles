@@ -88,9 +88,6 @@ public class LobbyScreen extends ScreenAdapter {
             stage.act(delta);
             stage.draw();
         }
-        game.batch.begin();
-        game.hud.draw(game.batch);
-        game.batch.end();
     }
 
     @Override

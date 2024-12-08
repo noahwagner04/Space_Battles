@@ -10,7 +10,12 @@ import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.ShootEvent;
 
 public class Player extends Sprite implements Damageable {
-    enum Stat { DEFENCE, ATTACK, SPEED, BASE_DEFENCE, MINIONS };
+    public static final byte DEFENCE = 0;
+    public static final byte ATTACK = 1;
+    public static final byte SPEED = 2;
+    public static final byte BASE_DEFENCE = 3;
+    public static final byte MINIONS = 4;
+
 
     private SpaceBattles game;
     public byte id;
@@ -87,7 +92,7 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    public void upgradeStat(Stat s) {
+    public void upgradeStat(int s) {
         if (statPoints <= 0) {
             statPoints = 0;
             System.out.println("No stat points to spend!");

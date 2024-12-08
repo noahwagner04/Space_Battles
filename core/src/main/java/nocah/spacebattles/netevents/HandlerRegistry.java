@@ -66,6 +66,7 @@ public class HandlerRegistry {
             } else {
                 if (game.minions[e.playerID][e.minionID] == null) {
                     game.minions[e.playerID][e.minionID] = new Minion(game, e.playerID, e.minionID);
+                    game.minions[e.playerID][e.minionID].setStats(game.bases[e.playerID].minionLevel);
                 }
 
                 Minion minion = game.minions[e.playerID][e.minionID];
@@ -73,7 +74,6 @@ public class HandlerRegistry {
                 if (minion.isDead()) {
                     minion.revive();
                 }
-
                 minion.setX(e.x);
                 minion.setY(e.y);
                 minion.velocity.x = e.xVel;
@@ -123,7 +123,13 @@ public class HandlerRegistry {
             DamageEvent e = (DamageEvent) event;
             switch(e.entityType) {
                 case NetConstants.PLAYER_ENTITY_TYPE:
-                    game.players[e.entityId].damage(e.damageAmount);
+                    Player p = game.players[e.entityId];
+
+                    if (p.damage(e.damageAmount)) {
+                        Player shooter = game.players[e.damagerID];
+                        float lvlDiff = p.getLevel() - shooter.getLevel();
+                        shooter.gainExperience(Math.max(6 * lvlDiff + 12, 12));
+                    }
                     break;
                 case NetConstants.PROJECTILE_ENTITY_TYPE:
                     // this essentially acts as a way to despawn the projectiles
@@ -138,17 +144,22 @@ public class HandlerRegistry {
                 case NetConstants.ASTEROID_ENTITY_TYPE:
                     Asteroid a = game.asteroids[e.entityId];
                     if (a.damage(e.damageAmount)) {
+                        game.players[e.damagerID].gainExperience(a.xp);
                         a.randomizeAttributes();
                         a.randomizePosition();
                     }
                     break;
                 case NetConstants.BASE_ENTITY_TYPE:
-                    game.bases[e.entityId].damage(e.damageAmount);
+                    if(game.bases[e.entityId].damage(e.damageAmount)) {
+                        game.players[e.damagerID].gainExperience(100);
+                    }
                     break;
                 case NetConstants.MINION_ENTITY_TYPE:
                     byte team = (byte)(e.entityId / SpaceBattles.MAX_MINIONS);
                     byte minion = (byte)(e.entityId % SpaceBattles.MAX_MINIONS);
-                    game.minions[team][minion].damage(e.damageAmount);
+                    if(game.minions[team][minion].damage(e.damageAmount)) {
+                        game.players[e.damagerID].gainExperience(5);
+                    }
                     break;
             }
         });
@@ -156,6 +167,16 @@ public class HandlerRegistry {
             handleClientEvent(event);
             DamageEvent e = (DamageEvent) event;
             game.server.broadcastExcept(e, e.entityId);
+        });
+
+        clientMap.put(NetConstants.UPGRADE_EVENT_ID, (event) -> {
+            UpgradeEvent e = (UpgradeEvent) event;
+            game.players[e.playerID].upgradeStat(e.upgradeID);
+        });
+        serverMap.put(NetConstants.UPGRADE_EVENT_ID, (event) -> {
+            handleClientEvent(event);
+            UpgradeEvent e = (UpgradeEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
         });
     }
 

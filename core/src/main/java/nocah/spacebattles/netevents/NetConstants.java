@@ -9,6 +9,7 @@ public class NetConstants {
     public static final int DISCONNECT_EVENT_ID = 6;
     public static final int SHOOT_EVENT_ID = 7;
     public static final int DAMAGE_EVENT_ID = 8;
+    public static final int UPGRADE_EVENT_ID = 9;
 
     public static final int PLAYER_ENTITY_TYPE = 1;
     public static final int MINION_ENTITY_TYPE = 2;

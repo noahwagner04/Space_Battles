@@ -43,6 +43,7 @@
 - have server explicitly call stop listening
 - Add buttons for starting / joining game
 - Add the 5 player abilities (Dash, rapid fire, bomb, force field, invisibility)
+- network xp and upgrades
 
 ## Open Issues ##
 - Finish game loop (add win condition / win & lose screen)

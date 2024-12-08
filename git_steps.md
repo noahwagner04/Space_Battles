@@ -1,4 +1,4 @@
-# Steps for contributing
+add# Steps for contributing
 ### 1. Download the repository
 ```bash
 git clone git@github.com:noahwagner04/Space_Battles.git

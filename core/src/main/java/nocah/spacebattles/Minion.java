@@ -48,7 +48,7 @@ public class Minion extends Sprite implements Damageable {
         this.team = team;
         this.id = id;
         playerLeader = game.players[team];
-        setLevel(0);
+        setStats(0);
     }
 
     public void update(float delta) {
@@ -306,13 +306,12 @@ public class Minion extends Sprite implements Damageable {
     public byte getTeam() {
         return team;
     }
-    public void setLevel(int minionLevel) {
+    public void setStats(int minionLevel) {
         shootRange = 8f + minionLevel / 4f;
         bulletDamage = 8f + minionLevel / 4f;
         bulletSpeed = 3f + minionLevel / 8f;
         shootKnockBack = Math.max(4f - minionLevel / 8f, 1f);
         shootInterval = Math.max(2f - minionLevel / 24f, 1f);
-
         maxHealth = 20f + minionLevel * 1.5f;
         health = maxHealth;
     }

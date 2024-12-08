@@ -53,8 +53,6 @@ public class SpaceBattles extends Game {
 
     public ArrayList<Bomb> bombs = new ArrayList<>();
 
-    public HUD hud;
-
     SpriteBatch batch;
     AssetManager am;
 
@@ -68,7 +66,6 @@ public class SpaceBattles extends Game {
     public void create() {
         am = new AssetManager();
         batch = new SpriteBatch();
-        hud = new HUD(new BitmapFont());
         int fb_w = (int)(Gdx.graphics.getWidth() * res);
         int fb_h = (int)(Gdx.graphics.getHeight() * res);
         frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, fb_w, fb_h, false);
@@ -82,188 +79,6 @@ public class SpaceBattles extends Game {
         am.load(SpaceBattles.RSC_TILED_MAP, TiledMap.class);
 
         setScreen(new LoadScreen(this));
-
-        name = "default_name";
-        SpaceBattles game = this;
-        hud.registerAction("server", new HUDActionCommand() {
-            static final String help = "creates server to listen for clients, and connects this client to it";
-
-            @Override
-            public String execute(String[] cmd) {
-                try {
-                    if (server != null) return "server already hosting";
-                    server = new Server();
-                    server.startServer(game);
-                    //spawn in a new client
-                    handlers.handleClientEvent(new SpawnEvent((byte)0));
-                    connected = true;
-                    return "ok!";
-                } catch (Exception e) {
-                    return help;
-                }
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("join", new HUDActionCommand() {
-            static final String help = "used to join server: join <server ip>";
-
-            @Override
-            public String execute(String[] cmd) {
-                try {
-                    if (client != null) return "client already connected";
-                    client = new Client(cmd[1]);
-                    return "ok!";
-                } catch (Exception e) {
-                    return help;
-                }
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("send", new HUDActionCommand() {
-            static final String help = "used to send string to server: send <string>";
-
-            @Override
-            public String execute(String[] cmd) {
-                try {
-                    sendEvent(new ChatEvent(name, cmd[1]));
-                    return "ok!";
-                } catch (Exception e) {
-                    return help;
-                }
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("name", new HUDActionCommand() {
-            static final String help = "used to set name: name <string>";
-
-            @Override
-            public String execute(String[] cmd) {
-                try {
-                    name = cmd[1];
-                    return "ok!";
-                } catch (Exception e) {
-                    return help;
-                }
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("start", new HUDActionCommand() {
-            static final String help = "used to start game if you're the host";
-
-            @Override
-            public String execute(String[] cmd) {
-                try {
-                    if (server == null) return "only the host can start a game!";
-                    sendEvent(new StartGameEvent());
-                    gameStarted = true;
-                    return "ok!";
-                } catch (Exception e) {
-                    return help;
-                }
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("upgrade", new HUDActionCommand() {
-            static final String help = "upgrade <defence, attack, speed, base_defence, minions>";
-
-            @Override
-            public String execute(String[] cmd) {
-                if (players[id].getStatPoints() == 0) {
-                    return "No stat points to spend!";
-                }
-                try {
-                    if (cmd[1].contentEquals("defence")) {
-                        players[id].upgradeStat(Player.Stat.DEFENCE);
-                    } else if (cmd[1].contentEquals("attack")) {
-                        players[id].upgradeStat(Player.Stat.ATTACK);
-                    } else if (cmd[1].contentEquals("speed")) {
-                        players[id].upgradeStat(Player.Stat.SPEED);
-                    } else if (cmd[1].contentEquals("base_defence")) {
-                        players[id].upgradeStat(Player.Stat.BASE_DEFENCE);
-                    } else if (cmd[1].contentEquals("minions")) {
-                        players[id].upgradeStat(Player.Stat.MINIONS);
-                    } else {
-                        return help;
-                    }
-                } catch (Exception e) {
-                    return help;
-                }
-                return "ok! (" + players[id].getStatPoints() + " stat points remaining)";
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        SpaceBattles self = this;
-        hud.registerAction("unlock", new HUDActionCommand() {
-            static final String help = "unlock <dash, rapid_fire, bomb, force_field, invisibility> (no repeats!)";
-
-            @Override
-            public String execute(String[] cmd) {
-                Player p = players[id];
-                if (!p.unlockAbility1) {
-                    return "Too low level! (next ability unlock at level 5)";
-                }
-
-                if (p.ability1 != null && !p.unlockAbility2) {
-                    return "Too low level! (next ability unlock at level 10)";
-                }
-
-                if (p.ability2 != null) {
-                    return "Max number of abilities is unlocked!";
-                }
-
-                try {
-                    if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
-                        if (p.ability1 == null) p.ability1 = new Dash(p, self);
-                        else p.ability2 = new Dash(p, self);
-                    } else if (cmd[1].contentEquals("rapid_fire") && !(p.ability1 instanceof RapidFire)) {
-                        if (p.ability1 == null) p.ability1 = new RapidFire(p, self);
-                        else p.ability2 = new RapidFire(p, self);
-                    } else if (cmd[1].contentEquals("bomb") && !(p.ability1 instanceof BombDeploy)) {
-                        if (p.ability1 == null) p.ability1 = new BombDeploy(p, self);
-                        else p.ability2 = new BombDeploy(p, self);
-                    } else if (cmd[1].contentEquals("force_field") && !(p.ability1 instanceof ForceField)) {
-                        if (p.ability1 == null) p.ability1 = new ForceField(p, self);
-                        else p.ability2 = new ForceField(p, self);
-                    } else if (cmd[1].contentEquals("invisibility") && !(p.ability1 instanceof Invisibility)) {
-                        if (p.ability1 == null) p.ability1 = new Invisibility(p, self);
-                        else p.ability2 = new Invisibility(p, self);
-                    } else {
-                        return help;
-                    }
-                } catch (Exception e) {
-                    return help;
-                }
-                return "ok!";
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
     }
 
     public void startWorldDraw(Matrix4 proj) {
@@ -359,6 +174,7 @@ public class SpaceBattles extends Game {
             sendEvent(new DamageEvent(
                 (byte)NetConstants.PLAYER_ENTITY_TYPE,
                 id,
+                id,
                 damageAmount,
                 a.getHealth()
             ));
@@ -394,6 +210,7 @@ public class SpaceBattles extends Game {
 
             DamageEvent despawnProjectile = new DamageEvent(
                 (byte)NetConstants.PROJECTILE_ENTITY_TYPE,
+                (byte) proj.team,
                 proj.getID(),
                 0,
                 0
@@ -426,6 +243,7 @@ public class SpaceBattles extends Game {
                     sendEvent(
                         new DamageEvent(
                             (byte)NetConstants.PLAYER_ENTITY_TYPE,
+                            (byte)proj.team,
                             p.id,
                             proj.damageAmount,
                             p.getHealth()
@@ -453,6 +271,7 @@ public class SpaceBattles extends Game {
                     sendEvent(
                         new DamageEvent(
                             (byte)NetConstants.BASE_ENTITY_TYPE,
+                            (byte) proj.team,
                             i,
                             proj.damageAmount,
                             b.getHealth()
@@ -479,6 +298,7 @@ public class SpaceBattles extends Game {
                     sendEvent(
                         new DamageEvent(
                             (byte)NetConstants.ASTEROID_ENTITY_TYPE,
+                            (byte) proj.team,
                             i,
                             proj.damageAmount,
                             a.getHealth()
@@ -509,6 +329,7 @@ public class SpaceBattles extends Game {
                         sendEvent(
                             new DamageEvent(
                                 (byte)NetConstants.MINION_ENTITY_TYPE,
+                                (byte) proj.team,
                                 i + (m.getTeam() * MAX_MINIONS),
                                 proj.damageAmount,
                                 m.getHealth()

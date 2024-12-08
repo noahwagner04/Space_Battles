@@ -83,11 +83,6 @@ public class MainMenuScreen extends ScreenAdapter {
         // Draw Stage
         stage.act(delta);
         stage.draw();
-
-        // Draw HUD
-        game.batch.begin();
-        game.hud.draw(game.batch);
-        game.batch.end();
     }
 
     @Override
