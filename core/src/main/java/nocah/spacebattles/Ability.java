@@ -1,6 +1,17 @@
 package nocah.spacebattles;
 
+import nocah.spacebattles.netevents.AbilityEvent;
+
 public class Ability {
+    public static final byte BOMB = 1;
+    public static final byte DASH = 2;
+    public static final byte FORCE_FIELD = 3;
+    public static final byte INVISIBILITY = 4;
+    public static final byte RAPID_FIRE = 5;
+
+    byte abilityID;
+    byte abilityNum;
+
     Player player;
     SpaceBattles game;
 
@@ -48,12 +59,14 @@ public class Ability {
         if (!isReady || isActive) return;
         isActive = true;
         onActivate();
+        game.sendEvent(new AbilityEvent(player.id, abilityID, abilityNum, (byte)1));
     }
 
     public void deactivate() {
         if (!isActive) return;
         isActive = false;
         onDeactivate();
+        game.sendEvent(new AbilityEvent(player.id, abilityID, abilityNum, (byte)0));
     }
 
     public void onActivate() {

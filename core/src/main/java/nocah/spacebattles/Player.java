@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
+import nocah.spacebattles.netevents.AbilityEvent;
 import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.ShootEvent;
 
@@ -188,10 +189,10 @@ public class Player extends Sprite implements Damageable {
             shootTimer = 0;
             if(game.server != null) {
                 int bullet_id = game.getBulletID();
-                game.sendEvent(new ShootEvent(game.id, (byte)-1, bullet_id, 0));
+                game.sendEvent(new ShootEvent(game.id, (byte)-1, (byte) -1, bullet_id, 0));
                 fireBullet(bullet_id);
             } else {
-                game.sendEvent(new ShootEvent(game.id, (byte)-1, 0, 0));
+                game.sendEvent(new ShootEvent(game.id, (byte)-1, (byte) -1, 0, 0));
             }
         }
         shootTimer += delta;
@@ -254,12 +255,12 @@ public class Player extends Sprite implements Damageable {
         healthBar.draw(batch);
         super.draw(batch);
 
-        if (ability1 != null) {
+        if (ability1 != null && this == game.players[game.id]) {
             ability1Bar.setValue(ability1.time / ability1.cooldown);
             ability1Bar.draw(batch);
         }
 
-        if (ability2 != null) {
+        if (ability2 != null && this == game.players[game.id]) {
             ability2Bar.setValue(ability2.time / ability2.cooldown);
             ability2Bar.draw(batch);
         }
@@ -543,5 +544,30 @@ public class Player extends Sprite implements Damageable {
 
     public int getStatPoints() {
         return statPoints;
+    }
+
+    public void setAbility(int aNum, byte aID){
+        switch (aID) {
+            case Ability.BOMB:
+                if (aNum == 1) ability1 = new BombDeploy(this, game, (byte) 1);
+                else ability2 = new BombDeploy(this, game, (byte) 2);
+                break;
+            case Ability.DASH:
+                if (aNum == 1) ability1 = new Dash(this, game, (byte) 1);
+                else ability2 = new Dash(this, game, (byte) 2);
+                break;
+            case Ability.FORCE_FIELD:
+                if (aNum == 1) ability1 = new ForceField(this, game, (byte) 1);
+                else ability2 = new ForceField(this, game, (byte) 2);
+                break;
+            case Ability.INVISIBILITY:
+                if (aNum == 1) ability1 = new Invisibility(this, game, (byte) 1);
+                else ability2 = new Invisibility(this, game, (byte) 2);
+                break;
+            case Ability.RAPID_FIRE:
+                if (aNum == 1) ability1 = new RapidFire(this, game, (byte) 1);
+                else ability2 = new RapidFire(this, game, (byte) 2);
+                break;
+        }
     }
 }

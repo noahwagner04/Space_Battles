@@ -110,7 +110,7 @@ public class Minion extends Sprite implements Damageable {
         if (target != null) {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
-            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
+            game.sendEvent(new ShootEvent(team, id, (byte) -1, bulletID, target.angleRad()));
             return;
         }
 
@@ -127,7 +127,7 @@ public class Minion extends Sprite implements Damageable {
         if (target != null) {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
-            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
+            game.sendEvent(new ShootEvent(team, id, (byte) -1, bulletID, target.angleRad()));
             return;
         }
 
@@ -147,7 +147,7 @@ public class Minion extends Sprite implements Damageable {
         if (target != null) {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
-            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
+            game.sendEvent(new ShootEvent(team, id, (byte)-1, bulletID, target.angleRad()));
             return;
         }
 
@@ -163,7 +163,7 @@ public class Minion extends Sprite implements Damageable {
         if (target != null) {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
-            game.sendEvent(new ShootEvent(team, id, bulletID, target.angleRad()));
+            game.sendEvent(new ShootEvent(team, id, (byte)-1, bulletID, target.angleRad()));
             return;
         }
     }

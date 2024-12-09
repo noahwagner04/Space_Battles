@@ -91,34 +91,34 @@ public class ArenaScreen extends ScreenAdapter {
             @Override
             public String execute(String[] cmd) {
                 Player p = game.players[game.id];
-//                if (!p.unlockAbility1) {
-//                    return "Too low level! (next ability unlock at level 5)";
-//                }
-//
-//                if (p.ability1 != null && !p.unlockAbility2) {
-//                    return "Too low level! (next ability unlock at level 10)";
-//                }
-//
-//                if (p.ability2 != null) {
-//                    return "Max number of abilities is unlocked!";
-//                }
+                if (!p.unlockAbility1) {
+                    return "Too low level! (next ability unlock at level 5)";
+                }
+
+                if (p.ability1 != null && !p.unlockAbility2) {
+                    return "Too low level! (next ability unlock at level 10)";
+                }
+
+                if (p.ability2 != null) {
+                    return "Max number of abilities is unlocked!";
+                }
 
                 try {
                     if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
-                        if (p.ability1 == null) p.ability1 = new Dash(p, game);
-                        else p.ability2 = new Dash(p, game);
+                        if (p.ability1 == null) p.ability1 = new Dash(p, game, (byte)1);
+                        else p.ability2 = new Dash(p, game, (byte) 2);
                     } else if (cmd[1].contentEquals("rapid_fire") && !(p.ability1 instanceof RapidFire)) {
-                        if (p.ability1 == null) p.ability1 = new RapidFire(p, game);
-                        else p.ability2 = new RapidFire(p, game);
+                        if (p.ability1 == null) p.ability1 = new RapidFire(p, game, (byte) 1);
+                        else p.ability2 = new RapidFire(p, game, (byte) 2);
                     } else if (cmd[1].contentEquals("bomb") && !(p.ability1 instanceof BombDeploy)) {
-                        if (p.ability1 == null) p.ability1 = new BombDeploy(p, game);
-                        else p.ability2 = new BombDeploy(p, game);
+                        if (p.ability1 == null) p.ability1 = new BombDeploy(p, game, (byte) 1);
+                        else p.ability2 = new BombDeploy(p, game, (byte) 1);
                     } else if (cmd[1].contentEquals("force_field") && !(p.ability1 instanceof ForceField)) {
-                        if (p.ability1 == null) p.ability1 = new ForceField(p, game);
-                        else p.ability2 = new ForceField(p, game);
+                        if (p.ability1 == null) p.ability1 = new ForceField(p, game, (byte) 1);
+                        else p.ability2 = new ForceField(p, game, (byte) 2);
                     } else if (cmd[1].contentEquals("invisibility") && !(p.ability1 instanceof Invisibility)) {
-                        if (p.ability1 == null) p.ability1 = new Invisibility(p, game);
-                        else p.ability2 = new Invisibility(p, game);
+                        if (p.ability1 == null) p.ability1 = new Invisibility(p, game, (byte) 1);
+                        else p.ability2 = new Invisibility(p, game, (byte) 2);
                     } else {
                         return help;
                     }

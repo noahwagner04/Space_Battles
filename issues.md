@@ -47,6 +47,7 @@
 - Finish game loop (add win condition / win & lose screen)
 - Make players, bases, and minions different colors
 - Add health bars to entities
+- networked abilities
 
 ## Open Issues ##
 - Add upgrade / ability unlock UI
@@ -55,6 +56,7 @@
 - Add HUD cheat-codes
 - Minions sometimes (rarely) will get damaged before sending move event to other clients
 - cap players to 4
-- check for client / server instance through bool 
 - on disconnect, remove all data associated with player (minions, bases, score, etc.)
+- don't make player null when player disconnects
+- add better title image
 

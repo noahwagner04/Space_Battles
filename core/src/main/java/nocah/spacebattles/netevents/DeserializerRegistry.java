@@ -17,6 +17,7 @@ public class DeserializerRegistry {
         deserializeMap.put(NetConstants.SHOOT_EVENT_ID, ShootEvent::deserialize);
         deserializeMap.put(NetConstants.DAMAGE_EVENT_ID, DamageEvent::deserialize);
         deserializeMap.put(NetConstants.UPGRADE_EVENT_ID, UpgradeEvent::deserialize);
+        deserializeMap.put(NetConstants.ABILITY_EVENT_ID, AbilityEvent::deserialize);
 
 
         // at some point im going to add all net events here

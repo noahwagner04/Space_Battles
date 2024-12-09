@@ -101,19 +101,40 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
-            if (e.minionID == -1) {
-                game.players[e.playerID].fireBullet(e.bulletID);
-            } else {
+            Player p = game.players[e.playerID];
+            Vector2 pPos = p.getCenter();
+            if (e.minionID == -1 && e.bombID == -1) {
+                p.fireBullet(e.bulletID);
+            } else if (e.minionID != -1) {
                 Minion m = game.minions[e.playerID][e.minionID];
                 Vector2 target = m.getCenter().add( new Vector2(1, 0).rotateRad(e.rotation));
                 m.shootAt(target, e.bulletID);
+            } else if (e.bulletID == -1) {
+                game.bombs.add(new Bomb(p, game, pPos.x, pPos.y, e.bombID));
+            } else {
+                Bomb b = null;
+                for (Bomb bomb : game.bombs) {
+                    if (bomb.id == e.bombID) {
+                        b = bomb;
+                        break;
+                    }
+                }
+                if (b == null) return;
+                Vector2 startPos = new Vector2(b.getX() + b.getOriginX(), b.getY() + b.getOriginY());
+                Projectile proj = new Projectile(e.bulletID, game.getEntity(SpaceBattles.RSC_SQUARE_IMG), startPos.x, startPos.y, b.bulletSpeed, e.rotation);
+                proj.setSize(0.15f, 0.15f);
+                proj.setOriginCenter();
+                proj.translate(-proj.getOriginX(), -proj.getOriginY());
+                proj.setColor(SpaceBattles.PLAYER_COLORS[e.playerID]);
+                game.projectiles.add(proj);
             }
         });
         serverMap.put(NetConstants.SHOOT_EVENT_ID, (event) -> {
             ShootEvent e = (ShootEvent) event;
+
             int bulletID  = game.getBulletID();
             game.players[e.playerID].fireBullet(bulletID);
-            game.server.broadcastEvent(new ShootEvent(e.playerID, (byte) -1, bulletID, 0));
+            game.server.broadcastEvent(new ShootEvent(e.playerID, (byte) -1, (byte) -1, bulletID, 0));
         });
 
         // clients handle collision damage, server handles projectiles
@@ -126,6 +147,7 @@ public class HandlerRegistry {
                     Player p = game.players[e.entityId];
 
                     if (p.damage(e.damageAmount)) {
+                        if (e.damagerID == e.entityId) return;
                         Player shooter = game.players[e.damagerID];
                         float lvlDiff = p.getLevel() - shooter.getLevel();
                         shooter.gainExperience(Math.max(6 * lvlDiff + 12, 12));
@@ -161,6 +183,16 @@ public class HandlerRegistry {
                         game.players[e.damagerID].gainExperience(5);
                     }
                     break;
+                case NetConstants.BOMB_ENTITY_TYPE:
+                    // this essentially acts as a way to despawn the bomb
+                    Iterator<Bomb> itr = game.bombs.iterator();
+                    while (itr.hasNext()) {
+                        Bomb b = itr.next();
+                        if (b.id == e.entityId) {
+                            itr.remove();
+                        }
+                    }
+                    break;
             }
         });
         serverMap.put(NetConstants.DAMAGE_EVENT_ID, (event) -> {
@@ -176,6 +208,37 @@ public class HandlerRegistry {
         serverMap.put(NetConstants.UPGRADE_EVENT_ID, (event) -> {
             handleClientEvent(event);
             UpgradeEvent e = (UpgradeEvent) event;
+            game.server.broadcastExcept(event, e.playerID);
+        });
+
+        clientMap.put(NetConstants.ABILITY_EVENT_ID, (event) -> {
+            AbilityEvent e = (AbilityEvent) event;
+            Player p = game.players[e.playerID];
+
+            // server should be the only one to handle bomb ability
+            if (game.server == null && e.abilityID == Ability.BOMB) return;
+
+            if (e.toggle == 1) {
+                if (e.abilityNum == 1) {
+                    if (p.ability1 == null) p.setAbility(e.abilityNum, e.abilityID);
+                    p.ability1.onActivate();
+                } else if (e.abilityNum == 2) {
+                    if (p.ability2 == null) p.setAbility(e.abilityNum, e.abilityID);
+                    p.ability2.onActivate();
+                }
+            } else if (e.toggle == 0) {
+                if (e.abilityNum == 1) {
+                    if (p.ability1 == null) return;
+                    p.ability1.onDeactivate();
+                } else if (e.abilityNum == 2) {
+                    if (p.ability1 == null) return;
+                    p.ability2.onDeactivate();
+                }
+            }
+        });
+        serverMap.put(NetConstants.ABILITY_EVENT_ID, (event) -> {
+            handleClientEvent(event);
+            AbilityEvent e = (AbilityEvent) event;
             game.server.broadcastExcept(event, e.playerID);
         });
     }

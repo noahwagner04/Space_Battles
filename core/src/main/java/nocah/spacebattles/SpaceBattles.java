@@ -43,6 +43,7 @@ public class SpaceBattles extends Game {
     public boolean connected = false;
     public boolean gameStarted = false;
     private int nextBulletId = 0;
+    private byte nextBombID = 0;
 
     public final float numOfPosSends = 20;
     float posTimer = 0;
@@ -360,7 +361,14 @@ public class SpaceBattles extends Game {
 
     public int getBulletID() {
         nextBulletId++;
+        if (nextBulletId < 0) nextBulletId = 0;
         return nextBulletId;
+    }
+
+    public byte getBombID() {
+        nextBombID++;
+        if (nextBombID < 0) nextBombID = 0;
+        return nextBombID;
     }
 
     public void updateAsteroids(float delta, Rectangle worldBounds) {
@@ -493,6 +501,7 @@ public class SpaceBattles extends Game {
     }
 
     public void updateBombs(float delta) {
+        if (server == null) return;
         Iterator<Bomb> iterator = bombs.iterator();
         while (iterator.hasNext()) {
             Bomb b = iterator.next();
@@ -500,6 +509,13 @@ public class SpaceBattles extends Game {
                 b.update(delta);
             } else {
                 iterator.remove();
+                sendEvent(new DamageEvent(
+                    (byte)NetConstants.BOMB_ENTITY_TYPE,
+                    b.player.id,
+                    b.id,
+                    1f,
+                    1f
+                ));
             }
         }
     }

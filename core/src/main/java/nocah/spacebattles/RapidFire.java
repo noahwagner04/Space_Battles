@@ -4,10 +4,12 @@ public class RapidFire extends Ability {
     private float bulletCoolDownCache;
     private float shootKnockBackCache;
 
-    public RapidFire(Player player, SpaceBattles game) {
+    public RapidFire(Player player, SpaceBattles game, byte abilityNum) {
         super(player, game);
         cooldown = 10;
         interval = 3;
+        abilityID = Ability.RAPID_FIRE;
+        this.abilityNum = abilityNum;
     }
 
     @Override

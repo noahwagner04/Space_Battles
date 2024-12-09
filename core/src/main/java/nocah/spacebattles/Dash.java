@@ -9,10 +9,13 @@ public class Dash extends Ability {
     private float rotAccelerationCache;
     private float rotFrictionCache;
 
-    public Dash(Player player, SpaceBattles game) {
+    public Dash(Player player, SpaceBattles game, byte abilityNum) {
         super(player, game);
         cooldown = 5f;
         interval = 2f;
+        abilityID = Ability.DASH;
+        this.abilityNum = abilityNum;
+
     }
 
     @Override
