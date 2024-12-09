@@ -5,11 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
-import nocah.spacebattles.netevents.ChatEvent;
-import nocah.spacebattles.netevents.SpawnEvent;
-import nocah.spacebattles.netevents.StartGameEvent;
 import nocah.spacebattles.netevents.UpgradeEvent;
 
 public class ArenaScreen extends ScreenAdapter {
@@ -21,6 +17,10 @@ public class ArenaScreen extends ScreenAdapter {
     private Rectangle worldBounds;
     public HUD hud;
 
+    private float endMessageTimer = 0;
+    private float endMessageInterval = 5;
+
+    private boolean hasWon = false;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
@@ -151,6 +151,14 @@ public class ArenaScreen extends ScreenAdapter {
         game.updateAsteroids(delta, worldBounds);
         game.updateMinions(delta, map, worldBounds);
         game.updateBombs(delta);
+
+        if (checkGameOver()) {
+            if (endMessageTimer > endMessageInterval) {
+                game.setScreen(new EndScreen(game, checkWin()));
+                return;
+            }
+            endMessageTimer += delta;
+        }
     }
 
     @Override
@@ -173,6 +181,76 @@ public class ArenaScreen extends ScreenAdapter {
 
         game.batch.begin();
         hud.draw(game.batch);
+
+        // NOTE: eventually replace with win / lose messages
+        if (checkWin()) {
+            game.batch.setColor(0, 1, 0, 1);
+        } else if (checkLose()) {
+            game.batch.setColor(1, 0, 0, 1);
+        }
         game.batch.end();
+    }
+
+    private boolean checkLose() {
+        return game.players[game.id].isSpectating() && game.bases[game.id].isDestroyed();
+    }
+
+    private boolean checkWin() {
+        if (hasWon) return true;
+
+        float null_bases = 0;
+        for (PlayerBase b : game.bases) {
+            if (b == null) {
+                null_bases++;
+                continue;
+            }
+            if (b == game.bases[game.id]) continue;
+
+            if (!b.isDestroyed()) return false;
+        }
+
+        // No win condition if single player, nice for debuging
+        if (null_bases == SpaceBattles.MAX_PLAYERS - 1) return false;
+
+        for (Player p : game.players) {
+            if (p == null || p == game.players[game.id]) continue;
+            if (!p.isSpectating()) return false;
+        }
+
+        hasWon = !checkLose();
+        return hasWon;
+    }
+
+    private boolean checkGameOver() {
+        float alive_players = 0;
+        float valid_players = 0;
+
+        for (Player p : game.players) {
+            if (p == null) continue;
+            valid_players++;
+            if (!p.isSpectating()) alive_players++;
+        }
+
+        // no game over for single player, good for debuging
+        if (valid_players == 1) return false;
+
+        if (alive_players > 1) return false;
+
+        float alive_bases = 0;
+        for (Player p : game.players) {
+            if (p == null) continue;
+            if (!game.bases[p.id].isDestroyed()) alive_bases++;
+        }
+
+        if (alive_bases > 1) return false;
+
+        if (alive_bases == 1 && alive_players == 1) {
+            for (Player p : game.players) {
+                if (p == null || p.isSpectating()) continue;
+                if (game.bases[p.id].isDestroyed()) return false;
+            }
+        }
+
+        return true;
     }
 }
