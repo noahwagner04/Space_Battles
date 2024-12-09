@@ -37,6 +37,7 @@ public class PlayerBase extends Sprite implements Damageable {
         setCenter(x, y);
         setOriginCenter();
         spawnPoint = new Vector2(x, y);
+        setColor(SpaceBattles.PLAYER_COLORS[team]);
     }
 
     public void update(float delta) {

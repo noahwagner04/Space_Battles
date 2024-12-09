@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -52,6 +53,13 @@ public class SpaceBattles extends Game {
     public Minion[][] minions = new Minion[MAX_PLAYERS][MAX_MINIONS];
 
     public ArrayList<Bomb> bombs = new ArrayList<>();
+
+    public static final Color[] PLAYER_COLORS = {
+        new Color(0.3f, 1, 1, 1),
+        new Color(0.3f, 1f, 0.3f, 1),
+        new Color(1, 1, 0.3f, 1),
+        new Color(1, 0.3f, 0.3f, 1)
+    };
 
     SpriteBatch batch;
     AssetManager am;

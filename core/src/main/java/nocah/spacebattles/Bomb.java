@@ -25,6 +25,7 @@ public class Bomb extends Sprite {
         setSize(0.5f, 0.5f);
         setOriginCenter();
         setCenter(x, y);
+        setColor(SpaceBattles.PLAYER_COLORS[player.id]);
     }
 
     public void update(float delta) {
@@ -46,6 +47,7 @@ public class Bomb extends Sprite {
             proj.translate(-proj.getOriginX(), -proj.getOriginY());
             proj.damageAmount = bulletDamage;
             proj.team = player.id;
+            proj.setColor(SpaceBattles.PLAYER_COLORS[player.id]);
             game.projectiles.add(proj);
         }
     }

@@ -49,6 +49,7 @@ public class Minion extends Sprite implements Damageable {
         this.id = id;
         playerLeader = game.players[team];
         setStats(0);
+        setColor(SpaceBattles.PLAYER_COLORS[team]);
     }
 
     public void update(float delta) {
@@ -177,6 +178,7 @@ public class Minion extends Sprite implements Damageable {
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
         proj.damageAmount = bulletDamage;
         proj.team = team;
+        proj.setColor(SpaceBattles.PLAYER_COLORS[team]);
         game.projectiles.add(proj);
 
         velocity.sub(heading.setLength(shootKnockBack));

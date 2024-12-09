@@ -67,6 +67,7 @@ public class Player extends Sprite implements Damageable {
         setOriginCenter();
         setupParticleEffect(game);
         setCenter(0, 0);
+        setColor(SpaceBattles.PLAYER_COLORS[id]);
     }
 
     public void gainExperience(float xp) {
@@ -227,8 +228,8 @@ public class Player extends Sprite implements Damageable {
     public void draw(Batch batch) {
         if (isSpectating()) return;
         if (this != game.players[game.id] && isInvisible) return;
-        super.draw(batch);
         if (!isInvisible) effect.draw(batch);
+        super.draw(batch);
         if (isInvincible) {
             float radius = ForceField.RADIUS;
             Vector2 pos = getCenter().sub(radius, radius);
@@ -397,6 +398,7 @@ public class Player extends Sprite implements Damageable {
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
         proj.damageAmount = bulletDamage;
         proj.team = id;
+        proj.setColor(SpaceBattles.PLAYER_COLORS[id]);
         game.projectiles.add(proj);
 
         velocity.sub(heading.scl(shootKnockBack));
