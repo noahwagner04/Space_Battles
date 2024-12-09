@@ -495,7 +495,7 @@ public class Player extends Sprite implements Damageable {
         setRotation(0);
         Vector2 spawn = new Vector2(0, 0);
         if (game.gameStarted) {
-            spawn = game.bases[game.id].spawnPoint;
+            spawn = game.bases[id].spawnPoint;
         }
         setCenter(spawn.x, spawn.y);
 

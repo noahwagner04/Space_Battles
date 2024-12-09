@@ -333,7 +333,7 @@ public class SpaceBattles extends Game {
                 if (ms == null || ms == minions[proj.team]) continue;
                 for (int i = 0; i < ms.length; i++) {
                     Minion m = ms[i];
-                    if (m == null || m.isDead()) continue;
+                    if (m == null || m.isDead() || !m.spawnedOnNetwork) continue;
                     if (m.getDamageArea().contains(proj.getCenter())) {
                         sendEvent(
                             new DamageEvent(
@@ -486,6 +486,7 @@ public class SpaceBattles extends Game {
                 Minion minion = minions[team][i];
                 if (minion == null || minion.isDead()) continue;
                 minion.sendMinionMoveEvent((byte) team, (byte) i);
+                minion.spawnedOnNetwork = true;
             }
         }
     }

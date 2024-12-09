@@ -87,10 +87,9 @@ public class HandlerRegistry {
             game.server.broadcastExcept(event, e.playerID);
         });
 
-        // this can cause bugs, not the best way to do it
+        // keep here in the case we want to do something when another client leaves
         clientMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
             DisconnectEvent e = (DisconnectEvent) event;
-            game.players[e.playerID] = null;
         });
         serverMap.put(NetConstants.DISCONNECT_EVENT_ID, (event) -> {
             handleClientEvent(event);

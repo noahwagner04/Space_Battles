@@ -48,6 +48,8 @@
 - Make players, bases, and minions different colors
 - Add health bars to entities
 - networked abilities
+- don't make player null when player disconnects
+
 
 ## Open Issues ##
 - Add upgrade / ability unlock UI
@@ -56,7 +58,5 @@
 - Add HUD cheat-codes
 - Minions sometimes (rarely) will get damaged before sending move event to other clients
 - cap players to 4
-- on disconnect, remove all data associated with player (minions, bases, score, etc.)
-- don't make player null when player disconnects
 - add better title image
 

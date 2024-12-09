@@ -15,6 +15,7 @@ public class Minion extends Sprite implements Damageable {
     private final byte team;
     private final byte id;
     private boolean dead;
+    public boolean spawnedOnNetwork = false;
 
     public Vector2 velocity = new Vector2();
     private float maxSpeed = 5f;
