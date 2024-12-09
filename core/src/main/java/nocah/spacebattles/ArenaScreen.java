@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import nocah.spacebattles.netevents.UpgradeEvent;
 
 public class ArenaScreen extends ScreenAdapter {
@@ -21,6 +23,8 @@ public class ArenaScreen extends ScreenAdapter {
     private float endMessageInterval = 5;
 
     private boolean hasWon = false;
+
+    private Stage stage;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
@@ -87,17 +91,17 @@ public class ArenaScreen extends ScreenAdapter {
             @Override
             public String execute(String[] cmd) {
                 Player p = game.players[game.id];
-                if (!p.unlockAbility1) {
-                    return "Too low level! (next ability unlock at level 5)";
-                }
-
-                if (p.ability1 != null && !p.unlockAbility2) {
-                    return "Too low level! (next ability unlock at level 10)";
-                }
-
-                if (p.ability2 != null) {
-                    return "Max number of abilities is unlocked!";
-                }
+//                if (!p.unlockAbility1) {
+//                    return "Too low level! (next ability unlock at level 5)";
+//                }
+//
+//                if (p.ability1 != null && !p.unlockAbility2) {
+//                    return "Too low level! (next ability unlock at level 10)";
+//                }
+//
+//                if (p.ability2 != null) {
+//                    return "Max number of abilities is unlocked!";
+//                }
 
                 try {
                     if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
@@ -133,6 +137,7 @@ public class ArenaScreen extends ScreenAdapter {
     @Override
     public void show() {
         System.out.println("Show ArenaScreen");
+        stage = new Stage(new ScreenViewport());
     }
 
     public void update(float delta) {

@@ -2,6 +2,7 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -57,6 +58,10 @@ public class Player extends Sprite implements Damageable {
     public boolean unlockAbility1 = false;
     public boolean unlockAbility2 = false;
 
+    private StatusBar healthBar;
+    private StatusBar ability1Bar;
+    private StatusBar ability2Bar;
+
     private boolean spectating = false;
 
     public Player(SpaceBattles game, byte id) {
@@ -68,6 +73,17 @@ public class Player extends Sprite implements Damageable {
         setupParticleEffect(game);
         setCenter(0, 0);
         setColor(SpaceBattles.PLAYER_COLORS[id]);
+
+        healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, size, size / 10f);
+        healthBar.setRange(0, maxHealth);
+        healthBar.setValue(health);
+        healthBar.noDrawOnFull = true;
+
+        ability1Bar = new StatusBar(game, Color.GRAY.cpy(), Color.WHITE.cpy(), getX(), getY() - 0.3f, size, 0.1f);
+        ability1Bar.setValue(0);
+
+        ability2Bar = new StatusBar(game, Color.GRAY.cpy(), Color.WHITE.cpy(), getX(), getY() - 0.35f, size, 0.1f);
+        ability2Bar.setValue(0);
     }
 
     public void gainExperience(float xp) {
@@ -106,6 +122,8 @@ public class Player extends Sprite implements Damageable {
             case DEFENCE:
                 health += 15;
                 maxHealth += 15;
+                healthBar.setRange(0, maxHealth);
+                healthBar.setValue(health);
                 shootKnockBack -= shootKnockBack * 0.05f;
                 break;
             case SPEED:
@@ -146,6 +164,9 @@ public class Player extends Sprite implements Damageable {
         handleThrust(delta);
         updatePosition(delta);
         updateParticleEffect(delta);
+        healthBar.setPosition(getX(), getY() - 0.25f);
+        ability1Bar.setPosition(getX(), getY() - 0.38f);
+        ability2Bar.setPosition(getX(), getY() - 0.5f);
 
         if (ability1 != null) {
             ability1.update(delta);
@@ -222,6 +243,7 @@ public class Player extends Sprite implements Damageable {
         }
 
         updateParticleEffect(delta);
+        healthBar.setPosition(getX(), getY() - 0.25f);
     }
 
     @Override
@@ -229,7 +251,19 @@ public class Player extends Sprite implements Damageable {
         if (isSpectating()) return;
         if (this != game.players[game.id] && isInvisible) return;
         if (!isInvisible) effect.draw(batch);
+        healthBar.draw(batch);
         super.draw(batch);
+
+        if (ability1 != null) {
+            ability1Bar.setValue(ability1.time / ability1.cooldown);
+            ability1Bar.draw(batch);
+        }
+
+        if (ability2 != null) {
+            ability2Bar.setValue(ability2.time / ability2.cooldown);
+            ability2Bar.draw(batch);
+        }
+
         if (isInvincible) {
             float radius = ForceField.RADIUS;
             Vector2 pos = getCenter().sub(radius, radius);
@@ -438,6 +472,7 @@ public class Player extends Sprite implements Damageable {
     public boolean damage(float amount) {
         if (isInvincible) return false;
         health -= Math.max(amount, 0);
+        healthBar.setValue(health);
         if (health <= 0) {
             if (!game.gameStarted) {
                 respawn();
@@ -453,6 +488,7 @@ public class Player extends Sprite implements Damageable {
     public void respawn() {
         setSpectating(false);
         health = maxHealth;
+        healthBar.setValue(health);
         velocity = new Vector2(0, 0);
         rotVelocity = 0;
         setRotation(0);
@@ -461,6 +497,14 @@ public class Player extends Sprite implements Damageable {
             spawn = game.bases[game.id].spawnPoint;
         }
         setCenter(spawn.x, spawn.y);
+
+        if (ability1 != null) {
+            ability1.reset();
+        }
+
+        if (ability2 != null) {
+            ability2.reset();
+        }
     }
 
     public void setSpectating(boolean isSpectator) {

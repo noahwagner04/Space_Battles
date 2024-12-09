@@ -16,6 +16,14 @@ public class Ability {
         this.game = game;
     }
 
+    public void reset() {
+        if (isActive) deactivate();
+
+        time = 0;
+        isReady = false;
+        isActive = false;
+    }
+
     public void update(float delta) {
         if (time < cooldown) {
             time += delta;

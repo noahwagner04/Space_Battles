@@ -1,6 +1,7 @@
 package nocah.spacebattles;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
@@ -14,9 +15,13 @@ public class Asteroid extends Sprite implements Damageable {
     private Rectangle worldBounds;
     public float xp;
 
+    private StatusBar healthBar;
+
     public Asteroid(SpaceBattles game, Rectangle worldBounds) {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
         this.worldBounds = worldBounds;
+        healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, 0, 0);
+        healthBar.noDrawOnFull = true;
         randomizeAttributes();
         randomizePosition();
     }
@@ -24,6 +29,7 @@ public class Asteroid extends Sprite implements Damageable {
     public void randomizeAttributes() {
         size = SpaceBattles.random.nextFloat(1.5f, 4);
         health = size * size * 20;
+
         setSize(size, size);
         setOriginCenter();
         xp = size * size * 0.6f;
@@ -37,6 +43,9 @@ public class Asteroid extends Sprite implements Damageable {
             tint.g += 3f;
             brightness = 1;
         }
+        healthBar.setRange(0, health);
+        healthBar.setValue(health);
+        healthBar.setSize(size, 0.1f);
 
         setColor(
             tint.r * brightness,
@@ -54,6 +63,7 @@ public class Asteroid extends Sprite implements Damageable {
         float x = SpaceBattles.random.nextFloat(worldBounds.x, worldBounds.width);
         float y = SpaceBattles.random.nextFloat(worldBounds.y, worldBounds.height);
         setPosition(x, y);
+        healthBar.setPosition(x, y - 0.25f);
     }
 
     public void setSpeed(float speed) {
@@ -67,6 +77,7 @@ public class Asteroid extends Sprite implements Damageable {
     public void update(float delta) {
         translate(velocity.x * delta, velocity.y * delta);
         rotate(rotationSpeed * delta);
+        healthBar.setPosition(getX(), getY() - 0.25f);
     }
 
     public void bounceOffBounds(Rectangle bounds) {
@@ -92,6 +103,12 @@ public class Asteroid extends Sprite implements Damageable {
     }
 
     @Override
+    public void draw(Batch batch) {
+        super.draw(batch);
+        healthBar.draw(batch);
+    }
+
+    @Override
     public float getHealth() {
         return health;
     }
@@ -99,6 +116,7 @@ public class Asteroid extends Sprite implements Damageable {
     @Override
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
+        healthBar.setValue(health);
         return health <= 0;
     }
 

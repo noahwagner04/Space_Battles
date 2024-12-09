@@ -45,10 +45,11 @@
 - Add the 5 player abilities (Dash, rapid fire, bomb, force field, invisibility)
 - network xp and upgrades
 - Finish game loop (add win condition / win & lose screen)
+- Make players, bases, and minions different colors
+- Add health bars to entities
 
 ## Open Issues ##
-- Make players, bases, and minions different colors
-- Add UI (Health bars, upgrade buttons, etc.)
+- Add upgrade / ability unlock UI
 - Add Health Regen? (or remove it altogether? only bases have it as of now)
 - Add better Art & sound effects
 - Add HUD cheat-codes

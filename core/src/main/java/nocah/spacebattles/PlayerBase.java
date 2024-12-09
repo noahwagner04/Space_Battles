@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Circle;
@@ -27,6 +28,8 @@ public class PlayerBase extends Sprite implements Damageable {
     private float minionSpawnInterval = 5;
     public int minionLevel = 0;
 
+    private StatusBar healthBar;
+
     private int team;
 
     public PlayerBase(SpaceBattles game, int team, float x, float y) {
@@ -38,6 +41,11 @@ public class PlayerBase extends Sprite implements Damageable {
         setOriginCenter();
         spawnPoint = new Vector2(x, y);
         setColor(SpaceBattles.PLAYER_COLORS[team]);
+
+        healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, 2, 0.1f);
+        healthBar.setRange(0, maxHealth);
+        healthBar.setValue(health);
+        healthBar.noDrawOnFull = true;
     }
 
     public void update(float delta) {
@@ -77,6 +85,7 @@ public class PlayerBase extends Sprite implements Damageable {
     public void draw(Batch batch) {
         if (destroyed) return;
         super.draw(batch);
+        healthBar.draw(batch);
     }
 
     public boolean isDestroyed() {
@@ -91,6 +100,7 @@ public class PlayerBase extends Sprite implements Damageable {
     @Override
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
+        healthBar.setValue(health);
         if (health <= 0) {
             destroyed = true;
             return true;
@@ -102,6 +112,7 @@ public class PlayerBase extends Sprite implements Damageable {
     public void heal(float amount) {
         health += Math.max(amount, 0);
         health = Math.min(health, maxHealth);
+        healthBar.setValue(health);
     }
 
     @Override
