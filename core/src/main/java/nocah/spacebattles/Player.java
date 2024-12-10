@@ -18,7 +18,6 @@ public class Player extends Sprite implements Damageable {
     public static final byte BASE_DEFENCE = 3;
     public static final byte MINIONS = 4;
 
-
     private SpaceBattles game;
     public byte id;
 
@@ -52,7 +51,7 @@ public class Player extends Sprite implements Damageable {
 
     private float experience = 0;
     private int level = 0;
-    private int statPoints = 0;
+    public int statPoints = 0;
 
     public Ability ability1;
     public Ability ability2;
@@ -88,7 +87,7 @@ public class Player extends Sprite implements Damageable {
     }
 
     public void gainExperience(float xp) {
-        if (level >= 10) return;
+        if (level >= 10 || !game.gameStarted) return;
         experience += xp;
         while (experience >= xpThreshold(level)) {
             levelUp();
@@ -150,7 +149,7 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    private float xpThreshold(float level) {
+    public float xpThreshold(float level) {
         return (float)(10 * Math.pow(1.25f, level - 1));
     }
 
@@ -569,5 +568,9 @@ public class Player extends Sprite implements Damageable {
                 else ability2 = new RapidFire(this, game, (byte) 2);
                 break;
         }
+    }
+
+    public float getExperience() {
+        return experience;
     }
 }

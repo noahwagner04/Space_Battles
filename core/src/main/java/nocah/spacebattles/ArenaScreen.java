@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -25,6 +26,9 @@ public class ArenaScreen extends ScreenAdapter {
     private boolean hasWon = false;
 
     private Stage stage;
+    private StatUpgradeUI statUpgradeUI;
+    private AbilityUnlockUI abilityUnlockUI;
+    private XPBarUI xpBarUI;
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
@@ -37,7 +41,6 @@ public class ArenaScreen extends ScreenAdapter {
             map.getProperties().get("width", Integer.class),
             map.getProperties().get("height", Integer.class)
         );
-        hud = new HUD(new BitmapFont());
 
         game.setBases(worldBounds);
         thisPlayer.respawn();
@@ -47,14 +50,21 @@ public class ArenaScreen extends ScreenAdapter {
         }
         camera = new Camera(15, 15);
 
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+
+        statUpgradeUI = new StatUpgradeUI(game, stage);
+        abilityUnlockUI = new AbilityUnlockUI(game, stage);
+        xpBarUI = new XPBarUI(game, stage);
+
+        hud = new HUD(new BitmapFont());
+
         hud.registerAction("upgrade", new HUDActionCommand() {
             static final String help = "upgrade <defence, attack, speed, base_defence, minions>";
 
             @Override
             public String execute(String[] cmd) {
-                if (game.players[game.id].getStatPoints() == 0) {
-                    return "No stat points to spend!";
-                }
+                game.players[game.id].statPoints++;
                 try {
                     if (cmd[1].contentEquals("defence")) {
                         game.players[game.id].upgradeStat(Player.DEFENCE);
@@ -77,54 +87,6 @@ public class ArenaScreen extends ScreenAdapter {
                 } catch (Exception e) {
                     return help;
                 }
-                return "ok! (" + game.players[game.id].getStatPoints() + " stat points remaining)";
-            }
-
-            public String help(String[] cmd) {
-                return help;
-            }
-        });
-
-        hud.registerAction("unlock", new HUDActionCommand() {
-            static final String help = "unlock <dash, rapid_fire, bomb, force_field, invisibility> (no repeats!)";
-
-            @Override
-            public String execute(String[] cmd) {
-                Player p = game.players[game.id];
-                if (!p.unlockAbility1) {
-                    return "Too low level! (next ability unlock at level 5)";
-                }
-
-                if (p.ability1 != null && !p.unlockAbility2) {
-                    return "Too low level! (next ability unlock at level 10)";
-                }
-
-                if (p.ability2 != null) {
-                    return "Max number of abilities is unlocked!";
-                }
-
-                try {
-                    if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
-                        if (p.ability1 == null) p.ability1 = new Dash(p, game, (byte)1);
-                        else p.ability2 = new Dash(p, game, (byte) 2);
-                    } else if (cmd[1].contentEquals("rapid_fire") && !(p.ability1 instanceof RapidFire)) {
-                        if (p.ability1 == null) p.ability1 = new RapidFire(p, game, (byte) 1);
-                        else p.ability2 = new RapidFire(p, game, (byte) 2);
-                    } else if (cmd[1].contentEquals("bomb") && !(p.ability1 instanceof BombDeploy)) {
-                        if (p.ability1 == null) p.ability1 = new BombDeploy(p, game, (byte) 1);
-                        else p.ability2 = new BombDeploy(p, game, (byte) 1);
-                    } else if (cmd[1].contentEquals("force_field") && !(p.ability1 instanceof ForceField)) {
-                        if (p.ability1 == null) p.ability1 = new ForceField(p, game, (byte) 1);
-                        else p.ability2 = new ForceField(p, game, (byte) 2);
-                    } else if (cmd[1].contentEquals("invisibility") && !(p.ability1 instanceof Invisibility)) {
-                        if (p.ability1 == null) p.ability1 = new Invisibility(p, game, (byte) 1);
-                        else p.ability2 = new Invisibility(p, game, (byte) 2);
-                    } else {
-                        return help;
-                    }
-                } catch (Exception e) {
-                    return help;
-                }
                 return "ok!";
             }
 
@@ -137,7 +99,6 @@ public class ArenaScreen extends ScreenAdapter {
     @Override
     public void show() {
         System.out.println("Show ArenaScreen");
-        stage = new Stage(new ScreenViewport());
     }
 
     public void update(float delta) {
@@ -194,6 +155,13 @@ public class ArenaScreen extends ScreenAdapter {
             game.batch.setColor(1, 0, 0, 1);
         }
         game.batch.end();
+
+        statUpgradeUI.update();
+        abilityUnlockUI.update();
+        xpBarUI.update();
+
+        stage.act(delta);
+        stage.draw();
     }
 
     private boolean checkLose() {
@@ -257,5 +225,10 @@ public class ArenaScreen extends ScreenAdapter {
         }
 
         return true;
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
     }
 }

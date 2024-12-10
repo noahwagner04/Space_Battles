@@ -18,7 +18,6 @@ public class LobbyScreen extends ScreenAdapter {
     private SpaceBattles game;
     private Camera camera;
     private Stage stage;
-    private Skin skin;
 
     private Rectangle lobbyBounds = new Rectangle(-6, -6, 12, 12);
 
@@ -32,14 +31,12 @@ public class LobbyScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-
         Table table = new Table();
         table.setFillParent(true);
         table.bottom();
         stage.addActor(table);
 
-        TextButton startButton = new TextButton("Start Game", skin);
+        TextButton startButton = new TextButton("Start Game", SpaceBattles.skin);
         startButton.setSize(100, 25);
         startButton.getLabel().setFontScale(1.5f);
         startButton.addListener(new ClickListener() {
@@ -98,6 +95,5 @@ public class LobbyScreen extends ScreenAdapter {
     @Override
     public void hide() {
         stage.dispose();
-        skin.dispose();
     }
 }

@@ -13,7 +13,6 @@ import nocah.spacebattles.netevents.SpawnEvent;
 public class MainMenuScreen extends ScreenAdapter {
     private final SpaceBattles game;
     private Stage stage;
-    private Skin skin;
 
     public MainMenuScreen(SpaceBattles game) {
         this.game = game;
@@ -25,17 +24,15 @@ public class MainMenuScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
 
-        TextField ipField = new TextField("", skin);
+        TextField ipField = new TextField("", SpaceBattles.skin);
         ipField.setMessageText("Enter IP Address");
         ipField.setAlignment(Align.center);
 
-        TextButton hostButton = new TextButton("Host", skin);
+        TextButton hostButton = new TextButton("Host", SpaceBattles.skin);
         hostButton.setSize(200, 50);
         hostButton.getLabel().setFontScale(1.5f);
         hostButton.addListener(new ClickListener() {
@@ -50,7 +47,7 @@ public class MainMenuScreen extends ScreenAdapter {
             }
         });
 
-        TextButton joinButton = new TextButton("Join", skin);
+        TextButton joinButton = new TextButton("Join", SpaceBattles.skin);
         joinButton.setSize(200, 50);
         joinButton.getLabel().setFontScale(1.5f);
         joinButton.addListener(new ClickListener() {
@@ -80,7 +77,6 @@ public class MainMenuScreen extends ScreenAdapter {
 
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
-        // Draw Stage
         stage.act(delta);
         stage.draw();
     }
@@ -93,6 +89,5 @@ public class MainMenuScreen extends ScreenAdapter {
     @Override
     public void hide() {
         stage.dispose();
-        skin.dispose();
     }
 }

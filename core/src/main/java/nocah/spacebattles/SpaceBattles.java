@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.*;
 
@@ -71,6 +72,8 @@ public class SpaceBattles extends Game {
     float res = 1f;
     FrameBuffer frameBuffer;
 
+    public static Skin skin;
+
     @Override
     public void create() {
         am = new AssetManager();
@@ -87,6 +90,7 @@ public class SpaceBattles extends Game {
         am.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
         am.load(SpaceBattles.RSC_TILED_MAP, TiledMap.class);
 
+        skin = new Skin(Gdx.files.internal("skin/quantum-horizon-ui.json"));
         setScreen(new LoadScreen(this));
     }
 
@@ -382,6 +386,7 @@ public class SpaceBattles extends Game {
     public void dispose() {
         batch.dispose();
         am.dispose();
+        skin.dispose();
 
         if (server != null) server.stop();
         if (client != null) {

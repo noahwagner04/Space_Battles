@@ -1,6 +1,5 @@
 package nocah.spacebattles;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Circle;
@@ -10,9 +9,8 @@ import com.badlogic.gdx.math.Vector2;
 public class PlayerBase extends Sprite implements Damageable {
     SpaceBattles game;
 
-    private float maxHealth = 1000;
+    private float maxHealth = 4000;
     private float health = maxHealth;
-    private float healRate = 2;
 
     public Vector2 spawnPoint;
 
@@ -56,7 +54,6 @@ public class PlayerBase extends Sprite implements Damageable {
             respawnTimer = 0;
             game.players[team].respawn();
         }
-        heal(healRate * delta);
 
         if (game.server == null) return;
         if (minionSpawnTimer > minionSpawnInterval) {
@@ -127,8 +124,8 @@ public class PlayerBase extends Sprite implements Damageable {
     }
 
     public void upgradeDefence() {
-        maxHealth += 100f;
-        health += 100f;
+        maxHealth += 400f;
+        heal(800);
     }
 
     public void upgradeMinions() {
