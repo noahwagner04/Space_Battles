@@ -293,6 +293,7 @@ public class SpaceBattles extends Game {
         for(PlayerBase b : bases) {
             if (b == null) continue;
             b.update(delta);
+            b.updateParticleEffects(delta);
         }
     }
 
@@ -543,7 +544,10 @@ public class SpaceBattles extends Game {
             for (int team = 0; team < MAX_PLAYERS; team++) {
                 for (int i = 0; i < MAX_MINIONS; i++) {
                     Minion m = minions[team][i];
-                    if (m == null || m.isDead()) continue;
+                    if (m == null) continue;
+                    m.updateDeathParticles(delta);
+                    if (m.isDead()) continue;
+
                     m.update(delta);
                     m.collide(map);
 
@@ -591,6 +595,7 @@ public class SpaceBattles extends Game {
             for (int i = 0; i < MAX_MINIONS; i++) {
                 Minion minion = minions[team][i];
                 if (minion == null) continue;
+                minion.updateDeathParticles(delta);
                 minion.updateRemoteMinion(delta);
             }
         }

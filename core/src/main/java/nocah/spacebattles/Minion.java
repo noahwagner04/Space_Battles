@@ -1,9 +1,8 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
@@ -45,6 +44,8 @@ public class Minion extends Sprite implements Damageable {
 
     private float size = 0.6f;
 
+    private ParticleEffect explosionEffect;
+
     public Minion(SpaceBattles game, byte team, byte id) {
         super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
         setSize(size, size);
@@ -57,6 +58,13 @@ public class Minion extends Sprite implements Damageable {
         playerLeader = game.players[team];
         setStats(0);
         setColor(SpaceBattles.PLAYER_COLORS[team]);
+
+        explosionEffect = new ParticleEffect();
+        explosionEffect.load(
+            Gdx.files.internal("particles/explosion.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        explosionEffect.scaleEffect(0.008f);
     }
 
     public void update(float delta) {
@@ -178,6 +186,10 @@ public class Minion extends Sprite implements Damageable {
         }
     }
 
+    public void updateDeathParticles(float delta) {
+        explosionEffect.update(delta * 1.5f);
+    }
+
     public void shootAt(Vector2 target, int bulletID) {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = target.sub(getCenter());
@@ -267,6 +279,7 @@ public class Minion extends Sprite implements Damageable {
 
     @Override
     public void draw(Batch batch) {
+        explosionEffect.draw(batch);
         if (dead) return;
         super.draw(batch);
     }
@@ -283,6 +296,9 @@ public class Minion extends Sprite implements Damageable {
             playDestroy();
             game.bases[team].minionCount--;
             dead = true;
+            Vector2 c = getCenter();
+            explosionEffect.setPosition(c.x, c.y);
+            explosionEffect.start();
             return true;
         }
         return false;

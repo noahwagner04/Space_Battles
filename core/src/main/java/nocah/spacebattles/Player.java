@@ -40,7 +40,9 @@ public class Player extends Sprite implements Damageable {
     public float rotFriction = 360 * 2;
 
     private float size = 1;
-    public ParticleEffect effect;
+    public ParticleEffect thrusterEffect;
+    private ParticleEffect explosionEffect;
+    private ParticleEffect levelUpEffect;
 
     private float bulletDamage = 30;
     private float bulletSpeed = 10;
@@ -112,7 +114,10 @@ public class Player extends Sprite implements Damageable {
         experience -= xpThreshold(level);
         level++;
         statPoints += (int)Math.max(level * 0.5, 1);
-        if (id == game.id) levelUp.play();
+        if (id == game.id) {
+            levelUp.play();
+            levelUpEffect.start();
+        }
         if (level >= 10) {
             System.out.println("Max Level 10! (second ability unlock)");
             unlockAbility2 = true;
@@ -251,8 +256,8 @@ public class Player extends Sprite implements Damageable {
         setRotation(r);
         float volume = game.getVolume(getCenter(), 0.025f);
         if (thrusterID != -1) thruster.setVolume(thrusterID, volume);
-        if (thrustAnimationState == 0 && effect.isComplete()) {
-            effect.start();
+        if (thrustAnimationState == 0 && thrusterEffect.isComplete()) {
+            thrusterEffect.start();
             if (thrusterID == -1) {
                 thruster.setVolume(thrusterID, volume);
                 thrusterID = thruster.loop();
@@ -262,10 +267,10 @@ public class Player extends Sprite implements Damageable {
             }
 
         } else if (thrustAnimationState == 1) {
-            effect.start();
+            thrusterEffect.start();
             thruster.resume(thrusterID);
         } else if (thrustAnimationState == 2) {
-            effect.allowCompletion();
+            thrusterEffect.allowCompletion();
             thruster.pause(thrusterID);
         }
 
@@ -275,11 +280,13 @@ public class Player extends Sprite implements Damageable {
 
     @Override
     public void draw(Batch batch) {
+        explosionEffect.draw(batch);
         if (isSpectating()) return;
         if (this != game.players[game.id] && isInvisible) return;
-        if (!isInvisible) effect.draw(batch);
+        if (!isInvisible) thrusterEffect.draw(batch);
         healthBar.draw(batch);
         super.draw(batch);
+        levelUpEffect.draw(batch);
 
         if (ability1 != null && this == game.players[game.id]) {
             ability1Bar.setValue(ability1.time / ability1.cooldown);
@@ -355,12 +362,26 @@ public class Player extends Sprite implements Damageable {
     }
 
     private void setupParticleEffect(SpaceBattles game) {
-        effect = new ParticleEffect();
-        effect.load(
+        thrusterEffect = new ParticleEffect();
+        thrusterEffect.load(
             Gdx.files.internal("particles/Thruster.p"),
             game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
         );
-        effect.scaleEffect(0.03f);
+        thrusterEffect.scaleEffect(0.03f);
+
+        explosionEffect = new ParticleEffect();
+        explosionEffect.load(
+            Gdx.files.internal("particles/explosion.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        explosionEffect.scaleEffect(0.015f);
+
+        levelUpEffect = new ParticleEffect();
+        levelUpEffect.load(
+            Gdx.files.internal("particles/levelUp.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        levelUpEffect.scaleEffect(0.015f);
     }
 
     private void handleRotation(float delta) {
@@ -400,11 +421,11 @@ public class Player extends Sprite implements Damageable {
                     thruster.resume(thrusterID);
                 }
                 thrustAnimationState = 1;
-                effect.start();
+                thrusterEffect.start();
             }
         } else {
             thrustAnimationState = 2;
-            effect.allowCompletion();
+            thrusterEffect.allowCompletion();
             thruster.pause(thrusterID);
             if (velocity.len() < friction * delta) velocity.setLength(0);
             else velocity.sub(velocity.cpy().setLength(friction * delta));
@@ -419,17 +440,21 @@ public class Player extends Sprite implements Damageable {
     }
 
     private void updateParticleEffect(float delta) {
-        effect.update(delta);
+        thrusterEffect.update(delta);
+        explosionEffect.update(delta);
+        levelUpEffect.update(delta);
         if (spectating) return;
 
         Vector2 origin = getCenter();
         Vector2 offset = getHeadingDir().scl(-size/4);
-        effect.setPosition(origin.x + offset.x, origin.y + offset.y);
+        thrusterEffect.setPosition(origin.x + offset.x, origin.y + offset.y);
 
-        effect.getEmitters().forEach(emitter -> {
+        thrusterEffect.getEmitters().forEach(emitter -> {
             emitter.getAngle().setHigh(getRotation() - 90);
             emitter.getAngle().setLow(getRotation() - 90);
         });
+
+        levelUpEffect.setPosition(origin.x, origin.y);
     }
 
     private void handleTileCollision(int tileX, int tileY, float tileSize, float playerX, float playerY, float radius) {
@@ -514,6 +539,9 @@ public class Player extends Sprite implements Damageable {
         if (health <= 0) {
             deathID = death.play();
             death.setVolume(deathID, game.getVolume(getCenter(), 1f));
+            Vector2 c = getCenter();
+            explosionEffect.setPosition(c.x, c.y);
+            explosionEffect.start();
             if (!game.gameStarted) {
                 respawn();
                 return true;
@@ -550,7 +578,7 @@ public class Player extends Sprite implements Damageable {
 
     public void setSpectating(boolean isSpectator) {
         if (isSpectator) {
-            effect.allowCompletion();
+            thrusterEffect.allowCompletion();
         }
         this.spectating = isSpectator;
     }

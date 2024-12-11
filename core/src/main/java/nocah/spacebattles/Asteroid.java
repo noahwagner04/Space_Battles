@@ -1,10 +1,11 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.Array;
 
 public class Asteroid extends Sprite implements Damageable {
     private Vector2 velocity;
@@ -19,6 +20,8 @@ public class Asteroid extends Sprite implements Damageable {
 
     private StatusBar healthBar;
 
+    private ParticleEffect crumbleEffect;
+
     public Asteroid(SpaceBattles game, Rectangle spawnArea) {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
         this.spawnArea = spawnArea;
@@ -26,6 +29,13 @@ public class Asteroid extends Sprite implements Damageable {
         healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, 0, 0);
         healthBar.noDrawOnFull = true;
         destroy = game.am.get(SpaceBattles.RSC_ASTEROID_DESTROY_SOUND, Sound.class);
+
+        crumbleEffect = new ParticleEffect();
+        crumbleEffect.load(
+            Gdx.files.internal("particles/asteroidExplosion.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+
         randomizeAttributes();
         randomizePosition();
     }
@@ -82,6 +92,7 @@ public class Asteroid extends Sprite implements Damageable {
         translate(velocity.x * delta, velocity.y * delta);
         rotate(rotationSpeed * delta);
         healthBar.setPosition(getX(), getY() - 0.25f);
+        crumbleEffect.update(delta);
     }
 
     public void bounceOffBounds(Rectangle bounds) {
@@ -106,10 +117,30 @@ public class Asteroid extends Sprite implements Damageable {
         return new Vector2(getX() + getOriginX(), getY() + getOriginY());
     }
 
+    private void playCrumbleEffect() {
+        Color tint = getColor().cpy();
+
+        crumbleEffect.reset(true);
+        crumbleEffect.scaleEffect(size / 100);
+        Array<ParticleEmitter> crumbleEmitters = crumbleEffect.getEmitters();
+        ParticleEmitter.GradientColorValue tint1 = crumbleEmitters.get(0).getTint();
+        ParticleEmitter.GradientColorValue tint2 = crumbleEmitters.get(1).getTint();
+
+        float[] tintArray = {tint.r, tint.g, tint.b};
+
+        tint1.setColors(tintArray);
+        tint2.setColors(tintArray);
+
+        Vector2 c = getCenter();
+        crumbleEffect.setPosition(c.x, c.y);
+        crumbleEffect.start();
+    }
+
     @Override
     public void draw(Batch batch) {
         super.draw(batch);
         healthBar.draw(batch);
+        crumbleEffect.draw(batch);
     }
 
     @Override
@@ -121,6 +152,9 @@ public class Asteroid extends Sprite implements Damageable {
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
         healthBar.setValue(health);
+        if (health <= 0) {
+            playCrumbleEffect();
+        }
         return health <= 0;
     }
 

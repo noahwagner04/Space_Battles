@@ -3,9 +3,7 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
@@ -40,6 +38,13 @@ public class PlayerBase extends Sprite implements Damageable {
     private TextureRegion pentagon;
     public float pentagonRotation = 0;
 
+    private ParticleEffect explosionEffect;
+    private ParticleEffect smokeEffect;
+    private ParticleEffect sparksEffect;
+
+    private boolean smokeStarted = false;
+    private boolean sparksStarted = false;
+
     public PlayerBase(SpaceBattles game, int team, float x, float y) {
         super(game.getEntity(SpaceBattles.RSC_CIRCLE_IMG));
         this.game = game;
@@ -59,6 +64,27 @@ public class PlayerBase extends Sprite implements Damageable {
 
         sound = game.am.get(SpaceBattles.RSC_BASE_AMBIENT_SOUND, Sound.class);
         destroy = game.am.get(SpaceBattles.RSC_BASE_DESTROY_SOUND, Sound.class);
+
+        explosionEffect = new ParticleEffect();
+        explosionEffect.load(
+            Gdx.files.internal("particles/explosion.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        explosionEffect.scaleEffect(0.03f);
+
+        smokeEffect = new ParticleEffect();
+        smokeEffect.load(
+            Gdx.files.internal("particles/smoke.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        smokeEffect.scaleEffect(0.03f);
+
+        sparksEffect = new ParticleEffect();
+        sparksEffect.load(
+            Gdx.files.internal("particles/sparks.p"),
+            game.am.get(SpaceBattles.RSC_PARTICLE_ATLAS, TextureAtlas.class)
+        );
+        sparksEffect.scaleEffect(0.015f);
     }
 
     public void update(float delta) {
@@ -97,6 +123,7 @@ public class PlayerBase extends Sprite implements Damageable {
 
     @Override
     public void draw(Batch batch) {
+        explosionEffect.draw(batch);
         if (destroyed) return;
         super.draw(batch);
         Color c = batch.getColor().cpy();
@@ -118,6 +145,8 @@ public class PlayerBase extends Sprite implements Damageable {
         pentagonRotation += 90 * Gdx.graphics.getDeltaTime();
         batch.setColor(c);
         healthBar.draw(batch);
+        smokeEffect.draw(batch);
+        sparksEffect.draw(batch);
     }
 
     public boolean isDestroyed() {
@@ -133,10 +162,28 @@ public class PlayerBase extends Sprite implements Damageable {
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
         healthBar.setValue(health);
+
+        if (health < 1500 && !smokeStarted) {
+            Vector2 c = getCenter();
+            smokeEffect.setPosition(c.x, c.y);
+            smokeStarted = true;
+        }
+
+        if (health < 750 && !sparksStarted) {
+            Vector2 c = getCenter();
+            sparksEffect.setPosition(c.x, c.y);
+            sparksStarted = true;
+        }
+
         if (health <= 0) {
             destroyed = true;
             long destroyID = destroy.play();
             destroy.setVolume(destroyID, game.getVolume(getCenter(), 2f));
+            smokeEffect.allowCompletion();
+            sparksEffect.allowCompletion();
+            Vector2 c = getCenter();
+            explosionEffect.setPosition(c.x, c.y);
+            explosionEffect.start();
             return true;
         }
         return false;
@@ -184,5 +231,16 @@ public class PlayerBase extends Sprite implements Damageable {
         } else {
             sound.setVolume(soundID, game.getVolume(getCenter(), 0.08f));
         }
+    }
+
+    public void updateParticleEffects(float delta) {
+        if (smokeStarted) {
+            smokeEffect.update(delta);
+        }
+
+        if (sparksStarted) {
+            sparksEffect.update(delta);
+        }
+        explosionEffect.update(delta);
     }
 }

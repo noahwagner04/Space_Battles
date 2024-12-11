@@ -1,13 +1,62 @@
 
 particles.png
-size: 256, 256
+size: 1024, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-particle-fire
+debris1
   rotate: false
-  xy: 2, 2
+  xy: 2, 68
   size: 128, 128
   orig: 128, 128
+  offset: 0, 0
+  index: -1
+debris2
+  rotate: false
+  xy: 132, 68
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+debris3
+  rotate: false
+  xy: 262, 68
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+debris4
+  rotate: false
+  xy: 392, 68
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+particle
+  rotate: false
+  xy: 782, 164
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particle-cloud
+  rotate: false
+  xy: 522, 68
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+particle-fire
+  rotate: false
+  xy: 652, 68
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+particle-star
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: -1

@@ -204,8 +204,8 @@ public class ArenaScreen extends ScreenAdapter {
         game.batch.draw(game.am.get(SpaceBattles.RSC_STARS1_IMG, Texture.class), 0, 0, 800, 800);
         Texture s2 = game.am.get(SpaceBattles.RSC_STARS2_IMG);
         Texture s3 = game.am.get(SpaceBattles.RSC_STARS3_IMG);
-        Vector2 pos2 = camera.getPosition().scl(0.0075f);
-        Vector2 pos3 = camera.getPosition().scl(0.015f);
+        Vector2 pos2 = camera.getPosition().scl(0.005f);
+        Vector2 pos3 = camera.getPosition().scl(0.01f);
 
         s2.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         game.batch.draw(s2, 0, 0, 800, 800, pos2.x, pos2.y, pos2.x + 1, pos2.y + 1);

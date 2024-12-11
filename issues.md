@@ -53,10 +53,10 @@
 - Add upgrade / ability unlock UI
 - add better title image
 - Add better Art
-
-## Open Issues ##
 - sound effects & music (elevator-like lobby music)
 - Various particle effects
-- Level up flare (maybe xp gain particle effect)
 - Add HUD cheat-codes
-- cap players to 4
+- credits
+
+## Open Issues ##
+- Add assignment README.md
