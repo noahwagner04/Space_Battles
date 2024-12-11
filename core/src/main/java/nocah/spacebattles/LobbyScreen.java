@@ -2,15 +2,14 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.SpawnEvent;
 import nocah.spacebattles.netevents.StartGameEvent;
 
@@ -77,6 +76,8 @@ public class LobbyScreen extends ScreenAdapter {
 
         game.startWorldDraw(camera.getProjMat());
         ScreenUtils.clear(0f, 0f, 0f, 1f);
+        game.batch.draw(game.am.get(SpaceBattles.RSC_STARS1_IMG, Texture.class), -6, -6, 12, 12);
+        game.batch.draw(game.am.get(SpaceBattles.RSC_STARS2_IMG, Texture.class), -6, -6, 12, 12);
         game.drawSprites(game.players);
         game.drawSprites(game.projectiles);
         game.endWorldDraw();

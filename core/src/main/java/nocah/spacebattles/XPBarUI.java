@@ -17,12 +17,14 @@ public class XPBarUI {
 
         xpBar.setPosition(Gdx.graphics.getWidth() - 70, 30);
         xpBar.setSize(50, 200);
+        xpBar.setColor(1, 1, 0, 1);
 
         int playerLevel = game.players[game.id].getLevel();
 
         Label.LabelStyle style = SpaceBattles.skin.get("default", Label.LabelStyle.class);
         levelLabel = new Label("lvl " + playerLevel, style);
         levelLabel.setPosition(Gdx.graphics.getWidth() - 80, 240);
+        levelLabel.setColor(1, 1, 0, 1);
 
         stage.addActor(xpBar);
         stage.addActor(levelLabel);

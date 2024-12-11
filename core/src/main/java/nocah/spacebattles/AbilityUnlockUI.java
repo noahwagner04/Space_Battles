@@ -1,6 +1,5 @@
 package nocah.spacebattles;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 public class AbilityUnlockUI {
     private SpaceBattles game;
     private Table table;
-    private Label levelLabel;
+    private Label message;
     private int abilityCount = 0;
     public int playerLevel;
     private final String[] abilityNames = {
@@ -30,11 +29,9 @@ public class AbilityUnlockUI {
         table.top();
         table.setFillParent(true);
 
-        Label.LabelStyle style = SpaceBattles.skin.get("default", Label.LabelStyle.class);
-        style.fontColor = new Color(1, 1, 1, 1);
-
-        levelLabel = new Label("Choose an ability!", style);
-        table.add(levelLabel).colspan(5).padTop(50).padBottom(10);
+        message = new Label("Choose an ability!", SpaceBattles.skin);
+        message.setColor(0.6f, 0.9f, 1f, 1);
+        table.add(message).colspan(5).padTop(50).padBottom(10);
         table.row();
 
         // Display buttons for unlocking abilities
@@ -48,6 +45,7 @@ public class AbilityUnlockUI {
                         unlockAbility(abilityIndex);
                     }
                 });
+                button.setColor(0, 0, 1, 1);
                 table.add(button).pad(5).width(150).height(100);
             }
         }

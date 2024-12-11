@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class LoadScreen extends ScreenAdapter {
     private SpaceBattles game;
     private float timer = 0;
-    private float waitTime = 1;
+    private float waitTime = 3f;
     private boolean canRender = false;
 
     public LoadScreen(SpaceBattles game) {
@@ -28,7 +28,7 @@ public class LoadScreen extends ScreenAdapter {
             return;
         }
 
-        if (!game.am.isLoaded(SpaceBattles.RSC_LIBGDX_IMG)) {
+        if (!game.am.isLoaded(SpaceBattles.RSC_TITLE_SCREEN_IMG)) {
             return;
         }
 
@@ -47,7 +47,7 @@ public class LoadScreen extends ScreenAdapter {
         }
 
         game.batch.begin();
-        Texture gdxTex = game.am.get(SpaceBattles.RSC_LIBGDX_IMG, Texture.class);
+        Texture gdxTex = game.am.get(SpaceBattles.RSC_TITLE_SCREEN_IMG, Texture.class);
         game.batch.draw(
             gdxTex,
             Gdx.graphics.getWidth() / 2f - gdxTex.getWidth() / 2f,
@@ -57,9 +57,6 @@ public class LoadScreen extends ScreenAdapter {
     }
 
     private void afterLoadCallback() {
-        TextureAtlas entities = game.am.get(SpaceBattles.RSC_ENTITY_ATLAS);
-        for(Texture texture : entities.getTextures()) {
-            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        }
+
     }
 }

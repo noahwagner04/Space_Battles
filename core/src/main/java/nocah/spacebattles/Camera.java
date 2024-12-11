@@ -28,4 +28,8 @@ public class Camera {
     public OrthographicCamera getOrthCamera() {
         return orthCamera;
     }
+
+    public Vector2 getPosition() {
+        return new Vector2(orthCamera.position.x, orthCamera.position.y);
+    }
 }

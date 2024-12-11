@@ -2,10 +2,12 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -45,8 +47,9 @@ public class ArenaScreen extends ScreenAdapter {
         game.setBases(worldBounds);
         thisPlayer.respawn();
 
+        Rectangle spawnArea = new Rectangle(5, 5, worldBounds.width - 5, worldBounds.height - 5);
         for (int i = 0; i < game.asteroids.length; i++) {
-            game.asteroids[i] = new Asteroid(game, worldBounds);
+            game.asteroids[i] = new Asteroid(game, spawnArea);
         }
         camera = new Camera(15, 15);
 
@@ -131,28 +134,41 @@ public class ArenaScreen extends ScreenAdapter {
     public void render(float delta) {
         update(delta);
 
-        game.startWorldDraw(camera.getProjMat());
+        game.startWorldDraw();
         ScreenUtils.clear(0f, 0f, 0f, 1f);
+        game.batch.draw(game.am.get(SpaceBattles.RSC_STARS1_IMG, Texture.class), 0, 0, 800, 800);
+        Texture s2 = game.am.get(SpaceBattles.RSC_STARS2_IMG);
+        Texture s3 = game.am.get(SpaceBattles.RSC_STARS3_IMG);
+        Vector2 pos2 = camera.getPosition().scl(0.0075f);
+        Vector2 pos3 = camera.getPosition().scl(0.015f);
+
+        s2.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        game.batch.draw(s2, 0, 0, 800, 800, pos2.x, pos2.y, pos2.x + 1, pos2.y + 1);
+
+        s3.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        game.batch.draw(s3, 0, 0, 800, 800, pos3.x, pos3.y, pos3.x + 1, pos3.y + 1);
+        game.endWorldDraw();
+
+        game.startWorldDraw(camera.getProjMat());
         mapRenderer.setView(camera.getOrthCamera());
         mapRenderer.render();
-        game.drawSprites(game.players);
         game.drawSprites(game.projectiles);
         game.drawSprites(game.bases);
         for(int i = 0; i < SpaceBattles.MAX_PLAYERS; i++) {
             game.drawSprites(game.minions[i]);
         }
         game.drawSprites(game.bombs);
+        game.drawSprites(game.players);
         game.drawSprites(game.asteroids);
         game.endWorldDraw();
 
         game.batch.begin();
         hud.draw(game.batch);
 
-        // NOTE: eventually replace with win / lose messages
         if (checkWin()) {
-            game.batch.setColor(0, 1, 0, 1);
+            game.batch.draw(game.am.get(SpaceBattles.RSC_YOU_WIN_IMG, Texture.class), 0, 0);
         } else if (checkLose()) {
-            game.batch.setColor(1, 0, 0, 1);
+            game.batch.draw(game.am.get(SpaceBattles.RSC_YOU_LOSE_IMG, Texture.class), 0, 0);
         }
         game.batch.end();
 

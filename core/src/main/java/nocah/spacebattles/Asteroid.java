@@ -3,7 +3,6 @@ package nocah.spacebattles;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 
 public class Asteroid extends Sprite implements Damageable {
@@ -12,14 +11,14 @@ public class Asteroid extends Sprite implements Damageable {
     private float size;
     private float health;
     private SpaceBattles game;
-    private Rectangle worldBounds;
+    private Rectangle spawnArea;
     public float xp;
 
     private StatusBar healthBar;
 
-    public Asteroid(SpaceBattles game, Rectangle worldBounds) {
+    public Asteroid(SpaceBattles game, Rectangle spawnArea) {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
-        this.worldBounds = worldBounds;
+        this.spawnArea = spawnArea;
         healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, 0, 0);
         healthBar.noDrawOnFull = true;
         randomizeAttributes();
@@ -60,10 +59,10 @@ public class Asteroid extends Sprite implements Damageable {
     }
 
     public void randomizePosition() {
-        float x = SpaceBattles.random.nextFloat(worldBounds.x, worldBounds.width);
-        float y = SpaceBattles.random.nextFloat(worldBounds.y, worldBounds.height);
-        setPosition(x, y);
-        healthBar.setPosition(x, y - 0.25f);
+        float x = SpaceBattles.random.nextFloat(spawnArea.x, spawnArea.width);
+        float y = SpaceBattles.random.nextFloat(spawnArea.y, spawnArea.height);
+        setCenter(x, y);
+        healthBar.setPosition(getX(), getY() - 0.25f);
     }
 
     public void setSpeed(float speed) {

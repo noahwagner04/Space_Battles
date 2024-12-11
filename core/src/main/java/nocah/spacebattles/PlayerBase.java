@@ -1,7 +1,10 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
@@ -30,6 +33,9 @@ public class PlayerBase extends Sprite implements Damageable {
 
     private int team;
 
+    private TextureRegion pentagon;
+    public float pentagonRotation = 0;
+
     public PlayerBase(SpaceBattles game, int team, float x, float y) {
         super(game.getEntity(SpaceBattles.RSC_CIRCLE_IMG));
         this.game = game;
@@ -44,6 +50,8 @@ public class PlayerBase extends Sprite implements Damageable {
         healthBar.setRange(0, maxHealth);
         healthBar.setValue(health);
         healthBar.noDrawOnFull = true;
+
+        pentagon = game.getEntity(SpaceBattles.RSC_PENTAGON_IMG);
     }
 
     public void update(float delta) {
@@ -82,6 +90,24 @@ public class PlayerBase extends Sprite implements Damageable {
     public void draw(Batch batch) {
         if (destroyed) return;
         super.draw(batch);
+        Color c = batch.getColor().cpy();
+        batch.setColor(getColor());
+        float size = getWidth() - 0.25f;
+        Vector2 center = getCenter();
+        batch.draw(
+            pentagon,
+            center.x - size / 2f,
+            center.y - size / 2f,
+            size / 2f,
+            size / 2f,
+            size,
+            size,
+            1,
+            1,
+            pentagonRotation
+        );
+        pentagonRotation += 90 * Gdx.graphics.getDeltaTime();
+        batch.setColor(c);
         healthBar.draw(batch);
     }
 

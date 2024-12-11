@@ -51,12 +51,12 @@
 - don't make player null when player disconnects
 - Minions sometimes (rarely) will get damaged before sending move event to other clients
 - Add upgrade / ability unlock UI
+- add better title image
+- Add better Art
 
 ## Open Issues ##
-- Add better Art & sound effects (elevator-like lobby music)
+- sound effects & music (elevator-like lobby music)
 - Various particle effects
 - Level up flare (maybe xp gain particle effect)
 - Add HUD cheat-codes
 - cap players to 4
-- add better title image
-

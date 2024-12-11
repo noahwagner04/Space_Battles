@@ -24,10 +24,8 @@ public class StatUpgradeUI {
 
         statPoints = game.players[game.id].getStatPoints();
 
-        Label.LabelStyle style = SpaceBattles.skin.get("default", Label.LabelStyle.class);
-        style.fontColor = new Color(1, 1, 1, 1);
-
-        statPointsLabel = new Label("Stat Points: " + statPoints, style);
+        statPointsLabel = new Label("Stat Points: " + statPoints, SpaceBattles.skin);
+        statPointsLabel.setColor(0.5f, 1, 0.5f, 1);
         table.add(statPointsLabel).colspan(1).padBottom(10).padLeft(10).left();
         table.row();
 
@@ -40,6 +38,8 @@ public class StatUpgradeUI {
                     game.players[game.id].upgradeStat(statType);
                 }
             });
+            button.setColor(0, 1, 0, 1);
+
             table.add(button).pad(5).width(350);
             table.row();
         }

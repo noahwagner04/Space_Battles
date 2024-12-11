@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
-import nocah.spacebattles.netevents.AbilityEvent;
 import nocah.spacebattles.netevents.MoveEvent;
 import nocah.spacebattles.netevents.ShootEvent;
 
@@ -65,7 +64,7 @@ public class Player extends Sprite implements Damageable {
     private boolean spectating = false;
 
     public Player(SpaceBattles game, byte id) {
-        super(game.getEntity(SpaceBattles.RSC_TRIANGLE_IMG));
+        super(game.getEntity(SpaceBattles.RSC_SHIP_IMG));
         this.game = game;
         this.id = id;
         setSize(size, size);

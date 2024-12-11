@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nocah.spacebattles.netevents.*;
@@ -21,14 +22,23 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class SpaceBattles extends Game {
-    public static final String RSC_LIBGDX_IMG = "textures/libgdx.png";
+    public static final String RSC_TITLE_SCREEN_IMG = "textures/titleScreen.png";
     public static final String RSC_SQUARE_IMG = "square";
     public static final String RSC_CIRCLE_IMG = "circle";
     public static final String RSC_TRIANGLE_IMG = "triangle";
     public static final String[] RSC_ASTEROID_IMGS = {"asteroid1", "asteroid2", "asteroid3"};
+    public static final String RSC_SHIP_IMG = "ship";
+    public static final String RSC_PENTAGON_IMG = "pentagon";
     public static final String RSC_ENTITY_ATLAS = "atlases/entities.atlas";
     public static final String RSC_PARTICLE_ATLAS = "atlases/particles.atlas";
     public static final String RSC_TILED_MAP = "BattleArena/BattleArena.tmx";
+    public static final String RSC_STARS1_IMG = "textures/stars1.png";
+    public static final String RSC_STARS2_IMG = "textures/stars2.png";
+    public static final String RSC_STARS3_IMG = "textures/stars3.png";
+    public static final String RSC_CONGRATULATIONS_IMG = "textures/congratulations.png";
+    public static final String RSC_BETTER_LUCK_IMG = "textures/betterLuckNextTime.png";
+    public static final String RSC_YOU_WIN_IMG = "textures/youWin.png";
+    public static final String RSC_YOU_LOSE_IMG = "textures/youLose.png";
 
     public static final int MAX_PLAYERS = 4;
     public static final int MAX_ASTEROIDS = 20;
@@ -82,15 +92,26 @@ public class SpaceBattles extends Game {
         int fb_h = (int)(Gdx.graphics.getHeight() * res);
         frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, fb_w, fb_h, false);
         handlers = new HandlerRegistry(this);
-        am.load(RSC_LIBGDX_IMG, Texture.class);
+        am.load(RSC_TITLE_SCREEN_IMG, Texture.class);
 
         am.load(RSC_ENTITY_ATLAS, TextureAtlas.class);
         am.load(RSC_PARTICLE_ATLAS, TextureAtlas.class);
+
+        am.load(RSC_STARS1_IMG, Texture.class);
+        am.load(RSC_STARS2_IMG, Texture.class);
+        am.load(RSC_STARS3_IMG, Texture.class);
+
+        am.load(RSC_CONGRATULATIONS_IMG, Texture.class);
+        am.load(RSC_BETTER_LUCK_IMG, Texture.class);
+        am.load(RSC_YOU_WIN_IMG, Texture.class);
+        am.load(RSC_YOU_LOSE_IMG, Texture.class);
 
         am.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
         am.load(SpaceBattles.RSC_TILED_MAP, TiledMap.class);
 
         skin = new Skin(Gdx.files.internal("skin/quantum-horizon-ui.json"));
+        Label.LabelStyle style = SpaceBattles.skin.get("default", Label.LabelStyle.class);
+        style.fontColor = new Color(1, 1, 1, 1);
         setScreen(new LoadScreen(this));
     }
 

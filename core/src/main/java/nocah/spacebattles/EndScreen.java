@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -45,10 +46,11 @@ public class EndScreen extends ScreenAdapter {
         game.batch.draw(game.getEntity(SpaceBattles.RSC_SQUARE_IMG), 0, Gdx.graphics.getHeight() - 535, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.batch.setColor(1, 1, 1, 1);
 
-        String mainText = gameWon ? "Congratulations!" : "Better luck next time!";
-        String subText = "Close game to play again...";
-        font.draw(game.batch, mainText, 400 - mainText.length() * 4, Gdx.graphics.getHeight() - 240);
-        font.draw(game.batch, subText, 400 - subText.length() * 4, Gdx.graphics.getHeight() - 280);
+        if (gameWon) {
+            game.batch.draw(game.am.get(SpaceBattles.RSC_CONGRATULATIONS_IMG, Texture.class), 0, 0);
+        } else {
+            game.batch.draw(game.am.get(SpaceBattles.RSC_BETTER_LUCK_IMG, Texture.class), 0, 0);
+        }
 
         font.draw(game.batch, "CREDITS: ", 200, Gdx.graphics.getHeight() - 500);
 
