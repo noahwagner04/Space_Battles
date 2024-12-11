@@ -104,10 +104,12 @@ public class HandlerRegistry {
             Vector2 pPos = p.getCenter();
             if (e.minionID == -1 && e.bombID == -1) {
                 p.fireBullet(e.bulletID);
+                p.playShoot();
             } else if (e.minionID != -1) {
                 Minion m = game.minions[e.playerID][e.minionID];
                 Vector2 target = m.getCenter().add( new Vector2(1, 0).rotateRad(e.rotation));
                 m.shootAt(target, e.bulletID);
+                m.playShoot();
             } else if (e.bulletID == -1) {
                 game.bombs.add(new Bomb(p, game, pPos.x, pPos.y, e.bombID));
             } else {
@@ -120,7 +122,7 @@ public class HandlerRegistry {
                 }
                 if (b == null) return;
                 Vector2 startPos = new Vector2(b.getX() + b.getOriginX(), b.getY() + b.getOriginY());
-                Projectile proj = new Projectile(e.bulletID, game.getEntity(SpaceBattles.RSC_SQUARE_IMG), startPos.x, startPos.y, b.bulletSpeed, e.rotation);
+                Projectile proj = new Projectile(game, e.bulletID, game.getEntity(SpaceBattles.RSC_SQUARE_IMG), startPos.x, startPos.y, b.bulletSpeed, e.rotation);
                 proj.setSize(0.15f, 0.15f);
                 proj.setOriginCenter();
                 proj.translate(-proj.getOriginX(), -proj.getOriginY());
@@ -158,6 +160,7 @@ public class HandlerRegistry {
                     while (iterator.hasNext()) {
                         Projectile proj = iterator.next();
                         if (proj.getID() == e.entityId) {
+                            proj.playHit();
                             iterator.remove();
                         }
                     }
@@ -166,6 +169,7 @@ public class HandlerRegistry {
                     Asteroid a = game.asteroids[e.entityId];
                     if (a.damage(e.damageAmount)) {
                         game.players[e.damagerID].gainExperience(a.xp);
+                        a.playDestroy();
                         a.randomizeAttributes();
                         a.randomizePosition();
                     }
@@ -188,6 +192,7 @@ public class HandlerRegistry {
                     while (itr.hasNext()) {
                         Bomb b = itr.next();
                         if (b.id == e.entityId) {
+                            b.playExplode();
                             itr.remove();
                         }
                     }

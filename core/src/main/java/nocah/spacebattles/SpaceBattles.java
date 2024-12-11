@@ -4,6 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -40,6 +42,32 @@ public class SpaceBattles extends Game {
     public static final String RSC_YOU_WIN_IMG = "textures/youWin.png";
     public static final String RSC_YOU_LOSE_IMG = "textures/youLose.png";
 
+    public static final String RSC_ASTEROID_DESTROY_SOUND = "Sounds/AstroidDestroy.ogg";
+    public static final String RSC_BASE_AMBIENT_SOUND = "Sounds/Base_ambient.ogg";
+    public static final String RSC_BASE_DESTROY_SOUND = "Sounds/BaseDestroy.ogg";
+    public static final String RSC_BOMB_DEPLOY_SOUND = "Sounds/BombDeploy.ogg";
+    public static final String RSC_BOMB_EXPLODE_SOUND = "Sounds/BombExplode.ogg";
+    public static final String RSC_BULLET_HIT_SOUND = "Sounds/BulletHit.ogg";
+    public static final String RSC_CLICK_SOUND = "Sounds/ClickSound.ogg";
+    public static final String RSC_DASH_SOUND = "Sounds/Dash.ogg";
+    public static final String RSC_FORCE_FIELD_SOUND = "Sounds/ForceField.ogg";
+    public static final String RSC_INVISIBILITY_SOUND = "Sounds/Invisibility.ogg";
+    public static final String RSC_UNINVISIBILITY_SOUND = "Sounds/unInvisibility.ogg";
+    public static final String RSC_LEVEL_UP_SOUND = "Sounds/LevelUp.ogg";
+    public static final String RSC_LOBBY_SCREEN_MUSIC = "Sounds/LobbyScreenSong.ogg";
+    public static final String RSC_LOSE_MUSIC = "Sounds/LoseSong.ogg";
+    public static final String RSC_LOSE_SOUND = "Sounds/LoseSound.ogg";
+    public static final String RSC_MINION_SHOOT_SOUND = "Sounds/MinionShoot.ogg";
+    public static final String RSC_PLAYER_DAMAGE_SOUND = "Sounds/PlayerDamage.ogg";
+    public static final String RSC_PLAYER_DEATH_SOUND = "Sounds/PlayerDeath.ogg";
+    public static final String RSC_PLAYER_SHOOT_SOUND = "Sounds/PlayerShoot.ogg";
+    public static final String RSC_SHIP_THRUSTER_SOUND = "Sounds/ShipThruster.ogg";
+    public static final String RSC_SPACE_AMBIENT_SOUND = "Sounds/SpaceAmbient.ogg";
+    public static final String RSC_TITLE_MUSIC = "Sounds/TitleSong.ogg";
+    public static final String RSC_UNLOCK_ABILITY_SOUND = "Sounds/UnlockAbility.ogg";
+    public static final String RSC_WIN_MUSIC = "Sounds/WinSong.ogg";
+
+
     public static final int MAX_PLAYERS = 4;
     public static final int MAX_ASTEROIDS = 20;
     public static final int MAX_MINIONS = 10;
@@ -55,6 +83,11 @@ public class SpaceBattles extends Game {
     public boolean gameStarted = false;
     private int nextBulletId = 0;
     private byte nextBombID = 0;
+    public Sound click;
+    public Music titleMusic;
+    public Music lobbyMusic;
+    public Music winMusic;
+    public Music loseMusic;
 
     public final float numOfPosSends = 20;
     float posTimer = 0;
@@ -109,6 +142,34 @@ public class SpaceBattles extends Game {
         am.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
         am.load(SpaceBattles.RSC_TILED_MAP, TiledMap.class);
 
+        am.load(RSC_ASTEROID_DESTROY_SOUND, Sound.class);
+        am.load(RSC_BASE_AMBIENT_SOUND, Sound.class);
+        am.load(RSC_BASE_DESTROY_SOUND, Sound.class);
+        am.load(RSC_BOMB_DEPLOY_SOUND, Sound.class);
+        am.load(RSC_BOMB_EXPLODE_SOUND, Sound.class);
+        am.load(RSC_BULLET_HIT_SOUND, Sound.class);
+        am.load(RSC_CLICK_SOUND, Sound.class);
+        am.load(RSC_DASH_SOUND, Sound.class);
+        am.load(RSC_FORCE_FIELD_SOUND, Sound.class);
+        am.load(RSC_INVISIBILITY_SOUND, Sound.class);
+        am.load(RSC_UNINVISIBILITY_SOUND, Sound.class);
+        am.load(RSC_LEVEL_UP_SOUND, Sound.class);
+        am.load(RSC_LOSE_SOUND, Sound.class);
+        am.load(RSC_MINION_SHOOT_SOUND, Sound.class);
+        am.load(RSC_PLAYER_DAMAGE_SOUND, Sound.class);
+        am.load(RSC_PLAYER_DEATH_SOUND, Sound.class);
+        am.load(RSC_PLAYER_SHOOT_SOUND, Sound.class);
+        am.load(RSC_SHIP_THRUSTER_SOUND, Sound.class);
+        am.load(RSC_SPACE_AMBIENT_SOUND, Sound.class);
+        am.load(RSC_UNLOCK_ABILITY_SOUND, Sound.class);
+        titleMusic = Gdx.audio.newMusic(Gdx.files.internal(RSC_TITLE_MUSIC));
+        titleMusic.setLooping(true);
+        titleMusic.setVolume(0.2f);
+        titleMusic.play();
+        lobbyMusic = Gdx.audio.newMusic(Gdx.files.internal(RSC_LOBBY_SCREEN_MUSIC));
+        lobbyMusic.setLooping(true);
+        winMusic = Gdx.audio.newMusic(Gdx.files.internal(RSC_WIN_MUSIC));
+        loseMusic = Gdx.audio.newMusic(Gdx.files.internal(RSC_LOSE_MUSIC));
         skin = new Skin(Gdx.files.internal("skin/quantum-horizon-ui.json"));
         Label.LabelStyle style = SpaceBattles.skin.get("default", Label.LabelStyle.class);
         style.fontColor = new Color(1, 1, 1, 1);
@@ -251,12 +312,14 @@ public class SpaceBattles extends Game {
             );
 
             if (proj.checkBounds(worldBounds)){
+                proj.playHit();
                 iterator.remove();
                 sendEvent(despawnProjectile);
                 continue;
             }
 
             if (map != null && proj.checkCollides(map)) {
+                proj.playHit();
                 iterator.remove();
                 sendEvent(despawnProjectile);
                 continue;
@@ -291,6 +354,7 @@ public class SpaceBattles extends Game {
                     }
 
                     sendEvent(despawnProjectile);
+                    proj.playHit();
                     iterator.remove();
                     removed = true;
                     break;
@@ -317,6 +381,7 @@ public class SpaceBattles extends Game {
                     }
 
                     sendEvent(despawnProjectile);
+                    proj.playHit();
                     iterator.remove();
                     removed = true;
                     break;
@@ -341,11 +406,13 @@ public class SpaceBattles extends Game {
 
                     if (a.damage(proj.damageAmount)) {
                         players[proj.team].gainExperience(a.xp);
+                        a.playDestroy();
                         a.randomizeAttributes();
                         a.randomizePosition();
                     }
 
                     sendEvent(despawnProjectile);
+                    proj.playHit();
                     iterator.remove();
                     removed = true;
                     break;
@@ -375,6 +442,7 @@ public class SpaceBattles extends Game {
                         }
 
                         sendEvent(despawnProjectile);
+                        proj.playHit();
                         iterator.remove();
                         removed = true;
                         break;
@@ -545,5 +613,16 @@ public class SpaceBattles extends Game {
                 ));
             }
         }
+    }
+
+    public float getVolume(Vector2 listenerLoc, float maxVolume) {
+        Player thisPlayer = players[id];
+        float distance = listenerLoc.dst(thisPlayer.getCenter());
+        return  Math.max(maxVolume * (1f - (distance / 10f)), 0);
+    }
+
+    public void playClick() {
+        long id = click.play();
+        click.setVolume(id, 0.4f);
     }
 }

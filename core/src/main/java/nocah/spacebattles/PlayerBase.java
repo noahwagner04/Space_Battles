@@ -2,6 +2,7 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -11,6 +12,9 @@ import com.badlogic.gdx.math.Vector2;
 
 public class PlayerBase extends Sprite implements Damageable {
     SpaceBattles game;
+    private Sound sound;
+    private long soundID = -1;
+    private Sound destroy;
 
     private float maxHealth = 4000;
     private float health = maxHealth;
@@ -52,6 +56,9 @@ public class PlayerBase extends Sprite implements Damageable {
         healthBar.noDrawOnFull = true;
 
         pentagon = game.getEntity(SpaceBattles.RSC_PENTAGON_IMG);
+
+        sound = game.am.get(SpaceBattles.RSC_BASE_AMBIENT_SOUND, Sound.class);
+        destroy = game.am.get(SpaceBattles.RSC_BASE_DESTROY_SOUND, Sound.class);
     }
 
     public void update(float delta) {
@@ -62,6 +69,8 @@ public class PlayerBase extends Sprite implements Damageable {
             respawnTimer = 0;
             game.players[team].respawn();
         }
+
+        playSound();
 
         if (game.server == null) return;
         if (minionSpawnTimer > minionSpawnInterval) {
@@ -126,6 +135,8 @@ public class PlayerBase extends Sprite implements Damageable {
         healthBar.setValue(health);
         if (health <= 0) {
             destroyed = true;
+            long destroyID = destroy.play();
+            destroy.setVolume(destroyID, game.getVolume(getCenter(), 2f));
             return true;
         }
         return false;
@@ -163,6 +174,15 @@ public class PlayerBase extends Sprite implements Damageable {
         for(Minion m : game.minions[team]) {
             if (m == null) continue;
             m.setStats(minionLevel);
+        }
+    }
+
+    private void playSound() {
+        if (soundID == -1) {
+            soundID = sound.loop();
+            sound.setVolume(soundID, game.getVolume(getCenter(), 0.08f));
+        } else {
+            sound.setVolume(soundID, game.getVolume(getCenter(), 0.08f));
         }
     }
 }

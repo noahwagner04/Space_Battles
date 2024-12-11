@@ -1,5 +1,7 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -23,11 +25,15 @@ public class AbilityUnlockUI {
     private boolean[] abilitiesUnlocked = { false, false, false, false, false };
     private byte[] abilities = { Ability.RAPID_FIRE, Ability.FORCE_FIELD, Ability.DASH, Ability.BOMB, Ability.INVISIBILITY };
 
+    private Sound abilityUnlock;
+
     public AbilityUnlockUI(SpaceBattles game, Stage stage) {
         this.game = game;
         table = new Table();
         table.top();
         table.setFillParent(true);
+
+        abilityUnlock = game.am.get(SpaceBattles.RSC_UNLOCK_ABILITY_SOUND, Sound.class);
 
         message = new Label("Choose an ability!", SpaceBattles.skin);
         message.setColor(0.6f, 0.9f, 1f, 1);
@@ -43,6 +49,7 @@ public class AbilityUnlockUI {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         unlockAbility(abilityIndex);
+                        abilityUnlock.play();
                     }
                 });
                 button.setColor(0, 0, 1, 1);

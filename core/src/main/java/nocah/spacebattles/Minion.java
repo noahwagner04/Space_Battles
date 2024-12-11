@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,6 +13,8 @@ import nocah.spacebattles.netevents.ShootEvent;
 public class Minion extends Sprite implements Damageable {
     SpaceBattles game;
     Player playerLeader;
+    private Sound shoot;
+
     private final byte team;
     private final byte id;
     private boolean dead;
@@ -48,6 +51,7 @@ public class Minion extends Sprite implements Damageable {
         this.game = game;
         this.team = team;
         this.id = id;
+        shoot = game.am.get(SpaceBattles.RSC_MINION_SHOOT_SOUND, Sound.class);
         playerLeader = game.players[team];
         setStats(0);
         setColor(SpaceBattles.PLAYER_COLORS[team]);
@@ -59,7 +63,6 @@ public class Minion extends Sprite implements Damageable {
         // if dst to player is in range x to y, follow (donut follow range)
         Vector2 toPlayer = playerLeader.getCenter().sub(getCenter());
         boolean applyFriction = false;
-
         if (toPlayer.len() > minFollowDist &&
             toPlayer.len() < maxFollowDist &&
             !playerLeader.isSpectating() &&
@@ -112,6 +115,7 @@ public class Minion extends Sprite implements Damageable {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
             game.sendEvent(new ShootEvent(team, id, (byte) -1, bulletID, target.angleRad()));
+            playShoot();
             return;
         }
 
@@ -129,6 +133,7 @@ public class Minion extends Sprite implements Damageable {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
             game.sendEvent(new ShootEvent(team, id, (byte) -1, bulletID, target.angleRad()));
+            playShoot();
             return;
         }
 
@@ -149,6 +154,7 @@ public class Minion extends Sprite implements Damageable {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
             game.sendEvent(new ShootEvent(team, id, (byte)-1, bulletID, target.angleRad()));
+            playShoot();
             return;
         }
 
@@ -165,6 +171,7 @@ public class Minion extends Sprite implements Damageable {
             int bulletID = game.getBulletID();
             shootAt(target, bulletID);
             game.sendEvent(new ShootEvent(team, id, (byte)-1, bulletID, target.angleRad()));
+            playShoot();
             return;
         }
     }
@@ -173,7 +180,7 @@ public class Minion extends Sprite implements Damageable {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = target.sub(getCenter());
         Vector2 startPos = getCenter().add(heading.cpy().setLength(size/2));
-        Projectile proj = new Projectile(bulletID, tex, startPos.x, startPos.y, bulletSpeed, heading.angleDeg());
+        Projectile proj = new Projectile(game, bulletID, tex, startPos.x, startPos.y, bulletSpeed, heading.angleDeg());
         proj.setSize(0.15f, 0.15f);
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
@@ -318,5 +325,10 @@ public class Minion extends Sprite implements Damageable {
         shootInterval = Math.max(2f - minionLevel / 24f, 1f);
         maxHealth = 20f + minionLevel * 1.5f;
         health = maxHealth;
+    }
+
+    public void playShoot() {
+        long shootID = shoot.play();
+        shoot.setVolume(shootID, game.getVolume(getCenter(), 0.3f));
     }
 }

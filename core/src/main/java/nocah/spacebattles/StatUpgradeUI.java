@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import nocah.spacebattles.netevents.UpgradeEvent;
 
 public class StatUpgradeUI {
     SpaceBattles game;
@@ -36,6 +37,8 @@ public class StatUpgradeUI {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     game.players[game.id].upgradeStat(statType);
+                    game.sendEvent(new UpgradeEvent(game.id, (byte)statType));
+                    game.playClick();
                 }
             });
             button.setColor(0, 1, 0, 1);

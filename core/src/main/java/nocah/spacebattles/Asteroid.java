@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -14,13 +15,17 @@ public class Asteroid extends Sprite implements Damageable {
     private Rectangle spawnArea;
     public float xp;
 
+    private Sound destroy;
+
     private StatusBar healthBar;
 
     public Asteroid(SpaceBattles game, Rectangle spawnArea) {
         super(game.getEntity(SpaceBattles.RSC_ASTEROID_IMGS[SpaceBattles.random.nextInt(2)]));
         this.spawnArea = spawnArea;
+        this.game = game;
         healthBar = new StatusBar(game, StatusBar.HP_B, StatusBar.HP_F, getX(), getY() - 0.25f, 0, 0);
         healthBar.noDrawOnFull = true;
+        destroy = game.am.get(SpaceBattles.RSC_ASTEROID_DESTROY_SOUND, Sound.class);
         randomizeAttributes();
         randomizePosition();
     }
@@ -125,5 +130,10 @@ public class Asteroid extends Sprite implements Damageable {
     @Override
     public Shape2D getDamageArea() {
         return new Circle(getX() + getOriginX(), getY() + getOriginY(), size / 3f);
+    }
+
+    public void playDestroy() {
+        long id = destroy.play();
+        destroy.setVolume(id, game.getVolume(getCenter(), 1f));
     }
 }

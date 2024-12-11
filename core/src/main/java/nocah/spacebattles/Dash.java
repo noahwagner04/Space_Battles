@@ -1,5 +1,7 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.audio.Sound;
+
 public class Dash extends Ability {
     private float maxSpeedCache;
     private float accelerationCache;
@@ -9,19 +11,22 @@ public class Dash extends Ability {
     private float rotAccelerationCache;
     private float rotFrictionCache;
 
+    private Sound dash;
+
     public Dash(Player player, SpaceBattles game, byte abilityNum) {
         super(player, game);
         cooldown = 5f;
         interval = 2f;
         abilityID = Ability.DASH;
         this.abilityNum = abilityNum;
-
+        dash = game.am.get(SpaceBattles.RSC_DASH_SOUND, Sound.class);
     }
 
     @Override
     public void onActivate() {
         player.effect.scaleEffect(1.5f);
-
+        long dashID = dash.play();
+        dash.setVolume(dashID, game.getVolume(player.getCenter(), 1f));
         maxSpeedCache = player.maxSpeed;
         accelerationCache = player.acceleration;
         frictionCache = player.friction;

@@ -1,5 +1,6 @@
 package nocah.spacebattles;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapProperties;
@@ -15,17 +16,21 @@ public class Projectile extends Sprite {
     public float damageAmount = 0;
     public Damageable target = null;
     private int id;
+    private Sound hit;
+    private SpaceBattles game;
 
 
     // 0-3, indicates what team fired this bullet
     public int team;
 
-    public Projectile(int id, TextureRegion texture, float x, float y, float speed, float angle) {
+    public Projectile(SpaceBattles game, int id, TextureRegion texture, float x, float y, float speed, float angle) {
         super(texture);
         setPosition(x, y);
         this.speed = speed;
         velocity = new Vector2(speed, 0).rotateDeg(angle);
         this.id = id;
+        this.game = game;
+        hit = game.am.get(SpaceBattles.RSC_BULLET_HIT_SOUND, Sound.class);
     }
 
     public void setTarget(Damageable target) {
@@ -67,5 +72,10 @@ public class Projectile extends Sprite {
 
     public int getID() {
         return id;
+    }
+
+    public void playHit() {
+        long hitID = hit.play();
+        hit.setVolume(hitID, game.getVolume(getCenter(), 1f));
     }
 }

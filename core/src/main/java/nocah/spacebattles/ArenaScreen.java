@@ -3,6 +3,7 @@ package nocah.spacebattles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -21,6 +22,9 @@ public class ArenaScreen extends ScreenAdapter {
     private OrthogonalTiledMapRenderer mapRenderer;
     private Rectangle worldBounds;
     public HUD hud;
+    private Sound spaceSound;
+    private Sound lose;
+    private long loseID = -1;
 
     private float endMessageTimer = 0;
     private float endMessageInterval = 5;
@@ -44,10 +48,18 @@ public class ArenaScreen extends ScreenAdapter {
             map.getProperties().get("height", Integer.class)
         );
 
+        spaceSound = game.am.get(SpaceBattles.RSC_SPACE_AMBIENT_SOUND, Sound.class);
+        long soundId = spaceSound.loop();
+        spaceSound.setVolume(soundId, 0.08f);
+
+        lose = game.am.get(SpaceBattles.RSC_LOSE_SOUND, Sound.class);
         game.setBases(worldBounds);
         thisPlayer.respawn();
 
         Rectangle spawnArea = new Rectangle(5, 5, worldBounds.width - 5, worldBounds.height - 5);
+
+        game.lobbyMusic.stop();
+
         for (int i = 0; i < game.asteroids.length; i++) {
             game.asteroids[i] = new Asteroid(game, spawnArea);
         }
@@ -90,6 +102,21 @@ public class ArenaScreen extends ScreenAdapter {
                 } catch (Exception e) {
                     return help;
                 }
+                return "ok!";
+            }
+
+            public String help(String[] cmd) {
+                return help;
+            }
+        });
+
+        hud.registerAction("test", new HUDActionCommand() {
+            static final String help = "dfgh";
+
+            @Override
+            public String execute(String[] cmd) {
+                loseID = lose.play();
+                lose.setVolume(loseID, 5f);
                 return "ok!";
             }
 
@@ -167,8 +194,16 @@ public class ArenaScreen extends ScreenAdapter {
 
         if (checkWin()) {
             game.batch.draw(game.am.get(SpaceBattles.RSC_YOU_WIN_IMG, Texture.class), 0, 0);
+            if (!game.winMusic.isPlaying())  {
+                game.winMusic.play();
+                game.winMusic.setVolume(0.2f);
+            }
         } else if (checkLose()) {
             game.batch.draw(game.am.get(SpaceBattles.RSC_YOU_LOSE_IMG, Texture.class), 0, 0);
+            if (loseID == -1) {
+                loseID = lose.play();
+                lose.setVolume(loseID, 5f);
+            }
         }
         game.batch.end();
 

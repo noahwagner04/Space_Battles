@@ -44,6 +44,7 @@ public class MainMenuScreen extends ScreenAdapter {
                 //spawn in a new client
                 game.handlers.handleClientEvent(new SpawnEvent((byte)0));
                 game.connected = true;
+                game.playClick();
             }
         });
 
@@ -56,6 +57,7 @@ public class MainMenuScreen extends ScreenAdapter {
                 System.out.println("Join button clicked!");
                 String ip = ipField.getText();
                 game.client = new Client(ip);
+                game.playClick();
             }
         });
 

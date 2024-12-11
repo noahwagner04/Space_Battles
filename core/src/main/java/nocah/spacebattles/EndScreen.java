@@ -27,6 +27,10 @@ public class EndScreen extends ScreenAdapter {
         FileHandle file = Gdx.files.internal("credits.txt");
         this.creditsText = file.readString();
         this.currentY = -scrollSpeed;
+        if (!gameWon) {
+            game.loseMusic.play();
+            game.loseMusic.setVolume(0.2f);
+        }
     }
 
     @Override

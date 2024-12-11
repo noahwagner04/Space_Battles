@@ -23,6 +23,9 @@ public class LobbyScreen extends ScreenAdapter {
     public LobbyScreen(SpaceBattles game) {
         this.game = game;
         camera = new Camera(lobbyBounds.width, lobbyBounds.height);
+        game.titleMusic.stop();
+        game.lobbyMusic.play();
+        game.lobbyMusic.setVolume(0.2f);
     }
 
     @Override
@@ -42,6 +45,7 @@ public class LobbyScreen extends ScreenAdapter {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 if (game.server != null) {
+                    game.playClick();
                     game.sendEvent(new StartGameEvent());
                     game.gameStarted = true;
                 }

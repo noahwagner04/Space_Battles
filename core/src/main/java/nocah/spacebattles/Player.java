@@ -2,6 +2,7 @@ package nocah.spacebattles;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -18,6 +19,14 @@ public class Player extends Sprite implements Damageable {
     public static final byte MINIONS = 4;
 
     private SpaceBattles game;
+    private Sound thruster;
+    private long thrusterID = -1;
+    private Sound shoot;
+    private Sound death;
+    private long deathID;
+    private Sound damage;
+    private long damageID;
+    private Sound levelUp;
     public byte id;
 
     public Vector2 velocity = new Vector2(0, 0);
@@ -83,6 +92,12 @@ public class Player extends Sprite implements Damageable {
 
         ability2Bar = new StatusBar(game, Color.GRAY.cpy(), Color.WHITE.cpy(), getX(), getY() - 0.35f, size, 0.1f);
         ability2Bar.setValue(0);
+
+        thruster = game.am.get(SpaceBattles.RSC_SHIP_THRUSTER_SOUND, Sound.class);
+        shoot = game.am.get(SpaceBattles.RSC_PLAYER_SHOOT_SOUND, Sound.class);
+        death = game.am.get(SpaceBattles.RSC_PLAYER_DEATH_SOUND, Sound.class);
+        damage = game.am.get(SpaceBattles.RSC_PLAYER_DAMAGE_SOUND, Sound.class);
+        levelUp = game.am.get(SpaceBattles.RSC_LEVEL_UP_SOUND, Sound.class);
     }
 
     public void gainExperience(float xp) {
@@ -97,6 +112,7 @@ public class Player extends Sprite implements Damageable {
         experience -= xpThreshold(level);
         level++;
         statPoints += (int)Math.max(level * 0.5, 1);
+        if (id == game.id) levelUp.play();
         if (level >= 10) {
             System.out.println("Max Level 10! (second ability unlock)");
             unlockAbility2 = true;
@@ -185,6 +201,7 @@ public class Player extends Sprite implements Damageable {
 
         if ((Gdx.input.isKeyPressed(Input.Keys.SPACE) || fireGun) && shootTimer > bulletCoolDown) {
             shootTimer = 0;
+            shoot.play();
             if(game.server != null) {
                 int bullet_id = game.getBulletID();
                 game.sendEvent(new ShootEvent(game.id, (byte)-1, (byte) -1, bullet_id, 0));
@@ -232,13 +249,24 @@ public class Player extends Sprite implements Damageable {
         setX(x);
         setY(y);
         setRotation(r);
-
+        float volume = game.getVolume(getCenter(), 0.025f);
+        if (thrusterID != -1) thruster.setVolume(thrusterID, volume);
         if (thrustAnimationState == 0 && effect.isComplete()) {
             effect.start();
+            if (thrusterID == -1) {
+                thruster.setVolume(thrusterID, volume);
+                thrusterID = thruster.loop();
+            } else {
+                thruster.setVolume(thrusterID, volume);
+                thruster.resume(thrusterID);
+            }
+
         } else if (thrustAnimationState == 1) {
             effect.start();
+            thruster.resume(thrusterID);
         } else if (thrustAnimationState == 2) {
             effect.allowCompletion();
+            thruster.pause(thrusterID);
         }
 
         updateParticleEffect(delta);
@@ -365,12 +393,19 @@ public class Player extends Sprite implements Damageable {
             thrustAnimationState = 0;
             velocity.add(direction.scl(acceleration * delta));
             if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
+                if (thrusterID == -1) {
+                    thrusterID = thruster.loop();
+                    thruster.setVolume(thrusterID,0.05f);
+                } else {
+                    thruster.resume(thrusterID);
+                }
                 thrustAnimationState = 1;
                 effect.start();
             }
         } else {
             thrustAnimationState = 2;
             effect.allowCompletion();
+            thruster.pause(thrusterID);
             if (velocity.len() < friction * delta) velocity.setLength(0);
             else velocity.sub(velocity.cpy().setLength(friction * delta));
         }
@@ -425,7 +460,7 @@ public class Player extends Sprite implements Damageable {
         TextureRegion tex = game.getEntity(SpaceBattles.RSC_SQUARE_IMG);
         Vector2 heading = getHeadingDir();
         Vector2 startPos = getCenter().add(heading.cpy().scl(size/2));
-        Projectile proj = new Projectile(bulletID, tex, startPos.x, startPos.y, bulletSpeed, getRotation() + 90);
+        Projectile proj = new Projectile(game, bulletID, tex, startPos.x, startPos.y, bulletSpeed, getRotation() + 90);
         proj.setSize(0.15f, 0.15f);
         proj.setOriginCenter();
         proj.translate(-proj.getOriginX(), -proj.getOriginY());
@@ -472,13 +507,20 @@ public class Player extends Sprite implements Damageable {
         if (isInvincible) return false;
         health -= Math.max(amount, 0);
         healthBar.setValue(health);
+        if (health > 0) {
+            damageID = damage.play();
+            damage.setVolume(damageID, game.getVolume(getCenter(), 0.3f));
+        }
         if (health <= 0) {
+            deathID = death.play();
+            death.setVolume(deathID, game.getVolume(getCenter(), 1f));
             if (!game.gameStarted) {
                 respawn();
                 return true;
             }
             setSpectating(true);
             game.bases[id].setRespawnTimer();
+            if (thrustAnimationState != 2) thruster.pause(thrusterID);
             return true;
         }
         return false;
@@ -571,5 +613,10 @@ public class Player extends Sprite implements Damageable {
 
     public float getExperience() {
         return experience;
+    }
+
+    public void playShoot() {
+        long shootID = shoot.play();
+        shoot.setVolume(shootID, game.getVolume(getCenter(), 0.3f));
     }
 }
