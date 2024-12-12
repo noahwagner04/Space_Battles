@@ -1,37 +1,112 @@
-Lorem ipsum odor amet, consectetuer adipiscing elit. Metus volutpat ex
-ultricies platea metus est mauris molestie. Morbi luctus ullamcorper
-maximus integer tempor erat adipiscing a. Dapibus etiam eget lacinia
-himenaeos; dictumst a rhoncus. Nam laoreet turpis sagittis quis
-phasellus aliquam. Et urna himenaeos enim integer dolor magnis augue.
-Quisque ut aliquet praesent eros diam; cras nibh. Mus feugiat id
-ullamcorper amet etiam arcu elementum.
+pauliuw (base ambient sound)
+base_ambient.ogg
+https://opengameart.org/content/space-ship-floating-sounds2
+License: https://creativecommons.org/publicdomain/zero/1.0/
 
-Sollicitudin ultricies at senectus imperdiet luctus nulla pretium
-imperdiet. In vehicula tristique lacus laoreet cursus volutpat integer
-interdum blandit. Curabitur platea metus laoreet risus aliquam commodo
-nisl fusce. Augue aliquet placerat turpis justo dignissim consectetur
-eu. Ultrices nostra nascetur nisi praesent elementum suscipit augue per.
-Fusce himenaeos ligula neque mauris mattis erat molestie ante.
+Zane Little Music (Level up sound)
+LevelUp.ogg (space1 in source)
+https://opengameart.org/content/theremin-laser-sfx
+License: https://creativecommons.org/publicdomain/zero/1.0/
 
-Fusce cras netus etiam sapien ac fringilla porta vitae phasellus. Aptent
-sed felis in ligula ornare imperdiet augue vehicula. Sem massa sagittis
-accumsan, lacus aptent aliquam. Magnis feugiat efficitur felis dapibus
-metus nostra nam sem. Cras velit condimentum; volutpat cubilia et massa
-fermentum. Diam felis nostra; sed per diam fringilla aliquam consectetur.
-Primis donec conubia ad ad maecenas odio aliquam.
+Daleonfire (player shoot sound)
+PlayerShoot.ogg (specific clipped section in the middle)
+https://pixabay.com/sound-effects/space-laser-38082/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
 
-Sit pharetra libero feugiat vehicula a rutrum. Facilisis in ipsum quis
-sollicitudin phasellus nisi. Nullam tortor mattis; natoque vel conubia
-gravida etiam litora. Tincidunt donec sem, nullam tempor erat nunc. Leo
-et egestas, gravida imperdiet tellus conubia finibus aenean. Suspendisse
-erat iaculis fusce scelerisque aenean auctor lobortis. Ante urna lacus
-ultricies congue ornare netus rutrum cursus.
+DayCraftMC (minion shoot sound)
+MinionShoot.ogg (trimmed part in the middle)
+https://pixabay.com/sound-effects/laser-1-72652/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
 
-Est erat varius rutrum inceptos tempus. Magnis molestie commodo porta
-torquent faucibus consequat litora. Cras finibus ligula facilisis pretium
-inceptos sed dictumst luctus massa. Nullam inceptos commodo lobortis
-habitant eget vestibulum leo vestibulum. Quisque commodo nec ultricies
-sed adipiscing ultrices. Porttitor etiam convallis purus auctor nibh.
-Sapien volutpat pulvinar taciti vitae, sit at cubilia nullam.
+JCI21 (spaceship thruster sound)
+ShipThruster.ogg (slight edit to make perfect loop)
+https://pixabay.com/sound-effects/rocket-launch-sfx-253937/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
+
+Kenney (bullet impacting things sound)
+BulletHit.ogg (impact 0 from source)
+https://opengameart.org/content/sci-fi-sounds
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+Little Robot Sound Factory (bomb plant sound)
+BombDeploy.ogg (Click_Electronic_00 from source)
+https://opengameart.org/content/ui-sound-effects-library
+License: https://creativecommons.org/licenses/by/3.0/
+
+Calinou (bomb explode sound)
+BombDestroy.ogg (grenade2 in source)
+https://opengameart.org/content/q009s-weapon-sounds
+License: https://creativecommons.org/licenses/by-sa/3.0/
+
+Tim Mortimer (ability unlock sound)
+UnlockAbility.ogg
+https://opengameart.org/content/4-sci-fi-menu-sounds
+License: https://creativecommons.org/licenses/by/3.0/
+
+Little Robot Sound Factory (click sound)
+ClickSound.ogg
+https://opengameart.org/content/ui-sound-effects-library
+License: https://creativecommons.org/licenses/by/3.0/
+
+Bird_man (asteroid destroy sound)
+AstroidDestroy.ogg
+https://pixabay.com/sound-effects/explosion-91872/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
+
+dklon (player and minion death sound)
+PlayerDeath.ogg (boom 6 from source)
+https://opengameart.org/content/boom-pack-1
+https://creativecommons.org/licenses/by/3.0/
+
+VoiceBosch (player damage sound)
+PlayerDamage.ogg (trimmed and slowed down)
+https://pixabay.com/sound-effects/laser-gun-174976/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
+
+plamdi1 (Base destroy sound)
+BaseDestroy.ogg
+https://pixabay.com/sound-effects/explosion-107629/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
+
+Kenney (force field sound effect)
+ForceField.ogg
+https://opengameart.org/content/sci-fi-sounds
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+Little Robot Sound Factory (warp speed sound)
+Dash.ogg
+https://opengameart.org/content/sci-fi-sound-effects-library
+License: https://creativecommons.org/licenses/by/3.0/
+
+rubberduck (invisibility sound)
+Invisibility.ogg and unInvisibility.ogg (they are reverses of each other)
+https://opengameart.org/content/50-cc0-sci-fi-sfx
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+NenadSimic (lose sound)
+LoseSound.ogg
+https://opengameart.org/content/muffled-distant-explosion
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+devy32 (ambient space sound)
+SpaceAmbient.ogg
+https://pixabay.com/sound-effects/space-rumble-29970/
+License: https://pixabay.com/service/license-summary/ (pixabay license)
+
+"Space Jazz" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
+
+"Space Fighter Loop" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
+
+"Newer Wave" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
+
+"Galactic Rap " Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
 
 Space Background: https://metaphoric.com/starfield/

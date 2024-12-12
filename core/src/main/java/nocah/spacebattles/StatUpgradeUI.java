@@ -36,7 +36,7 @@ public class StatUpgradeUI {
             button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    game.players[game.id].upgradeStat(statType);
+                    game.players[game.id].upgradeStat(statType, false);
                     game.sendEvent(new UpgradeEvent(game.id, (byte)statType));
                     game.playClick();
                 }

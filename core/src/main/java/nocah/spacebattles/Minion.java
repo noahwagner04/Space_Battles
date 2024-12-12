@@ -14,6 +14,7 @@ public class Minion extends Sprite implements Damageable {
     SpaceBattles game;
     Player playerLeader;
     private Sound shoot;
+    private Sound destroy;
 
     private final byte team;
     private final byte id;
@@ -52,6 +53,7 @@ public class Minion extends Sprite implements Damageable {
         this.team = team;
         this.id = id;
         shoot = game.am.get(SpaceBattles.RSC_MINION_SHOOT_SOUND, Sound.class);
+        destroy = game.am.get(SpaceBattles.RSC_PLAYER_DEATH_SOUND, Sound.class);
         playerLeader = game.players[team];
         setStats(0);
         setColor(SpaceBattles.PLAYER_COLORS[team]);
@@ -278,6 +280,7 @@ public class Minion extends Sprite implements Damageable {
     public boolean damage(float amount) {
         health -= Math.max(amount, 0);
         if (health <= 0) {
+            playDestroy();
             game.bases[team].minionCount--;
             dead = true;
             return true;
@@ -330,5 +333,11 @@ public class Minion extends Sprite implements Damageable {
     public void playShoot() {
         long shootID = shoot.play();
         shoot.setVolume(shootID, game.getVolume(getCenter(), 0.3f));
+    }
+
+    public void playDestroy() {
+        long destroyID = destroy.play();
+        destroy.setVolume(destroyID, game.getVolume(getCenter(), 0.65f));
+        destroy.setPitch(destroyID, 2f);
     }
 }

@@ -88,6 +88,7 @@ public class SpaceBattles extends Game {
     public Music lobbyMusic;
     public Music winMusic;
     public Music loseMusic;
+    public int seed;
 
     public final float numOfPosSends = 20;
     float posTimer = 0;

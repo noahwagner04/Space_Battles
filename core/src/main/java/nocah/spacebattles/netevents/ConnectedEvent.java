@@ -5,13 +5,15 @@ import java.nio.charset.StandardCharsets;
 
 public class ConnectedEvent implements NetEvent{
     public final byte playerID;
+    public final int seed;
 
-    public ConnectedEvent(byte playerID) {
+    public ConnectedEvent(byte playerID, int seed) {
         this.playerID = playerID;
+        this.seed = seed;
     }
 
     public byte getEventID() {return NetConstants.CONNECTED_EVENT_ID;}
-    public short getDataByteSize() {return 1;}
+    public short getDataByteSize() {return 1 + 4;}
 
     public byte[] serialize() {
 
@@ -22,6 +24,7 @@ public class ConnectedEvent implements NetEvent{
         buffer.put(getEventID());
         buffer.putShort(getDataByteSize());
         buffer.put(playerID);
+        buffer.putInt(seed);
 
         return buffer.array();
     }
@@ -31,7 +34,8 @@ public class ConnectedEvent implements NetEvent{
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         byte playerID = buffer.get();
+        int seed = buffer.getInt();
 
-        return new ConnectedEvent(playerID);
+        return new ConnectedEvent(playerID, seed);
     }
 }

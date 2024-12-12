@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import nocah.spacebattles.netevents.SpawnEvent;
 
+import java.util.Random;
+
 public class MainMenuScreen extends ScreenAdapter {
     private final SpaceBattles game;
     private Stage stage;
@@ -40,6 +42,10 @@ public class MainMenuScreen extends ScreenAdapter {
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 System.out.println("Host button clicked!");
                 game.server = new Server();
+
+                Random random = new Random();
+                game.seed = random.nextInt();
+
                 game.server.startServer(game);
                 //spawn in a new client
                 game.handlers.handleClientEvent(new SpawnEvent((byte)0));

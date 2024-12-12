@@ -38,6 +38,7 @@ public class ArenaScreen extends ScreenAdapter {
 
     public ArenaScreen (SpaceBattles game) {
         this.game = game;
+        SpaceBattles.random.setSeed(game.seed);
         thisPlayer = game.players[game.id];
         map = game.am.get(SpaceBattles.RSC_TILED_MAP);
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1f/map.getProperties().get("tilewidth", Integer.class));
@@ -54,7 +55,11 @@ public class ArenaScreen extends ScreenAdapter {
 
         lose = game.am.get(SpaceBattles.RSC_LOSE_SOUND, Sound.class);
         game.setBases(worldBounds);
-        thisPlayer.respawn();
+
+        for (Player p: game.players) {
+            if (p == null) continue;
+            p.respawn();
+        }
 
         Rectangle spawnArea = new Rectangle(5, 5, worldBounds.width - 5, worldBounds.height - 5);
 
@@ -75,27 +80,37 @@ public class ArenaScreen extends ScreenAdapter {
         hud = new HUD(new BitmapFont());
 
         hud.registerAction("upgrade", new HUDActionCommand() {
-            static final String help = "upgrade <defence, attack, speed, base_defence, minions>";
+            static final String help = "upgrade <defence, attack, speed, base_defence, minions> <ability points>";
 
             @Override
             public String execute(String[] cmd) {
-                game.players[game.id].statPoints++;
                 try {
+                    int amount = Integer.parseInt(cmd[2]);
                     if (cmd[1].contentEquals("defence")) {
-                        game.players[game.id].upgradeStat(Player.DEFENCE);
-                        game.sendEvent(new UpgradeEvent(game.id, Player.DEFENCE));
+                        for (int i = 0; i < amount; i++) {
+                            game.players[game.id].upgradeStat(Player.DEFENCE, true);
+                            game.sendEvent(new UpgradeEvent(game.id, Player.DEFENCE));
+                        }
                     } else if (cmd[1].contentEquals("attack")) {
-                        game.players[game.id].upgradeStat(Player.ATTACK);
-                        game.sendEvent(new UpgradeEvent(game.id, Player.ATTACK));
+                        for (int i = 0; i < amount; i++) {
+                            game.players[game.id].upgradeStat(Player.ATTACK, true);
+                            game.sendEvent(new UpgradeEvent(game.id, Player.ATTACK));
+                        }
                     } else if (cmd[1].contentEquals("speed")) {
-                        game.players[game.id].upgradeStat(Player.SPEED);
-                        game.sendEvent(new UpgradeEvent(game.id, Player.SPEED));
+                        for (int i = 0; i < amount; i++) {
+                            game.players[game.id].upgradeStat(Player.SPEED, true);
+                            game.sendEvent(new UpgradeEvent(game.id, Player.SPEED));
+                        }
                     } else if (cmd[1].contentEquals("base_defence")) {
-                        game.players[game.id].upgradeStat(Player.BASE_DEFENCE);
-                        game.sendEvent(new UpgradeEvent(game.id, Player.BASE_DEFENCE));
+                        for (int i = 0; i < amount; i++) {
+                            game.players[game.id].upgradeStat(Player.BASE_DEFENCE, true);
+                            game.sendEvent(new UpgradeEvent(game.id, Player.BASE_DEFENCE));
+                        }
                     } else if (cmd[1].contentEquals("minions")) {
-                        game.players[game.id].upgradeStat(Player.MINIONS);
-                        game.sendEvent(new UpgradeEvent(game.id, Player.MINIONS));
+                        for (int i = 0; i < amount; i++) {
+                            game.players[game.id].upgradeStat(Player.MINIONS, true);
+                            game.sendEvent(new UpgradeEvent(game.id, Player.MINIONS));
+                        }
                     } else {
                         return help;
                     }
@@ -110,13 +125,36 @@ public class ArenaScreen extends ScreenAdapter {
             }
         });
 
-        hud.registerAction("test", new HUDActionCommand() {
-            static final String help = "dfgh";
+        hud.registerAction("unlock", new HUDActionCommand() {
+            static final String help = "unlock <dash, rapid_fire, bomb, force_field, invisibility> < 1 or 2 for ability number>";
 
             @Override
             public String execute(String[] cmd) {
-                loseID = lose.play();
-                lose.setVolume(loseID, 5f);
+                Player p = game.players[game.id];
+
+                try {
+                    int abilityNum = Integer.parseInt(cmd[2]);
+                    if (cmd[1].contentEquals("dash") && !(p.ability1 instanceof Dash)) {
+                        if (abilityNum == 1) p.ability1 = new Dash(p, game, (byte)1);
+                        else if (abilityNum == 2) p.ability2 = new Dash(p, game, (byte) 2);
+                    } else if (cmd[1].contentEquals("rapid_fire") && !(p.ability1 instanceof RapidFire)) {
+                        if (abilityNum == 1) p.ability1 = new RapidFire(p, game, (byte) 1);
+                        else if (abilityNum == 2) p.ability2 = new RapidFire(p, game, (byte) 2);
+                    } else if (cmd[1].contentEquals("bomb") && !(p.ability1 instanceof BombDeploy)) {
+                        if (abilityNum == 1) p.ability1 = new BombDeploy(p, game, (byte) 1);
+                        else if (abilityNum == 2) p.ability2 = new BombDeploy(p, game, (byte) 1);
+                    } else if (cmd[1].contentEquals("force_field") && !(p.ability1 instanceof ForceField)) {
+                        if (abilityNum == 1) p.ability1 = new ForceField(p, game, (byte) 1);
+                        else if (abilityNum == 2) p.ability2 = new ForceField(p, game, (byte) 2);
+                    } else if (cmd[1].contentEquals("invisibility") && !(p.ability1 instanceof Invisibility)) {
+                        if (abilityNum == 1) p.ability1 = new Invisibility(p, game, (byte) 1);
+                        else if (abilityNum == 2) p.ability2 = new Invisibility(p, game, (byte) 2);
+                    } else {
+                        return help;
+                    }
+                } catch (Exception e) {
+                    return help;
+                }
                 return "ok!";
             }
 

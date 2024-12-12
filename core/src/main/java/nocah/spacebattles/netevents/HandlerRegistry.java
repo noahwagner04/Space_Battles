@@ -30,6 +30,7 @@ public class HandlerRegistry {
             ConnectedEvent e = (ConnectedEvent) event;
             game.connected = true;
             game.id = e.playerID;
+            game.seed = e.seed;
         });
 
         clientMap.put(NetConstants.START_GAME_EVENT_ID, (event) -> {
@@ -207,7 +208,7 @@ public class HandlerRegistry {
 
         clientMap.put(NetConstants.UPGRADE_EVENT_ID, (event) -> {
             UpgradeEvent e = (UpgradeEvent) event;
-            game.players[e.playerID].upgradeStat(e.upgradeID);
+            game.players[e.playerID].upgradeStat(e.upgradeID, false);
         });
         serverMap.put(NetConstants.UPGRADE_EVENT_ID, (event) -> {
             handleClientEvent(event);
@@ -224,10 +225,10 @@ public class HandlerRegistry {
 
             if (e.toggle == 1) {
                 if (e.abilityNum == 1) {
-                    if (p.ability1 == null) p.setAbility(e.abilityNum, e.abilityID);
+                    if (p.ability1 == null || p.ability1.abilityID != e.abilityID) p.setAbility(e.abilityNum, e.abilityID);
                     p.ability1.onActivate();
                 } else if (e.abilityNum == 2) {
-                    if (p.ability2 == null) p.setAbility(e.abilityNum, e.abilityID);
+                    if (p.ability2 == null || p.ability2.abilityID != e.abilityID) p.setAbility(e.abilityNum, e.abilityID);
                     p.ability2.onActivate();
                 }
             } else if (e.toggle == 0) {

@@ -9,7 +9,7 @@ public class Ability {
     public static final byte INVISIBILITY = 4;
     public static final byte RAPID_FIRE = 5;
 
-    byte abilityID;
+    public byte abilityID;
     byte abilityNum;
 
     Player player;

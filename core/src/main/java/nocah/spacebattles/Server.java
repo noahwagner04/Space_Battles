@@ -106,7 +106,7 @@ public class Server {
                     Socket clientSocket = serverSocket.accept();
                     int index = Arrays.asList(game.players).indexOf(null);
                     clientSockets[index - 1] = clientSocket;
-                    sendEvent(new ConnectedEvent((byte)index), index);
+                    sendEvent(new ConnectedEvent((byte)index, game.seed), index);
                     DataReceiver dataReceiver = new DataReceiver(new DataInputStream(clientSocket.getInputStream()), eventQueue);
                     dataReceivers.add(dataReceiver);
                     new Thread(dataReceiver).start();

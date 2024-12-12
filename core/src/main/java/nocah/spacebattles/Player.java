@@ -124,8 +124,8 @@ public class Player extends Sprite implements Damageable {
         }
     }
 
-    public void upgradeStat(int s) {
-        if (statPoints <= 0) {
+    public void upgradeStat(int s, boolean hudCommand) {
+        if (statPoints <= 0 && id == game.id && !hudCommand) {
             statPoints = 0;
             System.out.println("No stat points to spend!");
             return;
