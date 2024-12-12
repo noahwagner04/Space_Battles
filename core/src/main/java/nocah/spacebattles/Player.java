@@ -136,7 +136,7 @@ public class Player extends Sprite implements Damageable {
             return;
         }
 
-        statPoints--;
+        if (!hudCommand) statPoints--;
 
         switch (s) {
             case DEFENCE:
