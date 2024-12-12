@@ -254,7 +254,7 @@ public class Player extends Sprite implements Damageable {
         setX(x);
         setY(y);
         setRotation(r);
-        float volume = game.getVolume(getCenter(), 0.025f);
+        float volume = game.getVolume(getCenter(), 0.05f);
         if (thrusterID != -1) thruster.setVolume(thrusterID, volume);
         if (thrustAnimationState == 0 && thrusterEffect.isComplete()) {
             thrusterEffect.start();
@@ -416,7 +416,7 @@ public class Player extends Sprite implements Damageable {
             if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
                 if (thrusterID == -1) {
                     thrusterID = thruster.loop();
-                    thruster.setVolume(thrusterID,0.05f);
+                    thruster.setVolume(thrusterID,0.075f);
                 } else {
                     thruster.resume(thrusterID);
                 }

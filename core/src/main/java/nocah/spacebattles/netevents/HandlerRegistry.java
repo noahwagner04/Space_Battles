@@ -136,6 +136,7 @@ public class HandlerRegistry {
 
             int bulletID  = game.getBulletID();
             game.players[e.playerID].fireBullet(bulletID);
+            game.players[e.playerID].playShoot();
             game.server.broadcastEvent(new ShootEvent(e.playerID, (byte) -1, (byte) -1, bulletID, 0));
         });
 
