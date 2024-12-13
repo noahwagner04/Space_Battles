@@ -237,7 +237,7 @@ public class HandlerRegistry {
                     if (p.ability1 == null) return;
                     p.ability1.onDeactivate();
                 } else if (e.abilityNum == 2) {
-                    if (p.ability1 == null) return;
+                    if (p.ability2 == null) return;
                     p.ability2.onDeactivate();
                 }
             }

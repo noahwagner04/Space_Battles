@@ -57,6 +57,7 @@
 - Various particle effects
 - Add HUD cheat-codes
 - credits
+- fixed ability issue
 
 ## Open Issues ##
 - Add assignment README.md
